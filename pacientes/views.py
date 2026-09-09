@@ -11,6 +11,7 @@ from core.concurrency import (
     is_locked_by_other, get_locker_user
 )
 from core.decorators import permiso_requerido
+from core.tenant import get_empresa
 
 
 @login_required
@@ -21,9 +22,11 @@ def registrar_paciente(request):
         form = PacienteForm(request.POST, request.FILES)
         if form.is_valid():
             paciente = form.save(commit=False)
+            paciente.empresa = get_empresa(request)
             paciente.registrado_por = request.user
             paciente.save()
             ActivityLog.objects.create(
+                empresa=paciente.empresa,
                 usuario=request.user,
                 accion='CREAR',
                 modelo='Paciente',
@@ -52,7 +55,10 @@ def registrar_paciente(request):
 def lista_pacientes(request):
     """Vista para listar todos los pacientes"""
     q = request.GET.get('q', '').strip()
-    pacientes = Paciente.objects.filter(activo=True)
+    empresa = get_empresa(request)
+    pacientes = Paciente.objects.filter(
+        activo=True, empresa=empresa
+    ) if empresa else Paciente.objects.none()
 
     if q:
         pacientes = pacientes.filter(
@@ -78,7 +84,9 @@ def lista_pacientes(request):
 @permiso_requerido('ver_detalle_paciente')
 def detalle_paciente(request, paciente_id):
     """Vista para ver detalle de un paciente"""
-    paciente = get_object_or_404(Paciente, id=paciente_id)
+    paciente = get_object_or_404(
+        Paciente, id=paciente_id, empresa=get_empresa(request)
+    )
 
     context = {
         'paciente': paciente,
@@ -91,7 +99,9 @@ def detalle_paciente(request, paciente_id):
 @permiso_requerido('editar_pacientes')
 def editar_paciente(request, paciente_id):
     """Vista para editar un paciente (FBV) con control de concurrencia."""
-    paciente = get_object_or_404(Paciente, id=paciente_id)
+    paciente = get_object_or_404(
+        Paciente, id=paciente_id, empresa=get_empresa(request)
+    )
 
     # ---- Bloqueo pesimista: verificar si otro usuario lo está editando ----
     if is_locked_by_other('Paciente', paciente_id, request.user):
@@ -115,6 +125,7 @@ def editar_paciente(request, paciente_id):
             try:
                 form.save()
                 ActivityLog.objects.create(
+                    empresa=paciente.empresa,
                     usuario=request.user,
                     accion='EDITAR',
                     modelo='Paciente',
@@ -150,11 +161,14 @@ def editar_paciente(request, paciente_id):
 @permiso_requerido('eliminar_pacientes')
 def eliminar_paciente(request, paciente_id):
     """Vista para eliminar un paciente (FBV) - Solo POST"""
-    paciente = get_object_or_404(Paciente, id=paciente_id)
+    paciente = get_object_or_404(
+        Paciente, id=paciente_id, empresa=get_empresa(request)
+    )
 
     if request.method == 'POST':
         nombre_completo = f'{paciente.nombres} {paciente.apellidos}'
         ActivityLog.objects.create(
+            empresa=paciente.empresa,
             usuario=request.user,
             accion='ELIMINAR',
             modelo='Paciente',

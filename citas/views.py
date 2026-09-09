@@ -12,6 +12,7 @@ from core.concurrency import (
     is_locked_by_other, get_locker_user
 )
 from core.decorators import permiso_requerido
+from core.tenant import get_empresa
 
 
 @login_required
@@ -19,12 +20,14 @@ from core.decorators import permiso_requerido
 def registrar_cita(request):
     """Vista para registrar una nueva cita (FBV)"""
     if request.method == 'POST':
-        form = CitaForm(request.POST)
+        form = CitaForm(request.POST, empresa=get_empresa(request))
         if form.is_valid():
             cita = form.save(commit=False)
+            cita.empresa = get_empresa(request)
             cita.registrado_por = request.user
             cita.save()
             ActivityLog.objects.create(
+                empresa=cita.empresa,
                 usuario=request.user,
                 accion='CREAR',
                 modelo='Cita',
@@ -36,7 +39,7 @@ def registrar_cita(request):
         else:
             messages.error(request, 'Por favor corrige los errores.')
     else:
-        form = CitaForm()
+        form = CitaForm(empresa=get_empresa(request))
 
     context = {
         'form': form,
@@ -51,7 +54,10 @@ def lista_citas(request):
     """Vista para listar todas las citas"""
     q = request.GET.get('q', '').strip()
     estado = request.GET.get('estado', '')
-    citas = Cita.objects.all().select_related('paciente', 'doctor')
+    empresa = get_empresa(request)
+    citas = Cita.objects.filter(
+        empresa=empresa
+    ).select_related('paciente', 'doctor') if empresa else Cita.objects.none()
 
     if q:
         citas = citas.filter(
@@ -69,12 +75,16 @@ def lista_citas(request):
     page = request.GET.get('page', 1)
     citas_page = paginator.get_page(page)
 
-    # Conteos para los filtros
-    total = Cita.objects.count()
-    conteo_pendientes = Cita.objects.filter(estado='PENDIENTE').count()
-    conteo_confirmadas = Cita.objects.filter(estado='CONFIRMADA').count()
-    conteo_completadas = Cita.objects.filter(estado='COMPLETADA').count()
-    conteo_canceladas = Cita.objects.filter(estado='CANCELADA').count()
+    # Conteos para los filtros (acotados a la empresa)
+    if empresa:
+        total = Cita.objects.filter(empresa=empresa).count()
+        conteo_pendientes = Cita.objects.filter(empresa=empresa, estado='PENDIENTE').count()
+        conteo_confirmadas = Cita.objects.filter(empresa=empresa, estado='CONFIRMADA').count()
+        conteo_completadas = Cita.objects.filter(empresa=empresa, estado='COMPLETADA').count()
+        conteo_canceladas = Cita.objects.filter(empresa=empresa, estado='CANCELADA').count()
+    else:
+        total = conteo_pendientes = conteo_confirmadas = 0
+        conteo_completadas = conteo_canceladas = 0
 
     context = {
         'citas': citas_page,
@@ -98,7 +108,7 @@ def detalle_cita(request, cita_id):
     """Vista para ver detalle de una cita"""
     cita = get_object_or_404(Cita.objects.select_related(
         'paciente', 'doctor', 'registrado_por'
-    ), id=cita_id)
+    ).filter(empresa=get_empresa(request)), id=cita_id)
 
     context = {
         'cita': cita,
@@ -111,7 +121,7 @@ def detalle_cita(request, cita_id):
 @permiso_requerido('editar_citas')
 def editar_cita(request, cita_id):
     """Vista para editar una cita con control de concurrencia."""
-    cita = get_object_or_404(Cita, id=cita_id)
+    cita = get_object_or_404(Cita, id=cita_id, empresa=get_empresa(request))
 
     # Bloqueo pesimista
     if is_locked_by_other('Cita', cita_id, request.user):
@@ -129,11 +139,12 @@ def editar_cita(request, cita_id):
         if version_form:
             cita.version = int(version_form)
 
-        form = CitaForm(request.POST, instance=cita)
+        form = CitaForm(request.POST, instance=cita, empresa=get_empresa(request))
         if form.is_valid():
             try:
                 form.save()
                 ActivityLog.objects.create(
+                    empresa=cita.empresa,
                     usuario=request.user,
                     accion='EDITAR',
                     modelo='Cita',
@@ -146,11 +157,11 @@ def editar_cita(request, cita_id):
             except ConcurrentUpdateError as e:
                 messages.error(request, str(e))
                 cita.refresh_from_db()
-                form = CitaForm(instance=cita)
+                form = CitaForm(instance=cita, empresa=get_empresa(request))
         else:
             messages.error(request, 'Por favor corrige los errores.')
     else:
-        form = CitaForm(instance=cita)
+        form = CitaForm(instance=cita, empresa=get_empresa(request))
 
     context = {
         'form': form,
@@ -165,10 +176,11 @@ def editar_cita(request, cita_id):
 @permiso_requerido('eliminar_citas')
 def eliminar_cita(request, cita_id):
     """Vista para eliminar una cita (FBV)"""
-    cita = get_object_or_404(Cita, id=cita_id)
+    cita = get_object_or_404(Cita, id=cita_id, empresa=get_empresa(request))
 
     if request.method == 'POST':
         ActivityLog.objects.create(
+            empresa=cita.empresa,
             usuario=request.user,
             accion='ELIMINAR',
             modelo='Cita',
@@ -185,7 +197,7 @@ def eliminar_cita(request, cita_id):
 @permiso_requerido('cambiar_estado_cita')
 def cambiar_estado_cita(request, cita_id):
     """Vista para cambiar el estado de una cita (FBV)"""
-    cita = get_object_or_404(Cita, id=cita_id)
+    cita = get_object_or_404(Cita, id=cita_id, empresa=get_empresa(request))
 
     if request.method == 'POST':
         nuevo_estado = request.POST.get('estado')
@@ -194,6 +206,7 @@ def cambiar_estado_cita(request, cita_id):
             try:
                 cita.save()
                 ActivityLog.objects.create(
+                    empresa=cita.empresa,
                     usuario=request.user,
                     accion='EDITAR',
                     modelo='Cita',

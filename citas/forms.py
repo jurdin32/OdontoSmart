@@ -33,9 +33,26 @@ class CitaForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        empresa = kwargs.pop('empresa', None)
         super().__init__(*args, **kwargs)
-        self.fields['paciente'].queryset = Paciente.objects.filter(activo=True)
-        self.fields['doctor'].queryset = Medico.objects.filter(activo=True)
+
+        qs_paciente = Paciente.objects.filter(activo=True)
+        qs_medico = Medico.objects.filter(activo=True)
+        if empresa:
+            qs_paciente = qs_paciente.filter(empresa=empresa)
+            qs_medico = qs_medico.filter(empresa=empresa)
+        if self.instance.pk:
+            # Al editar, garantizar que el valor actual esté en el queryset
+            if self.instance.paciente_id:
+                qs_paciente = qs_paciente | Paciente.objects.filter(
+                    pk=self.instance.paciente_id
+                )
+            if self.instance.doctor_id:
+                qs_medico = qs_medico | Medico.objects.filter(
+                    pk=self.instance.doctor_id
+                )
+        self.fields['paciente'].queryset = qs_paciente
+        self.fields['doctor'].queryset = qs_medico
         self.fields['paciente'].empty_label = 'Seleccione un paciente'
         self.fields['doctor'].empty_label = 'Seleccione un doctor'
         self.fields['estado'].initial = 'PENDIENTE'
