@@ -2,7 +2,7 @@
 import django,os,sys,time,logging
 from decimal import Decimal
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'odontologia.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'OdontoSmart.settings')
 django.setup()
 
 from django.utils import timezone as tz

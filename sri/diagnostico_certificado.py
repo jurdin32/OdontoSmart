@@ -1,7 +1,7 @@
 """Diagnóstico del certificado digital p12."""
 import django, sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-os.environ['DJANGO_SETTINGS_MODULE'] = 'odontologia.settings'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'OdontoSmart.settings'
 django.setup()
 
 from sri.models import SriEmpresaConfig

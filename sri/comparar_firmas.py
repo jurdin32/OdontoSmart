@@ -1,7 +1,7 @@
 """Compara XML del facturador SRI vs nuestro XML."""
 import os, sys, base64
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'odontologia.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'OdontoSmart.settings')
 import django; django.setup()
 
 from lxml import etree
