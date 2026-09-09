@@ -1,8 +1,0 @@
-{
-    "chat.tools.terminal.autoApprove": {
-        "/^\\./venv/bin/pip freeze 2>/dev/null \\| grep -iE '\\^\\(weasyprint\\|openpyxl\\|xmlschema\\|requests\\|cryptography\\|lxml\\|django\\|django-background\\|celery\\|redis\\)' ; echo '--- check import ---'; \\./venv/bin/python -c \"import weasyprint; print\\('weasyprint OK', weasyprint\\.__version__\\)\" 2>&1 \\| tail -1$/": {
-            "approve": true,
-            "matchCommandLine": true
-        }
-    }
-}

@@ -3,11 +3,23 @@ __pycache__/
 *.py[cod]
 venv/
 .venv/
+venv
+.venv
+*.pyo
+*.pyd
 
 # Entorno / secretos
 .env
 .env.*
 !.env.example
+
+# Editor / IDE
+.vscode/
+.idea/
+
+# Entorno local
+.venv/
+venv/
 
 # Base de datos
 db.sqlite3
@@ -20,6 +32,9 @@ media/
 
 # Estáticos compilados
 staticfiles/
+
+# Caché de Django / compresión
+*.log
 
 # Respaldos
 backups/
