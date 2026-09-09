@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='reportes' %}
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+        <div class="dashboard-content">
+            <div class="page-header page-header--between">
+                <div>
+                    <h1 class="page-title">Reporte de Actividad</h1>
+                    <p class="page-subtitle">Auditoría y registro de acciones del sistema</p>
+                </div>
+                <a href="{% url 'reportes' %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver</a>
+            </div>
+
+            <form class="report-filters" method="GET">
+                <div class="filter-group"><label class="filter-label">Desde</label><input type="date" name="desde" class="form-input filter-input" value="{{ desde }}"></div>
+                <div class="filter-group"><label class="filter-label">Hasta</label><input type="date" name="hasta" class="form-input filter-input" value="{{ hasta }}"></div>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Filtrar</button>
+                {% if desde or hasta %}<a href="{% url 'reporte_actividad' %}" class="btn btn-secondary"><i class="fas fa-times"></i> Limpiar</a>{% endif %}
+            </form>
+
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-icon stat-card--blue"><i class="fas fa-history"></i></div><div class="stat-info"><span class="stat-number">{{ total_acciones }}</span><span class="stat-label">Total Acciones</span></div></div>
+                <div class="stat-card"><div class="stat-icon" style="background:#ecfdf5;color:#10b981;"><i class="fas fa-plus-circle"></i></div><div class="stat-info"><span class="stat-number">{{ creaciones }}</span><span class="stat-label">Creaciones</span></div></div>
+                <div class="stat-card"><div class="stat-icon" style="background:#fef3c7;color:#d97706;"><i class="fas fa-edit"></i></div><div class="stat-info"><span class="stat-number">{{ ediciones }}</span><span class="stat-label">Ediciones</span></div></div>
+                <div class="stat-card"><div class="stat-icon" style="background:#fef2f2;color:#ef4444;"><i class="fas fa-trash-alt"></i></div><div class="stat-info"><span class="stat-number">{{ eliminaciones }}</span><span class="stat-label">Eliminaciones</span></div></div>
+                <div class="stat-card"><div class="stat-icon" style="background:#dbeafe;color:#2563eb;"><i class="fas fa-sign-in-alt"></i></div><div class="stat-info"><span class="stat-number">{{ logins }}</span><span class="stat-label">Inicios Sesión</span></div></div>
+            </div>
+
+            <div class="reports-grid-2col">
+                <div class="report-section">
+                    <h3 class="form-section-title">Acciones por Modelo</h3>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead><tr><th>Modelo</th><th>Acciones</th></tr></thead>
+                            <tbody>
+                                {% for m in por_modelo %}
+                                <tr><td><strong>{{ m.modelo }}</strong></td><td><span class="badge badge-blue">{{ m.total }}</span></td></tr>
+                                {% empty %}
+                                <tr><td colspan="2" class="text-center">Sin datos</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="report-section">
+                    <h3 class="form-section-title">Acciones por Usuario</h3>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead><tr><th>Usuario</th><th>Acciones</th></tr></thead>
+                            <tbody>
+                                {% for u in por_usuario %}
+                                <tr><td><strong>{{ u.usuario__username }}</strong></td><td><span class="badge badge-blue">{{ u.total }}</span></td></tr>
+                                {% empty %}
+                                <tr><td colspan="2" class="text-center">Sin datos</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="report-section">
+                <h3 class="form-section-title">Actividad Reciente</h3>
+                <div class="table-container">
+                    <table class="table">
+                        <thead><tr><th>Usuario</th><th>Acción</th><th>Modelo</th><th>Descripción</th><th>Fecha</th></tr></thead>
+                        <tbody>
+                            {% for a in recientes %}
+                            <tr>
+                                <td>{{ a.usuario.username }}</td>
+                                <td><span class="badge {% if a.accion == 'CREAR' %}" style="background:#ecfdf5;color:#10b981;"{% elif a.accion == 'EDITAR' %}" style="background:#fef3c7;color:#d97706;"{% elif a.accion == 'ELIMINAR' %}" style="background:#fef2f2;color:#ef4444;"{% else %}" style="background:#dbeafe;color:#2563eb;"{% endif %}>{{ a.get_accion_display }}</span></td>
+                                <td>{{ a.modelo }}</td>
+                                <td>{{ a.descripcion|truncatechars:40 }}</td>
+                                <td>{{ a.fecha|date:"d/m/Y H:i" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="5" class="text-center">Sin actividad</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

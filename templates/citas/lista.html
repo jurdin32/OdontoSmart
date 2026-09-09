@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='citas' %}
+
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+
+        <div class="dashboard-content">
+            <div class="page-header page-header--between">
+                <div>
+                    <h1 class="page-title">Citas</h1>
+                    <p class="page-subtitle">Gestión de citas odontológicas</p>
+                </div>
+                <a href="{% url 'registrar_cita' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nueva Cita
+                </a>
+            </div>
+
+            {% if query %}
+            <div class="search-info">
+                <i class="fas fa-search"></i> Resultados para "<strong>{{ query }}</strong>" — 
+                <span>{{ citas|length }} cita{{ citas|length|pluralize:'s' }}</span>
+                <a href="{% url 'lista_citas' %}" class="search-clear"><i class="fas fa-times"></i> Limpiar</a>
+            </div>
+            {% endif %}
+
+            <div class="filter-tabs">
+                <a href="{% url 'lista_citas' %}{% if query %}?q={{ query }}{% endif %}" class="filter-tab {% if not estado_activo %}active{% endif %}">
+                    Todas <span class="filter-count">{{ conteos.TODAS }}</span>
+                </a>
+                <a href="{% url 'lista_citas' %}?estado=PENDIENTE{% if query %}&q={{ query }}{% endif %}" class="filter-tab filter-tab-pendiente {% if estado_activo == 'PENDIENTE' %}active{% endif %}">
+                    Pendientes <span class="filter-count">{{ conteos.PENDIENTE }}</span>
+                </a>
+                <a href="{% url 'lista_citas' %}?estado=CONFIRMADA{% if query %}&q={{ query }}{% endif %}" class="filter-tab filter-tab-confirmada {% if estado_activo == 'CONFIRMADA' %}active{% endif %}">
+                    Confirmadas <span class="filter-count">{{ conteos.CONFIRMADA }}</span>
+                </a>
+                <a href="{% url 'lista_citas' %}?estado=COMPLETADA{% if query %}&q={{ query }}{% endif %}" class="filter-tab filter-tab-completada {% if estado_activo == 'COMPLETADA' %}active{% endif %}">
+                    Completadas <span class="filter-count">{{ conteos.COMPLETADA }}</span>
+                </a>
+                <a href="{% url 'lista_citas' %}?estado=CANCELADA{% if query %}&q={{ query }}{% endif %}" class="filter-tab filter-tab-cancelada {% if estado_activo == 'CANCELADA' %}active{% endif %}">
+                    Canceladas <span class="filter-count">{{ conteos.CANCELADA }}</span>
+                </a>
+            </div>
+
+            {% if citas %}
+            <!-- Tabla escritorio -->
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Paciente</th>
+                            <th>Doctor</th>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Motivo</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in citas %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ c.paciente.nombres }} {{ c.paciente.apellidos }}</td>
+                            <td>{{ c.doctor.nombre_completo|default:"-" }}</td>
+                            <td>{{ c.fecha|date:"d/m/Y" }}</td>
+                            <td>{{ c.hora|time:"H:i" }}</td>
+                            <td class="motivo-cell">{{ c.motivo|truncatechars:40 }}</td>
+                            <td>
+                                <span class="estado-badge estado-{{ c.estado|lower }}">
+                                    {{ c.get_estado_display }}
+                                </span>
+                            </td>
+                            <td class="actions-cell">
+                                <a href="{% url 'detalle_cita' c.id %}" class="btn-action btn-view" title="Ver">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'editar_cita' c.id %}" class="btn-action btn-edit" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Tarjetas móvil -->
+            <div class="cita-cards">
+                {% for c in citas %}
+                <div class="cita-card" data-search="{{ c.paciente.nombres|lower }} {{ c.paciente.apellidos|lower }} {{ c.motivo|lower }}">
+                    <div class="cita-card-top">
+                        <div class="cita-card-date">
+                            <span class="cita-card-day">{{ c.fecha|date:"d" }}</span>
+                            <span class="cita-card-month">{{ c.fecha|date:"M" }}</span>
+                        </div>
+                        <div class="cita-card-info">
+                            <h3>{{ c.paciente.nombres }} {{ c.paciente.apellidos }}</h3>
+                            <span class="cita-card-doctor">
+                                <i class="fas fa-user-md"></i> {{ c.doctor.nombre_completo|default:"Sin asignar" }}
+                            </span>
+                        </div>
+                        <span class="estado-badge estado-{{ c.estado|lower }}">{{ c.get_estado_display }}</span>
+                    </div>
+                    <div class="cita-card-body">
+                        <div class="cita-card-detail">
+                            <i class="fas fa-clock"></i> {{ c.hora|time:"H:i" }} hrs
+                        </div>
+                        <div class="cita-card-detail">
+                            <i class="fas fa-stethoscope"></i> {{ c.motivo|truncatechars:60 }}
+                        </div>
+                    </div>
+                    <div class="cita-card-actions">
+                        <a href="{% url 'detalle_cita' c.id %}" class="btn btn-sm btn-outline">
+                            <i class="fas fa-eye"></i> Ver
+                        </a>
+                        <a href="{% url 'editar_cita' c.id %}" class="btn btn-sm btn-outline">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-calendar-plus fa-4x"></i>
+                <h3>No hay citas registradas</h3>
+                <p>Comienza agendando la primera cita</p>
+                <a href="{% url 'registrar_cita' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nueva Cita
+                </a>
+            </div>
+            {% endif %}
+
+            {% include 'componentes/pagination.html' with page_obj=citas %}
+        </div>
+
+        <!-- Modal Eliminar -->
+        <div class="modal-overlay" id="deleteCitaModal">
+            <div class="modal-container">
+                <div class="modal-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                <h2 class="modal-title">¿Eliminar cita?</h2>
+                <p class="modal-text">
+                    Estás a punto de eliminar la cita de <strong id="modalCitaPaciente"></strong>
+                    <br>del <span id="modalCitaFecha"></span>.
+                    <br>Esta acción no se puede deshacer.
+                </p>
+                <form method="POST" id="deleteCitaForm" class="modal-actions">
+                    {% csrf_token %}
+                    <button type="button" class="btn btn-secondary" id="cancelCitaDelete">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Sí, Eliminar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    // Buscador
+    document.getElementById('globalSearch')?.addEventListener('input', function() {
+        const q = this.value.toLowerCase();
+        document.querySelectorAll('.table tbody tr').forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+        });
+        document.querySelectorAll('.cita-card').forEach(card => {
+            const txt = card.dataset.search || card.textContent.toLowerCase();
+            card.style.display = txt.includes(q) ? '' : 'none';
+        });
+    });
+
+    // Modal eliminar
+    const delModal = document.getElementById('deleteCitaModal');
+    const delForm = document.getElementById('deleteCitaForm');
+
+    document.querySelectorAll('.btn-delete-cita').forEach(btn => {
+        btn.addEventListener('click', function() {
+            delForm.action = '/citas/' + this.dataset.id + '/eliminar/';
+            document.getElementById('modalCitaPaciente').textContent = this.dataset.paciente;
+            document.getElementById('modalCitaFecha').textContent = this.dataset.fecha;
+            delModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+    });
+
+    document.getElementById('cancelCitaDelete')?.addEventListener('click', () => {
+        delModal.classList.remove('active');
+        document.body.style.overflow = '';
+    });
+    delModal?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            delModal?.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    });
+</script>
+{% endblock %}

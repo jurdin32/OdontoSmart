@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='usuarios' %}
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+        <div class="dashboard-content">
+            <div class="page-header page-header--between">
+                <div>
+                    <h1 class="page-title">🩺 Vincular Médicos</h1>
+                    <p class="page-subtitle">Médicos sin usuario asignado — crea su acceso al sistema</p>
+                </div>
+                <a href="{% url 'lista_usuarios' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
+            </div>
+            {% if medicos %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Médico</th>
+                            <th>Cédula</th>
+                            <th>Especialidad</th>
+                            <th>Registro Prof.</th>
+                            <th>Teléfono</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for m in medicos %}
+                        <tr>
+                            <td><strong>Dr. {{ m.nombre_completo }}</strong></td>
+                            <td>{{ m.cedula }}</td>
+                            <td>{{ m.get_especialidad_display }}</td>
+                            <td>{{ m.registro_profesional }}</td>
+                            <td>{{ m.telefono }}</td>
+                            <td>
+                                <a href="{% url 'crear_usuario_desde_medico' m.id %}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-user-plus"></i> Crear Usuario
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-check-circle" style="font-size:3rem;color:var(--success);margin-bottom:16px;"></i>
+                <h3>Todos los médicos tienen usuario</h3>
+                <p>No hay médicos pendientes de vinculación.</p>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% endblock %}

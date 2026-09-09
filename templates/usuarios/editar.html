@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='usuarios' %}
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+
+        <div class="dashboard-content">
+            <div class="page-header">
+                <h1 class="page-title">✏️ Editar Usuario</h1>
+                <p class="page-subtitle">{{ user_edit.get_full_name|default:user_edit.username }}</p>
+            </div>
+
+            <div class="form-card">
+                <form method="POST" novalidate>
+                    {% csrf_token %}
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Usuario</label>
+                            <input type="text" class="form-input" value="{{ user_edit.username }}" disabled style="opacity:0.6;">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" class="form-input" value="{{ user_edit.email }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Nombres</label>
+                            <input type="text" name="first_name" class="form-input" value="{{ user_edit.first_name }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Apellidos</label>
+                            <input type="text" name="last_name" class="form-input" value="{{ user_edit.last_name }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Teléfono</label>
+                            <input type="text" name="telefono" class="form-input" value="{{ profile.telefono }}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Rol</label>
+                            <select name="rol" class="form-input">
+                                {% for rol in roles %}
+                                <option value="{{ rol.nombre }}" {% if profile.rol and profile.rol.nombre == rol.nombre %}selected{% endif %}>
+                                    {{ rol.get_nombre_display }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Nueva contraseña <small>(dejar vacío para no cambiar)</small></label>
+                            <input type="password" name="password1" class="form-input" placeholder="••••••••" minlength="8">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Confirmar contraseña</label>
+                            <input type="password" name="password2" class="form-input" placeholder="Repite la contraseña">
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Guardar Cambios
+                        </button>
+                        <a href="{% url 'lista_usuarios' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            {% if user_edit.medico %}
+            <div class="form-card" style="margin-top:16px;">
+                <div class="form-section">
+                    <h3 class="form-section-title">🩺 Médico Vinculado</h3>
+                    <p>Este usuario está vinculado al médico <strong>Dr. {{ user_edit.medico.nombre_completo }}</strong></p>
+                    <a href="{% url 'editar_medico' user_edit.medico.id %}" class="btn btn-secondary" style="margin-top:8px;">
+                        <i class="fas fa-user-md"></i> Ver Médico
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% endblock %}

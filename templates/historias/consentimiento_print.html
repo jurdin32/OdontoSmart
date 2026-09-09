@@ -1,0 +1,300 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', serif;
+            color: #1e293b;
+            line-height: 1.4;
+            padding: 15px 30px;
+            background: white;
+            font-size: 0.82rem;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #2563eb;
+        }
+        .header h1 {
+            font-size: 1.2rem;
+            color: #0f172a;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .header .subtitle {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 2px;
+        }
+        .header .clinic-info {
+            font-size: 0.78rem;
+            color: #475569;
+            margin-top: 4px;
+        }
+        .section {
+            margin-bottom: 10px;
+        }
+        .section-title {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #0f172a;
+            padding-bottom: 4px;
+            border-bottom: 1.5px solid #e2e8f0;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2px 20px;
+            margin-bottom: 6px;
+        }
+        .info-row {
+            display: flex;
+            align-items: baseline;
+            padding: 2px 0;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #475569;
+            min-width: 110px;
+            font-size: 0.78rem;
+        }
+        .info-value {
+            font-weight: 500;
+            color: #0f172a;
+            font-size: 0.82rem;
+            border-bottom: 1px dotted #cbd5e1;
+            flex: 1;
+            padding-bottom: 1px;
+        }
+        .consent-text {
+            text-align: justify;
+            font-size: 0.78rem;
+            color: #1e293b;
+            line-height: 1.5;
+            padding: 10px 14px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+        .consent-text strong {
+            color: #0f172a;
+        }
+        .signatures {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-top: 16px;
+            padding-top: 10px;
+        }
+        .signature-box {
+            text-align: center;
+        }
+        .signature-line {
+            border-bottom: 2px solid #475569;
+            height: 36px;
+            margin-bottom: 4px;
+        }
+        .signature-label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: #475569;
+        }
+        .signature-name {
+            font-size: 0.78rem;
+            color: #0f172a;
+            font-weight: 500;
+            margin-top: 2px;
+        }
+        .footer {
+            margin-top: 14px;
+            padding-top: 8px;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            font-size: 0.65rem;
+            color: #94a3b8;
+        }
+        .badge-acepta {
+            display: inline-block;
+            padding: 2px 12px;
+            background: #dcfce7;
+            color: #166534;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.72rem;
+        }
+        .data-box {
+            display: inline-block;
+            background: #f1f5f9;
+            border-radius: 4px;
+            padding: 6px 12px;
+            margin-top: 4px;
+            font-size: 0.78rem;
+        }
+        .data-box span {
+            display: inline-block;
+            margin-right: 14px;
+        }
+        .data-box strong {
+            font-size: 0.72rem;
+            color: #64748b;
+        }
+        .data-box .val {
+            font-weight: 600;
+            color: #0f172a;
+        }
+        @media print {
+            body { padding: 8px 18px; font-size: 0.78rem; }
+            @page { margin: 0.8cm; }
+            .no-print { display: none !important; }
+            .section { break-inside: avoid; }
+            .header { margin-bottom: 10px; padding-bottom: 8px; }
+            .section { margin-bottom: 6px; }
+            .signatures { margin-top: 10px; }
+            .footer { margin-top: 8px; }
+            .consent-text { padding: 8px 12px; }
+            .signature-line { height: 30px; }
+        }
+        .btn-print, .btn-back { display: none; }
+        @media screen {
+            .btn-print, .btn-back { display: inline-block; }
+            .btn-print {
+                padding: 10px 24px;
+                background: #2563eb;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-size: 0.9rem;
+                font-weight: 600;
+                cursor: pointer;
+                margin-bottom: 20px;
+                font-family: inherit;
+            }
+            .btn-print:hover { background: #1d4ed8; }
+            .btn-back {
+                padding: 10px 24px;
+                background: #e2e8f0;
+                color: #475569;
+                border: none;
+                border-radius: 8px;
+                font-size: 0.9rem;
+                font-weight: 600;
+                cursor: pointer;
+                margin-bottom: 20px;
+                margin-right: 8px;
+                text-decoration: none;
+                font-family: inherit;
+            }
+            .btn-back:hover { background: #cbd5e1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print" style="margin-bottom:12px;">
+        <a href="{% url 'editar_evolucion' evolucion.id %}" class="btn-back">← Volver</a>
+        <button class="btn-print" onclick="window.print()">🖨️ Imprimir</button>
+    </div>
+
+    <div class="header">
+        <img src="{% static 'img/logo_negro.png' %}" alt="Teodoro Domínguez Odontólogo" style="display:block;margin:0 auto 6px;max-width:160px;height:auto;">
+        <div class="subtitle">Sistema de Gestión Odontológica</div>
+        <div class="clinic-info">Consultorio Odontológico · Consentimiento Informado</div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Datos del Paciente</div>
+        <div class="info-grid">
+            <div class="info-row">
+                <span class="info-label">Paciente:</span>
+                <span class="info-value">{{ paciente.nombres }} {{ paciente.apellidos }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Cédula:</span>
+                <span class="info-value">{{ paciente.cedula }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Teléfono:</span>
+                <span class="info-value">{{ paciente.celular|default:'' }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Dirección:</span>
+                <span class="info-value">{{ paciente.direccion|default:'' }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Datos de la Consulta</div>
+        <div class="info-grid">
+            <div class="info-row">
+                <span class="info-label">Fecha:</span>
+                <span class="info-value">{{ lugar_fecha }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Médico:</span>
+                <span class="info-value">{{ evolucion.consentimiento_medico }}</span>
+            </div>
+            <div class="info-row" style="grid-column:1/-1;">
+                <span class="info-label">Motivo:</span>
+                <span class="info-value">{{ evolucion.motivo }}</span>
+            </div>
+            <div class="info-row" style="grid-column:1/-1;">
+                <span class="info-label">Diagnóstico:</span>
+                <span class="info-value">{{ evolucion.diagnostico }}</span>
+            </div>
+            <div class="info-row" style="grid-column:1/-1;">
+                <span class="info-label">Tratamiento:</span>
+                <span class="info-value">{{ evolucion.tratamiento }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Consentimiento Informado</div>
+        <div class="consent-text">
+            <p>Usted tiene derecho a conocer el procedimiento al que va a ser sometido y las complicaciones más frecuentes que ocurren. El presente documento tiene por objeto explicarle en qué consiste, con el fin de que usted, o su representante legal, lo firme.</p>
+            <p style="margin-top:6px;">Le recordamos que por imperativo legal, tendrá que firmar, usted o su representante legal, el consentimiento informado para que pueda realizarse dicho procedimiento.</p>
+            <p style="margin-top:8px;"><strong>Sr/Sra.</strong> <em>{{ paciente.nombres }} {{ paciente.apellidos }}</em>, con N° <strong>{{ paciente.cedula }}</strong> como paciente, ha sido informada(o) por el Dr./Dra. <strong>{{ evolucion.consentimiento_medico|default:'_______________' }}</strong> sobre los procedimientos propios clínicos de ortodoncia y ortopedia, que constan en el plan de tratamiento, otorgando mi consentimiento para realizar las prácticas necesarias al caso clínico.</p>
+        </div>
+        <div class="data-box">
+            <span><strong>Acepta el tratamiento:</strong> <span class="val">{% if evolucion.consentimiento_acepta %}SÍ ✓{% else %}NO{% endif %}</span></span>
+            <span><strong>Lugar y fecha:</strong> <span class="val">{{ lugar_fecha }}</span></span>
+            <span><strong>Médico que informa:</strong> <span class="val">{{ evolucion.consentimiento_medico|default:'_______________' }}</span></span>
+        </div>
+    </div>
+
+    <div class="signatures">
+        <div class="signature-box">
+            <div class="signature-line"></div>
+            <div class="signature-label">Firma del Paciente / Tutor</div>
+            <div class="signature-name">{{ paciente.nombres }} {{ paciente.apellidos }}</div>
+            <div style="font-size:0.68rem;color:#94a3b8;margin-top:2px;">C.I. {{ paciente.cedula }}</div>
+        </div>
+        <div class="signature-box">
+            <div class="signature-line"></div>
+            <div class="signature-label">Firma del Odontólogo</div>
+            <div class="signature-name">{{ evolucion.consentimiento_medico|default:'_______________' }}</div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Documento generado por Dental D & D · {{ lugar_fecha }}<br>
+        Este documento es de carácter informativo y forma parte de la historia clínica del paciente.
+    </div>
+
+    <script>
+        window.onload = function() { /* auto-print: window.print(); */ };
+    </script>
+</body>
+</html>

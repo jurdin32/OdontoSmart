@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# Entorno / secretos
+.env
+.env.*
+!.env.example
+
+# Base de datos
+db.sqlite3
+db.sqlite3-journal
+*.sqlite3
+
+# Archivos subidos y media (contienen .p12, XML firmados y logs)
+media/
+!media/.gitkeep
+
+# Estáticos compilados
+staticfiles/
+
+# Respaldos
+backups/
+
+# Logs
+*.log
+
+# macOS
+.DS_Store

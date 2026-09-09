@@ -1,0 +1,21 @@
+🦷 CLÍNICA DENTAL D&D - Recordatorio de Cita
+
+Hola {{ paciente.nombres }} {{ paciente.apellidos }},
+
+Te recordamos que tienes una cita programada:
+
+📅 Fecha: {{ cita.fecha|date:"l, d \\d\\e F \\d\\e Y" }}
+⏰ Hora: {{ cita.hora|time:"H:i" }}
+👨‍⚕️ Odontólogo: Dr. {{ doctor.nombre_completo }}
+📍 Lugar: Dental D&D
+
+Motivo de consulta: {{ cita.motivo }}
+
+‼️ IMPORTANTE:
+- Por favor, llega 10 minutos antes de tu cita.
+- Si no puedes asistir, cancela con al menos 24 horas de anticipación.
+
+📞 Contacto: [Teléfono de la clínica]
+
+¡Te esperamos!
+Dental D&D

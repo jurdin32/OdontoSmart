@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load permisos_tags %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='reportes' %}
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+        <div class="dashboard-content">
+            <div class="page-header">
+                <h1 class="page-title">Reportes</h1>
+                <p class="page-subtitle">Panel de reportes y estadísticas del consultorio</p>
+            </div>
+
+            <div class="reports-grid">
+                <a href="{% url 'reporte_pacientes' %}" class="report-card">
+                    <div class="report-icon" style="background:#eff6ff;color:#2563eb;">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="report-info">
+                        <h3>Pacientes</h3>
+                        <p>Estadísticas demográficas, edad, género y más</p>
+                    </div>
+                    <i class="fas fa-arrow-right report-arrow"></i>
+                </a>
+
+                <a href="{% url 'reporte_citas' %}" class="report-card">
+                    <div class="report-icon" style="background:#ecfdf5;color:#10b981;">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="report-info">
+                        <h3>Citas</h3>
+                        <p>Por estado, por médico, próximas citas</p>
+                    </div>
+                    <i class="fas fa-arrow-right report-arrow"></i>
+                </a>
+
+                <a href="{% url 'reporte_medicos' %}" class="report-card">
+                    <div class="report-icon" style="background:#fef3c7;color:#d97706;">
+                        <i class="fas fa-user-md"></i>
+                    </div>
+                    <div class="report-info">
+                        <h3>Médicos</h3>
+                        <p>Productividad, especialidades, rendimiento</p>
+                    </div>
+                    <i class="fas fa-arrow-right report-arrow"></i>
+                </a>
+
+                <a href="{% url 'reporte_historias' %}" class="report-card">
+                    <div class="report-icon" style="background:#f5f3ff;color:#7c3aed;">
+                        <i class="fas fa-notes-medical"></i>
+                    </div>
+                    <div class="report-info">
+                        <h3>Historias Clínicas</h3>
+                        <p>Condiciones médicas frecuentes, evoluciones</p>
+                    </div>
+                    <i class="fas fa-arrow-right report-arrow"></i>
+                </a>
+
+                <a href="{% url 'reporte_valores' %}" class="report-card">
+                    <div class="report-icon" style="background:#ecfdf5;color:#059669;">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="report-info">
+                        <h3>Valores</h3>
+                        <p>Ingresos por tratamiento: diario, semanal, mensual, anual</p>
+                    </div>
+                    <i class="fas fa-arrow-right report-arrow"></i>
+                </a>
+
+                {% tiene_permiso 'ver_facturas' as puede_ver_facturas %}
+                {% if puede_ver_facturas %}
+                <a href="{% url 'reporte_facturas' %}" class="report-card">
+                    <div class="report-icon" style="background:#ecfdf5;color:#059669;">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    <div class="report-info">
+                        <h3>Facturas</h3>
+                        <p>Reporte de facturación con exportación a Excel y PDF</p>
+                    </div>
+                    <i class="fas fa-arrow-right report-arrow"></i>
+                </a>
+                {% endif %}
+
+                <a href="{% url 'reporte_actividad' %}" class="report-card">
+                    <div class="report-icon" style="background:#fff7ed;color:#f59e0b;">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div class="report-info">
+                        <h3>Actividad del Sistema</h3>
+                        <p>Acciones por usuario, por modelo, auditoría</p>
+                    </div>
+                    <i class="fas fa-arrow-right report-arrow"></i>
+                </a>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

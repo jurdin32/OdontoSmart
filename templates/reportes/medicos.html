@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='reportes' %}
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+        <div class="dashboard-content">
+            <div class="page-header page-header--between">
+                <div>
+                    <h1 class="page-title">Reporte de Médicos</h1>
+                    <p class="page-subtitle">Productividad y rendimiento del personal</p>
+                </div>
+                <a href="{% url 'reportes' %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver</a>
+            </div>
+
+            <form class="report-filters" method="GET">
+                <div class="filter-group"><label class="filter-label">Desde</label><input type="date" name="desde" class="form-input filter-input" value="{{ desde }}"></div>
+                <div class="filter-group"><label class="filter-label">Hasta</label><input type="date" name="hasta" class="form-input filter-input" value="{{ hasta }}"></div>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Filtrar</button>
+                {% if desde or hasta %}<a href="{% url 'reporte_medicos' %}" class="btn btn-secondary"><i class="fas fa-times"></i> Limpiar</a>{% endif %}
+            </form>
+
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-icon" style="background:#dbeafe;color:#2563eb;"><i class="fas fa-user-md"></i></div><div class="stat-info"><span class="stat-number">{{ total_med }}</span><span class="stat-label">Total Médicos</span></div></div>
+                <div class="stat-card"><div class="stat-icon" style="background:#ecfdf5;color:#10b981;"><i class="fas fa-user-check"></i></div><div class="stat-info"><span class="stat-number">{{ con_usuario }}</span><span class="stat-label">Con Usuario</span></div></div>
+            </div>
+
+            <div class="report-section">
+                <h3 class="form-section-title">Distribución por Especialidad</h3>
+                <div class="table-container">
+                    <table class="table">
+                        <thead><tr><th>Especialidad</th><th>Cantidad</th></tr></thead>
+                        <tbody>
+                            {% for esp in por_especialidad %}
+                            <tr>
+                                <td><strong>{{ esp.especialidad }}</strong></td>
+                                <td><span class="badge badge-blue">{{ esp.total }}</span></td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="2" class="text-center">Sin datos</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="report-section">
+                <h3 class="form-section-title">Rendimiento por Médico</h3>
+                <div class="table-container">
+                    <table class="table">
+                        <thead><tr><th>Médico</th><th>Especialidad</th><th>Total Citas</th><th>Completadas</th><th>Pendientes</th></tr></thead>
+                        <tbody>
+                            {% for item in medicos %}
+                            {% with m=item.medico %}
+                            <tr>
+                                <td><strong>Dr. {{ m.nombres }} {{ m.apellidos }}</strong></td>
+                                <td>{{ m.get_especialidad_display }}</td>
+                                <td><span class="badge badge-blue">{{ item.total_citas }}</span></td>
+                                <td><span class="badge" style="background:#ecfdf5;color:#10b981;">{{ item.citas_completadas }}</span></td>
+                                <td><span class="badge" style="background:#fef3c7;color:#d97706;">{{ item.citas_pendientes }}</span></td>
+                            </tr>
+                            {% endwith %}
+                            {% empty %}
+                            <tr><td colspan="5" class="text-center">Sin datos</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

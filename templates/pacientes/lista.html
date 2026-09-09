@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='pacientes' %}
+
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+
+        <div class="dashboard-content">
+            <div class="page-header page-header--between">
+                <div>
+                    <h1 class="page-title">Pacientes</h1>
+                    <p class="page-subtitle">Lista de pacientes registrados en el sistema</p>
+                </div>
+                <a href="{% url 'registrar_paciente' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nuevo Paciente
+                </a>
+            </div>
+
+            {% if query %}
+            <div class="search-info">
+                <i class="fas fa-search"></i> Resultados para "<strong>{{ query }}</strong>" — 
+                <span>{{ pacientes|length }} paciente{{ pacientes|length|pluralize:'s' }}</span>
+                <a href="{% url 'lista_pacientes' %}" class="search-clear"><i class="fas fa-times"></i> Limpiar</a>
+            </div>
+            {% endif %}
+
+            {% if pacientes %}
+            <!-- Vista tabla (escritorio) -->
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Nombres</th>
+                            <th>Apellidos</th>
+                            <th>Cédula</th>
+                            <th>Edad</th>
+                            <th>Teléfono</th>
+                            <th>Género</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in pacientes %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ p.nombres }}</td>
+                            <td>{{ p.apellidos }}</td>
+                            <td>{{ p.cedula }}</td>
+                            <td>{{ p.edad }} años</td>
+                            <td>{{ p.telefono }}</td>
+                            <td>{{ p.get_genero_display }}</td>
+                            <td class="actions-cell">
+                                <a href="{% url 'detalle_paciente' p.id %}" class="btn-action btn-view" title="Ver">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'editar_paciente' p.id %}" class="btn-action btn-edit" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'historia' p.id %}" class="btn-action btn-history" title="Historia Clínica">
+                                    <i class="fas fa-notes-medical"></i>
+                                </a>
+                                <button type="button" class="btn-action btn-delete" title="Eliminar"
+                                    data-id="{{ p.id }}"
+                                    data-nombre="{{ p.nombres }} {{ p.apellidos }}"
+                                    data-cedula="{{ p.cedula }}"
+                                    data-edad="{{ p.edad }}"
+                                    data-telefono="{{ p.telefono }}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Vista tarjetas (móvil) - estilo médicos -->
+            <div class="data-cards">
+                {% for p in pacientes %}
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <div class="data-card-icon">
+                            {% if p.foto %}
+                            <img src="{{ p.foto.url }}" alt="{{ p.nombres }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+                            {% else %}
+                            {{ p.nombres|first|upper }}
+                            {% endif %}
+                        </div>
+                        <div class="data-card-info">
+                            <h3 class="data-card-title">{{ p.nombres }} {{ p.apellidos }}</h3>
+                            <span class="data-card-sub">
+                                <span class="badge {% if p.genero == 'M' %}badge-primary{% else %}badge-danger{% endif %}">
+                                    {% if p.genero == 'M' %}<i class="fas fa-mars"></i>{% elif p.genero == 'F' %}<i class="fas fa-venus"></i>{% endif %}
+                                    {{ p.get_genero_display }}
+                                </span>
+                            </span>
+                        </div>
+                        <div class="data-card-actions">
+                            <a href="{% url 'detalle_paciente' p.id %}" class="data-card-btn data-card-btn-primary" title="Ver">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{% url 'editar_paciente' p.id %}" class="data-card-btn data-card-btn-warning" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'historia' p.id %}" class="data-card-btn data-card-btn-primary" title="Historia Clínica">
+                                <i class="fas fa-notes-medical"></i>
+                            </a>
+                            <button type="button" class="data-card-btn data-card-btn-danger" title="Eliminar"
+                                data-id="{{ p.id }}"
+                                data-nombre="{{ p.nombres }} {{ p.apellidos }}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="data-card-body">
+                        <div class="data-card-row">
+                            <i class="fas fa-id-card"></i>
+                            <span class="data-card-row-label">Cédula</span>
+                            <span class="data-card-row-value">{{ p.cedula }}</span>
+                        </div>
+                        <div class="data-card-row">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span class="data-card-row-label">Edad</span>
+                            <span class="data-card-row-value">{{ p.edad }} años</span>
+                        </div>
+                        <div class="data-card-row">
+                            <i class="fas fa-phone"></i>
+                            <span class="data-card-row-label">Teléfono</span>
+                            <span class="data-card-row-value">{{ p.telefono }}</span>
+                        </div>
+                    </div>
+                    <div class="data-card-footer">
+                        <a href="{% url 'detalle_paciente' p.id %}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-eye"></i> Ver ficha
+                        </a>
+                        <a href="{% url 'historia' p.id %}" class="btn btn-sm btn-secondary">
+                            <i class="fas fa-notes-medical"></i> Historia
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% include 'componentes/pagination.html' with page_obj=pacientes %}
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-users fa-4x"></i>
+                <h3>No hay pacientes registrados</h3>
+                <p>Comienza registrando el primer paciente</p>
+                <a href="{% url 'registrar_paciente' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Registrar Paciente
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Modal Eliminar Paciente -->
+        <div class="modal-overlay" id="deleteModal">
+            <div class="modal-container">
+                <div class="modal-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h2 class="modal-title">¿Eliminar paciente?</h2>
+                <p class="modal-text">
+                    Estás a punto de eliminar a <strong id="modalPatientName"></strong>.
+                    <br>Esta acción no se puede deshacer.
+                </p>
+                <div class="modal-info" id="modalInfo">
+                    <div class="modal-info-row">
+                        <span class="modal-info-label">Cédula</span>
+                        <span id="modalCedula"></span>
+                    </div>
+                    <div class="modal-info-row">
+                        <span class="modal-info-label">Edad</span>
+                        <span id="modalEdad"></span>
+                    </div>
+                    <div class="modal-info-row">
+                        <span class="modal-info-label">Teléfono</span>
+                        <span id="modalTelefono"></span>
+                    </div>
+                </div>
+                <form method="POST" id="deleteForm" class="modal-actions">
+                    {% csrf_token %}
+                    <button type="button" class="btn btn-secondary" id="cancelDelete">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Sí, Eliminar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    // Buscador
+    document.getElementById('globalSearch')?.addEventListener('input', function() {
+        const q = this.value.toLowerCase();
+        document.querySelectorAll('.table tbody tr').forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(q) ? '' : 'none';
+        });
+        document.querySelectorAll('.patient-card').forEach(card => {
+            const text = card.dataset.search || card.textContent.toLowerCase();
+            card.style.display = text.includes(q) ? '' : 'none';
+        });
+    });
+
+    // Modal Eliminar
+    const deleteModal = document.getElementById('deleteModal');
+    const deleteForm = document.getElementById('deleteForm');
+    const modalPatientName = document.getElementById('modalPatientName');
+    const modalCedula = document.getElementById('modalCedula');
+    const modalEdad = document.getElementById('modalEdad');
+    const modalTelefono = document.getElementById('modalTelefono');
+    const cancelDelete = document.getElementById('cancelDelete');
+
+    function openDeleteModal(id, nombre, cedula, edad, telefono) {
+        deleteForm.action = '/pacientes/' + id + '/eliminar/';
+        modalPatientName.textContent = nombre;
+        modalCedula.textContent = cedula;
+        modalEdad.textContent = edad + ' años';
+        modalTelefono.textContent = telefono;
+        deleteModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeDeleteModal() {
+        deleteModal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    // Abrir modal desde botones de eliminar
+    document.querySelectorAll('.btn-delete, .card-btn-delete').forEach(btn => {
+        btn.addEventListener('click', function() {
+            openDeleteModal(
+                this.dataset.id,
+                this.dataset.nombre,
+                this.dataset.cedula,
+                this.dataset.edad,
+                this.dataset.telefono
+            );
+        });
+    });
+
+    // Cerrar modal
+    cancelDelete?.addEventListener('click', closeDeleteModal);
+    deleteModal?.addEventListener('click', function(e) {
+        if (e.target === this) closeDeleteModal();
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeDeleteModal();
+    });
+</script>
+{% endblock %}

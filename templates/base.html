@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} | {{ empresa.nombre|default:'OdontSmart' }}</title>
+    <link rel="icon" type="image/svg+xml" href="{% if config_empresa and config_empresa.logo %}{{ config_empresa.logo.url }}{% else %}{% static 'img/logo-icon.svg' %}{% endif %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=8.0">
+    {% load empresa_tags %}
+    {% if config_empresa %}
+    <style>
+        :root {
+            --primary: {{ config_empresa.color_principal }};
+            --primary-dark: {{ config_empresa.color_secundario }};
+            --primary-light: {{ config_empresa.color_principal|hex_to_rgb:'0.4' }};
+            --primary-bg: {{ config_empresa.color_principal|hex_to_rgb:'0.07' }};
+            --gradient-main: linear-gradient(135deg, {{ config_empresa.color_secundario }} 0%, {{ config_empresa.color_secundario }} 40%, {{ config_empresa.color_principal }} 100%);
+            --gradient-sidebar: linear-gradient(180deg, {{ config_empresa.color_secundario }} 0%, {{ config_empresa.color_secundario }} 100%);
+            --gradient-accent: linear-gradient(135deg, {{ config_empresa.color_secundario }}, {{ config_empresa.color_principal }});
+        }
+        .nav-item.active {
+            background: {{ config_empresa.color_principal|hex_to_rgb:'0.15' }};
+            color: {{ config_empresa.color_principal|hex_to_rgb:'1' }};
+        }
+    </style>
+    {% endif %}
+</head>
+<body>
+    <!-- Toast Messages -->
+    {% if messages %}
+    <div class="toast-container" id="toastContainer">
+        {% for message in messages %}
+        <div class="toast toast-{{ message.tags }}" role="alert">
+            <div class="toast-icon">
+                {% if message.tags == 'success' %}
+                <i class="fas fa-check-circle"></i>
+                {% elif message.tags == 'error' %}
+                <i class="fas fa-exclamation-circle"></i>
+                {% elif message.tags == 'info' %}
+                <i class="fas fa-info-circle"></i>
+                {% elif message.tags == 'warning' %}
+                <i class="fas fa-exclamation-triangle"></i>
+                {% endif %}
+            </div>
+            <div class="toast-content">
+                <span>{{ message }}</span>
+            </div>
+            <button class="toast-close" onclick="this.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    {% block content %}{% endblock %}
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

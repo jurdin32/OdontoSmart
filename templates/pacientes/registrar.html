@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='pacientes' %}
+
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+
+        <div class="dashboard-content">
+            <div class="page-header">
+                <h1 class="page-title">
+                    {% if paciente %}Editar Paciente{% else %}Registrar Paciente{% endif %}
+                </h1>
+                <p class="page-subtitle">
+                    {% if paciente %}Actualiza los datos del paciente{% else %}Ingresa los datos del nuevo paciente{% endif %}
+                </p>
+            </div>
+
+            <div class="form-card">
+                {% if object_version %}
+                <div class="concurrency-banner" id="concurrencyBanner" style="display:none;">
+                    <i class="fas fa-lock"></i>
+                    <span id="concurrencyMessage">⚠️ Editando...</span>
+                </div>
+                {% endif %}
+
+                <form method="POST" class="paciente-form" novalidate enctype="multipart/form-data"
+                      data-object-type="Paciente"
+                      data-object-id="{{ paciente.id }}"
+                      data-object-version="{{ object_version }}">
+                    {% csrf_token %}
+                    {% if object_version %}
+                    <input type="hidden" name="object_version" value="{{ object_version }}">
+                    {% endif %}
+
+                    <!-- Datos Personales -->
+                    <div class="form-section">
+                        <h3 class="form-section-title">
+                            <i class="fas fa-user"></i> Datos Personales
+                        </h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.nombres.label }}</label>
+                                {{ form.nombres }}
+                                {% if form.nombres.errors %}<div class="form-error">{% for e in form.nombres.errors %}<span>{{ e }}</span>{% endfor %}</div>{% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">{{ form.apellidos.label }}</label>
+                                {{ form.apellidos }}
+                                {% if form.apellidos.errors %}<div class="form-error">{% for e in form.apellidos.errors %}<span>{{ e }}</span>{% endfor %}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.cedula.label }}</label>
+                                {{ form.cedula }}
+                                {% if form.cedula.errors %}<div class="form-error">{% for e in form.cedula.errors %}<span>{{ e }}</span>{% endfor %}</div>{% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">{{ form.fecha_nacimiento.label }}</label>
+                                {{ form.fecha_nacimiento }}
+                                {% if form.fecha_nacimiento.errors %}<div class="form-error">{% for e in form.fecha_nacimiento.errors %}<span>{{ e }}</span>{% endfor %}</div>{% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">{{ form.genero.label }}</label>
+                                {{ form.genero }}
+                                {% if form.genero.errors %}<div class="form-error">{% for e in form.genero.errors %}<span>{{ e }}</span>{% endfor %}</div>{% endif %}
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.lugar.label }}</label>
+                                {{ form.lugar }}
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">{{ form.nacionalidad.label }}</label>
+                                {{ form.nacionalidad }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contacto -->
+                    <div class="form-section">
+                        <h3 class="form-section-title">
+                            <i class="fas fa-address-book"></i> Información de Contacto
+                        </h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.telefono.label }}</label>
+                                {{ form.telefono }}
+                                {% if form.telefono.errors %}<div class="form-error">{% for e in form.telefono.errors %}<span>{{ e }}</span>{% endfor %}</div>{% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">{{ form.celular.label }}</label>
+                                {{ form.celular }}
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.email.label }}</label>
+                                {{ form.email }}
+                                {% if form.email.errors %}<div class="form-error">{% for e in form.email.errors %}<span>{{ e }}</span>{% endfor %}</div>{% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">{{ form.ocupacion.label }}</label>
+                                {{ form.ocupacion }}
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.direccion.label }}</label>
+                                {{ form.direccion }}
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">{{ form.foto.label }}</label>
+                                {{ form.foto }}
+                                {% if paciente and paciente.foto %}
+                                <div style="margin-top: 8px;">
+                                    <img src="{{ paciente.foto.url }}" alt="Foto" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid var(--gray-200);">
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acompañante -->
+                    <div class="form-section">
+                        <h3 class="form-section-title">
+                            <i class="fas fa-user-friends"></i> Acompañante (Opcional)
+                        </h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.acompanante_nombre.label }}</label>
+                                {{ form.acompanante_nombre }}
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">{{ form.acompanante_parentesco.label }}</label>
+                                {{ form.acompanante_parentesco }}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">{{ form.acompanante_telefono.label }}</label>
+                            {{ form.acompanante_telefono }}
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <a href="{% url 'lista_pacientes' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            {% if paciente %}Actualizar{% else %}Guardar Paciente{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

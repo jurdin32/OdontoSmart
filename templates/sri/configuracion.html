@@ -1,0 +1,297 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='sri_config' %}
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+        <div class="dashboard-content">
+            <div class="page-header">
+                <h1 class="page-title"><i class="fas fa-file-contract"></i> Configuración SRI</h1>
+                <p class="page-subtitle">Datos para la emisión de documentos electrónicos ante el SRI Ecuador</p>
+            </div>
+
+            <form method="POST" enctype="multipart/form-data" class="form-card">
+                {% csrf_token %}
+
+                <!-- Datos del Emisor -->
+                <h3 class="form-section-title"><i class="fas fa-building"></i> Datos del Emisor</h3>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+                    <div>
+                        <label class="form-label">RUC *</label>
+                        <input type="text" name="ruc" class="form-input" value="{{ config.ruc }}" maxlength="13" required placeholder="1234567890001">
+                    </div>
+                    <div>
+                        <label class="form-label">Razón Social *</label>
+                        <input type="text" name="razon_social" class="form-input" value="{{ config.razon_social }}" required>
+                    </div>
+                    <div>
+                        <label class="form-label">Nombre Comercial</label>
+                        <input type="text" name="nombre_comercial" class="form-input" value="{{ config.nombre_comercial }}">
+                    </div>
+                    <div>
+                        <label class="form-label">Resolución SRI (offline)</label>
+                        <input type="text" name="resolucion_sri" class="form-input" value="{{ config.resolucion_sri }}" placeholder="Nro. de resolución">
+                    </div>
+                </div>
+
+                <div style="margin-bottom:24px;">
+                    <label class="form-label">Dirección Matriz</label>
+                    <textarea name="direccion" class="form-input" rows="2">{{ config.direccion }}</textarea>
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+                    <div>
+                        <label class="form-label">Tipo de Contribuyente</label>
+                        <select name="tipo_contribuyente" class="form-input">
+                            <option value="REGIMEN_GENERAL" {% if config.tipo_contribuyente == 'REGIMEN_GENERAL' %}selected{% endif %}>Régimen General</option>
+                            <option value="RIMPE_NEGOCIO_POPULAR" {% if config.tipo_contribuyente == 'RIMPE_NEGOCIO_POPULAR' %}selected{% endif %}>RIMPE - Negocio Popular</option>
+                            <option value="RIMPE_EMPRENDEDOR" {% if config.tipo_contribuyente == 'RIMPE_EMPRENDEDOR' %}selected{% endif %}>RIMPE - Emprendedor</option>
+                            <option value="AGENTE_RETENCION" {% if config.tipo_contribuyente == 'AGENTE_RETENCION' %}selected{% endif %}>Agente de Retención</option>
+                            <option value="CONTRIBUYENTE_ESPECIAL" {% if config.tipo_contribuyente == 'CONTRIBUYENTE_ESPECIAL' %}selected{% endif %}>Contribuyente Especial</option>
+                        </select>
+                        <small style="color:var(--gray-500);">Define la estructura XML que enviará el SRI</small>
+                    </div>
+                    <div>
+                        <label class="form-label">Resolución Contribuyente Especial</label>
+                        <input type="text" name="contribuyente_especial" class="form-input" value="{{ config.contribuyente_especial }}" placeholder="Solo si aplica">
+                    </div>
+                    <div>
+                        <label class="form-label" style="display:block;margin-bottom:8px;">Obligado a llevar contabilidad</label>
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                            <input type="checkbox" name="obligado_contabilidad" {% if config.obligado_contabilidad %}checked{% endif %} style="width:18px;height:18px;">
+                            <span>Sí</span>
+                        </label>
+                    </div>
+                    <div></div>
+                </div>
+
+                <hr style="margin:24px 0;border-color:var(--gray-200);">
+
+                <!-- Ambiente y Serie -->
+                <h3 class="form-section-title"><i class="fas fa-cog"></i> Ambiente y Numeración</h3>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:24px;">
+                    <div>
+                        <label class="form-label">Ambiente SRI</label>
+                        <select name="ambiente" class="form-input">
+                            <option value="1" {% if config.ambiente == '1' %}selected{% endif %}>🔬 Pruebas</option>
+                            <option value="2" {% if config.ambiente == '2' %}selected{% endif %}>🚀 Producción</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Establecimiento</label>
+                        <input type="text" name="estab_factura" class="form-input" value="{{ config.estab_factura }}" maxlength="3" placeholder="001">
+                    </div>
+                    <div>
+                        <label class="form-label">Punto de Emisión</label>
+                        <input type="text" name="emision_factura" class="form-input" value="{{ config.emision_factura }}" maxlength="3" placeholder="001">
+                    </div>
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+                    <div>
+                        <label class="form-label">Secuencial Actual</label>
+                        <input type="number" name="secuencial_factura" class="form-input" value="{{ config.secuencial_factura }}" min="1">
+                        <small style="color:var(--gray-500);">Se incrementa automáticamente con cada factura</small>
+                    </div>
+                    <div>
+                        <label class="form-label">N° Documento actual</label>
+                        <div style="padding:10px 14px;background:var(--gray-50);border-radius:8px;font-family:monospace;font-size:1.1rem;">
+                            {{ config.estab_factura|default:"001" }}-{{ config.emision_factura|default:"001" }}-{{ config.secuencial_factura|stringformat:"09d" }}
+                        </div>
+                    </div>
+                </div>
+
+                <hr style="margin:24px 0;border-color:var(--gray-200);">
+
+                <!-- Comercio Exterior -->
+                <h3 class="form-section-title"><i class="fas fa-ship"></i> Comercio Exterior</h3>
+                <p style="font-size:.85rem;color:var(--gray-500);margin-bottom:12px;">
+                    Solo si emites facturas de exportación. Para ventas locales, dejar todo como está.
+                </p>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+                    <div>
+                        <label class="form-label" style="display:block;margin-bottom:8px;">Factura de exportación</label>
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                            <input type="checkbox" name="comercio_exterior" {% if config.comercio_exterior %}checked{% endif %} style="width:18px;height:18px;">
+                            <span>Sí</span>
+                        </label>
+                    </div>
+                    <div>
+                        <label class="form-label">Incoterm</label>
+                        <input type="text" name="inco_term_factura" class="form-input" value="{{ config.inco_term_factura }}" placeholder="EXW, FOB, CIF...">
+                    </div>
+                    <div>
+                        <label class="form-label">Lugar Incoterm</label>
+                        <input type="text" name="lugar_inco_term" class="form-input" value="{{ config.lugar_inco_term }}" placeholder="Ciudad / Puerto">
+                    </div>
+                    <div>
+                        <label class="form-label">País Origen</label>
+                        <input type="text" name="pais_origen" class="form-input" value="{{ config.pais_origen }}" maxlength="4" placeholder="ECU">
+                    </div>
+                    <div>
+                        <label class="form-label">Puerto de Embarque</label>
+                        <input type="text" name="puerto_embarque" class="form-input" value="{{ config.puerto_embarque }}">
+                    </div>
+                    <div>
+                        <label class="form-label">Puerto de Destino</label>
+                        <input type="text" name="puerto_destino" class="form-input" value="{{ config.puerto_destino }}">
+                    </div>
+                    <div>
+                        <label class="form-label">País Destino</label>
+                        <input type="text" name="pais_destino" class="form-input" value="{{ config.pais_destino }}" maxlength="4" placeholder="ECU">
+                    </div>
+                    <div>
+                        <label class="form-label">País Adquisición</label>
+                        <input type="text" name="pais_adquisicion" class="form-input" value="{{ config.pais_adquisicion }}" maxlength="4" placeholder="ECU">
+                    </div>
+                </div>
+
+                <hr style="margin:24px 0;border-color:var(--gray-200);">
+
+                <!-- Certificado Digital -->
+                <h3 class="form-section-title"><i class="fas fa-lock"></i> Certificado Digital</h3>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+                    <div>
+                        <label class="form-label">Archivo .p12</label>
+                        {% if config.certificado_p12 %}
+                        <div style="margin-bottom:8px;padding:10px;background:#ecfdf5;border-radius:8px;display:flex;align-items:center;gap:8px;">
+                            <i class="fas fa-check-circle" style="color:var(--success);"></i>
+                            <span style="font-size:.9rem;">{{ config.certificado_p12.name }}</span>
+                        </div>
+                        {% endif %}
+                        <input type="file" name="certificado_p12" class="form-input" accept=".p12,.pfx">
+                        <small style="color:var(--gray-500);">Archivo de certificado de firma electrónica (Token)</small>
+                    </div>
+                    <div>
+                        <label class="form-label">Clave del Certificado</label>
+                        <input type="password" name="clave_certificado" class="form-input" value="{{ config.clave_certificado }}" placeholder="Contraseña del .p12">
+                    </div>
+                </div>
+
+                <!-- Botón Verificar Firma -->
+                <div style="margin-bottom:24px;">
+                    <button type="button" id="btnVerificarFirma" class="btn btn-primary" style="background:var(--info);border-color:var(--info);" onclick="verificarFirma(this)">
+                        <i class="fas fa-shield-alt"></i> Verificar Firma Electrónica
+                    </button>
+                    <small style="color:var(--gray-500);display:block;margin-top:6px;">
+                        Valida que el certificado .p12 esté vigente, la contraseña sea correcta y sea apto para facturación electrónica SRI.
+                    </small>
+                </div>
+
+                <!-- Resultado de verificación -->
+                <div id="resultadoVerificacion" style="display:none;margin-bottom:24px;"></div>
+
+                <!-- Botones -->
+                <div style="display:flex;gap:12px;padding-top:16px;border-top:1px solid var(--gray-200);">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Guardar Configuración
+                    </button>
+                    <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+
+            <!-- Resumen / vista previa -->
+            {% if config.ruc %}
+            <div class="form-card" style="margin-top:20px;">
+                <h3 class="form-section-title"><i class="fas fa-eye"></i> Vista previa de datos SRI</h3>
+                <div style="background:var(--gray-50);padding:20px;border-radius:10px;font-family:monospace;font-size:.9rem;line-height:1.8;">
+                    <div><strong>RUC:</strong> {{ config.ruc }}</div>
+                    <div><strong>Razón Social:</strong> {{ config.razon_social }}</div>
+                    <div><strong>Ambiente:</strong> {% if config.ambiente == '1' %}🔬 Pruebas{% else %}🚀 Producción{% endif %}</div>
+                    <div><strong>Serie:</strong> {{ config.estab_factura|default:"001" }}-{{ config.emision_factura|default:"001" }}</div>
+                    <div><strong>Secuencial:</strong> {{ config.secuencial_factura|stringformat:"09d" }}</div>
+                    <div><strong>N° Documento:</strong> {{ config.estab_factura|default:"001" }}-{{ config.emision_factura|default:"001" }}-{{ config.secuencial_factura|stringformat:"09d" }}</div>
+                    {% if config.certificado_p12 %}
+                    <div><strong>Certificado:</strong> ✅ Cargado</div>
+                    {% else %}
+                    <div><strong>Certificado:</strong> ⚠️ No cargado</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+
+<script>
+function verificarFirma(btn) {
+    var resultDiv = document.getElementById('resultadoVerificacion');
+    var originalHTML = btn.innerHTML;
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando...';
+    resultDiv.style.display = 'none';
+    resultDiv.className = '';
+
+    fetch('{% url "verificar_certificado" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}',
+        },
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(resp) {
+        var html = '';
+        if (resp.valido) {
+            html = '<div class="alert alert-success" style="padding:16px;border-radius:10px;">';
+            html += '<strong><i class="fas fa-check-circle"></i> ' + resp.mensaje + '</strong>';
+            html += '<div style="margin-top:12px;font-size:.9rem;line-height:1.8;">';
+            if (resp.detalles) {
+                html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+                html += '<div><strong>Titular:</strong> ' + (resp.detalles.titular || '-') + '</div>';
+                if (resp.detalles.ruc_certificado) {
+                    html += '<div><strong>RUC:</strong> ' + resp.detalles.ruc_certificado + '</div>';
+                }
+                html += '<div><strong>Emisor:</strong> ' + (resp.detalles.emisor || '-') + '</div>';
+                html += '<div><strong>Válido desde:</strong> ' + (resp.detalles.valido_desde || '-') + '</div>';
+                html += '<div><strong>Válido hasta:</strong> ' + (resp.detalles.valido_hasta || '-') + '</div>';
+                html += '<div><strong>Días restantes:</strong> ' + (resp.detalles.dias_restantes || '-') + '</div>';
+                html += '</div>';
+            }
+            html += '</div>';
+            if (resp.advertencias && resp.advertencias.length > 0) {
+                html += '<div style="margin-top:10px;padding:10px;background:#fff3cd;border-radius:8px;color:#856404;">';
+                html += '<strong>&#9888;&#65039; Advertencias:</strong><ul style="margin:4px 0 0 16px;">';
+                for (var i = 0; i < resp.advertencias.length; i++) {
+                    html += '<li>' + resp.advertencias[i] + '</li>';
+                }
+                html += '</ul></div>';
+            }
+            html += '</div>';
+        } else {
+            html = '<div class="alert alert-danger" style="padding:16px;border-radius:10px;">';
+            html += '<strong><i class="fas fa-times-circle"></i> ' + (resp.mensaje || 'Error desconocido') + '</strong>';
+            if (resp.detalles) {
+                html += '<div style="margin-top:12px;font-size:.9rem;line-height:1.8;">';
+                if (resp.detalles.valido_desde) {
+                    html += '<div><strong>Válido desde:</strong> ' + resp.detalles.valido_desde + '</div>';
+                }
+                if (resp.detalles.valido_hasta) {
+                    html += '<div><strong>Válido hasta:</strong> ' + resp.detalles.valido_hasta + '</div>';
+                }
+                html += '</div>';
+            }
+            html += '</div>';
+        }
+        resultDiv.innerHTML = html;
+        resultDiv.style.display = 'block';
+    })
+    .catch(function(err) {
+        var msg = 'Error de conexión al verificar el certificado.';
+        try { msg = err.message || msg; } catch(e) {}
+        var html = '<div class="alert alert-danger" style="padding:16px;border-radius:10px;">';
+        html += '<strong><i class="fas fa-exclamation-triangle"></i> ' + msg + '</strong>';
+        html += '</div>';
+        resultDiv.innerHTML = html;
+        resultDiv.style.display = 'block';
+    })
+    .finally(function() {
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+    });
+}
+</script>
+{% endblock content %}

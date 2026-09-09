@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='tareas' %}
+
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+
+        <div class="dashboard-content">
+            <div class="page-header page-header--between">
+                <div>
+                    <h1 class="page-title">⚙️ Tareas en Segundo Plano</h1>
+                    <p class="page-subtitle">Ejecuta tareas administrativas sin interrumpir la atención</p>
+                </div>
+            </div>
+
+            <!-- Tarjetas de tareas disponibles -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:32px;">
+                <div class="detail-card" style="padding:20px;">
+                    <h3 style="margin-bottom:8px;"><i class="fas fa-bell" style="color:var(--warning);"></i> Recordatorios</h3>
+                    <p style="font-size:.85rem;color:var(--gray-500);margin-bottom:16px;">
+                        Envía recordatorios de citas para mañana por correo y WhatsApp.
+                    </p>
+                    <form method="POST" action="{% url 'ejecutar_tarea' 'recordatorios' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary" style="width:100%;">
+                            <i class="fas fa-play"></i> Ejecutar
+                        </button>
+                    </form>
+                </div>
+
+                <div class="detail-card" style="padding:20px;">
+                    <h3 style="margin-bottom:8px;"><i class="fas fa-file-invoice-dollar" style="color:var(--success);"></i> Facturación Mensual</h3>
+                    <p style="font-size:.85rem;color:var(--gray-500);margin-bottom:16px;">
+                        Genera resumen de facturación del mes actual.
+                    </p>
+                    <form method="POST" action="{% url 'ejecutar_tarea' 'facturacion' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary" style="width:100%;">
+                            <i class="fas fa-play"></i> Ejecutar
+                        </button>
+                    </form>
+                </div>
+
+                <div class="detail-card" style="padding:20px;">
+                    <h3 style="margin-bottom:8px;"><i class="fas fa-database" style="color:var(--info);"></i> Respaldo BD</h3>
+                    <p style="font-size:.85rem;color:var(--gray-500);margin-bottom:16px;">
+                        Crea un respaldo comprimido de la base de datos.
+                    </p>
+                    <form method="POST" action="{% url 'ejecutar_tarea' 'respaldo' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary" style="width:100%;">
+                            <i class="fas fa-play"></i> Ejecutar
+                        </button>
+                    </form>
+                </div>
+
+                <div class="detail-card" style="padding:20px;">
+                    <h3 style="margin-bottom:8px;"><i class="fas fa-broom" style="color:var(--gray-500);"></i> Limpieza de Locks</h3>
+                    <p style="font-size:.85rem;color:var(--gray-500);margin-bottom:16px;">
+                        Limpia locks de edición expirados del sistema.
+                    </p>
+                    <form method="POST" action="{% url 'ejecutar_tarea' 'limpieza' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary" style="width:100%;">
+                            <i class="fas fa-play"></i> Ejecutar
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Historial de ejecuciones -->
+            <div class="form-card">
+                <h3 class="form-section-title" style="margin-bottom:16px;">
+                    <i class="fas fa-history"></i> Historial de Ejecuciones
+                </h3>
+
+                {% if logs %}
+                <div style="overflow-x:auto;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Tarea</th>
+                                <th>Estado</th>
+                                <th>Detalle</th>
+                                <th>Ejecutado por</th>
+                                <th>Fecha</th>
+                                <th>Duración</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in logs %}
+                            <tr>
+                                <td><strong>{{ log.get_tarea_display }}</strong></td>
+                                <td>
+                                    {% if log.estado == 'COMPLETADO' %}
+                                    <span style="color:var(--success);font-weight:600;">✅ Completado</span>
+                                    {% elif log.estado == 'ERROR' %}
+                                    <span style="color:var(--error);font-weight:600;">❌ Error</span>
+                                    {% elif log.estado == 'EN_PROCESO' %}
+                                    <span style="color:var(--warning);font-weight:600;">⏳ En proceso</span>
+                                    {% elif log.estado == 'SIMULADO' %}
+                                    <span style="color:var(--gray-500);font-weight:600;">🔷 Simulado</span>
+                                    {% else %}
+                                    <span>{{ log.get_estado_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                                    {{ log.detalle|truncatechars:80 }}
+                                </td>
+                                <td>{% if log.ejecutado_por %}{{ log.ejecutado_por.get_full_name|default:log.ejecutado_por.username }}{% else %}-{% endif %}</td>
+                                <td>{{ log.fecha_ejecucion|date:"d/m/Y H:i" }}</td>
+                                <td>{{ log.duracion_segundos|floatformat:1 }}s</td>
+                                <td>
+                                    <form method="POST" action="{% url 'eliminar_log_tarea' log.id %}" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-secondary" onclick="return confirm('¿Eliminar este registro?')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div style="text-align:center;padding:40px;color:var(--gray-400);">
+                    <i class="fas fa-inbox" style="font-size:2rem;margin-bottom:12px;display:block;"></i>
+                    <p>No hay ejecuciones registradas aún.</p>
+                    <p style="font-size:.85rem;">Usa los botones de arriba para ejecutar una tarea.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

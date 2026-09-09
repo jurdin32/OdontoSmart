@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte de Facturas</title>
+    <style>
+        @page { margin: 15mm; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; color: #1e293b; }
+        h1 { font-size: 18px; color: #1e3a5f; text-align: center; margin-bottom: 4px; }
+        .subtitle { text-align: center; color: #64748b; font-size: 12px; margin-bottom: 20px; }
+        .stats { display: flex; justify-content: space-between; margin-bottom: 20px; }
+        .stat-box { background: #f8fafc; padding: 10px 16px; border-radius: 6px; text-align: center; flex: 1; margin: 0 4px; }
+        .stat-box strong { display: block; font-size: 16px; color: #2563eb; }
+        .stat-box span { font-size: 10px; color: #94a3b8; text-transform: uppercase; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th { background: #1e3a5f; color: #fff; padding: 8px 10px; text-align: left; font-size: 10px; text-transform: uppercase; }
+        td { padding: 6px 10px; border-bottom: 1px solid #e2e8f0; }
+        .total-row td { font-weight: 700; border-top: 2px solid #1e293b; padding-top: 10px; }
+        .footer { text-align: center; color: #94a3b8; font-size: 9px; margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 10px; }
+        .right { text-align: right; }
+        .center { text-align: center; }
+    </style>
+</head>
+<body>
+    <h1>Reporte de Facturas</h1>
+    <p class="subtitle">
+        Período: {{ desde|default:"—" }} a {{ hasta|default:"—" }} — Generado: {{ hoy|date:"d/m/Y H:i" }}
+    </p>
+
+    <div class="stats">
+        <div class="stat-box"><strong>{{ total_facturas }}</strong><span>Facturas</span></div>
+        <div class="stat-box"><strong>${{ monto_total|floatformat:2 }}</strong><span>Monto Total</span></div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>N°</th>
+                <th>Paciente</th>
+                <th>Emisión</th>
+                <th class="right">Total</th>
+                <th>Forma Pago</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for f in facturas %}
+            <tr>
+                <td>{{ f.numero }}</td>
+                <td>{{ f.paciente }}</td>
+                <td>{{ f.fecha_emision|date:"d/m/Y" }}</td>
+                <td class="right">${{ f.total|floatformat:2 }}</td>
+                <td>{{ f.get_forma_pago_display }}</td>
+                <td>{{ f.get_estado_display }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr class="total-row">
+                <td colspan="3"><strong>TOTAL</strong></td>
+                <td class="right"><strong>${{ monto_total|floatformat:2 }}</strong></td>
+                <td colspan="2"></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="footer">
+        <p>Generado por OdontSmart</p>
+    </div>
+</body>
+</html>

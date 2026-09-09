@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='proformas' %}
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+        <div class="dashboard-content">
+            <div class="page-header">
+                <h1 class="page-title">{{ title }}</h1>
+            </div>
+
+            <form method="POST" id="proformaForm" class="form-card">
+                {% csrf_token %}
+                <input type="hidden" name="items" id="id_items" value="{{ items_json|default:'[]' }}">
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+                    <div>
+                        <label class="form-label">Paciente</label>
+                        {{ form.paciente }}
+                    </div>
+                    <div>
+                        <label class="form-label">Médico</label>
+                        {{ form.medico }}
+                    </div>
+                    <div>
+                        <label class="form-label">Válido hasta</label>
+                        {{ form.fecha_validez }}
+                    </div>
+                    <div></div>
+                </div>
+
+                <!-- Items -->
+                <div style="margin-bottom:24px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                        <label class="form-label" style="margin:0;font-size:1rem;">Servicios / Productos</label>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="agregarItem()">
+                            <i class="fas fa-plus"></i> Agregar Item
+                        </button>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table class="table" id="itemsTable">
+                            <thead>
+                                <tr>
+                                    <th style="width:50%;">Descripción</th>
+                                    <th style="width:15%;">Cantidad</th>
+                                    <th style="width:20%;">Precio Unit.</th>
+                                    <th style="width:15%;">Total</th>
+                                    <th style="width:40px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="itemsBody">
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="3" style="text-align:right;font-weight:600;">Subtotal</td>
+                                    <td id="subtotalDisplay">$0.00</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" style="text-align:right;">
+                                        Descuento (%): {{ form.descuento_porcentaje }}
+                                    </td>
+                                    <td id="descuentoDisplay">$0.00</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" style="text-align:right;">
+                                        Impuesto (%): {{ form.impuesto_porcentaje }}
+                                    </td>
+                                    <td id="impuestoDisplay">$0.00</td>
+                                    <td></td>
+                                </tr>
+                                <tr style="font-size:1.1rem;">
+                                    <td colspan="3" style="text-align:right;font-weight:700;">TOTAL</td>
+                                    <td id="totalDisplay" style="font-weight:700;">$0.00</td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Notas -->
+                <div style="margin-bottom:24px;">
+                    <label class="form-label">Notas / Condiciones</label>
+                    {{ form.notas }}
+                </div>
+
+                {% if proforma %}
+                <div style="margin-bottom:24px;">
+                    <label class="form-label">Estado</label>
+                    {{ form.estado }}
+                </div>
+                {% endif %}
+
+                <div style="display:flex;gap:12px;">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> {% if proforma %}Actualizar{% else %}Guardar{% endif %}
+                    </button>
+                    <a href="{% url 'lista_proformas' %}" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function() {
+    "use strict";
+
+    // 1. Cargar items desde el hidden input (Django preserva el valor POST)
+    var items = [];
+    var hiddenField = document.getElementById('id_items');
+    if (hiddenField && hiddenField.value && hiddenField.value !== '[]') {
+        try { items = JSON.parse(hiddenField.value); } catch(e) { items = []; }
+    }
+    // Si hay proforma guardada en BD, cargar sus items
+    {% if proforma and proforma.items %}
+    try { items = {{ proforma.items|safe }}; } catch(e) { items = []; }
+    {% endif %}
+    if (!Array.isArray(items)) items = [];
+
+    function h(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function fmt(n) { return '$' + (parseFloat(n)||0).toFixed(2); }
+
+    function render() {
+        var tbody = document.getElementById('itemsBody');
+        tbody.innerHTML = '';
+        for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+            var total = (parseFloat(item.cantidad)||0) * (parseFloat(item.precio_unitario)||0);
+            var row = document.createElement('tr');
+            row.innerHTML =
+                '<td><input type="text" class="form-input" value="' + h(item.descripcion||'') + '" placeholder="Describa el servicio"></td>' +
+                '<td><input type="number" class="form-input" value="' + (item.cantidad||1) + '" min="1" step="1"></td>' +
+                '<td><input type="number" class="form-input" value="' + (item.precio_unitario||0) + '" min="0" step="0.01"></td>' +
+                '<td style="font-weight:600;">' + fmt(total) + '</td>' +
+                '<td><button type="button" class="btn btn-sm btn-secondary" onclick="window.eliminarItem(' + i + ')"><i class="fas fa-times"></i></button></td>';
+            tbody.appendChild(row);
+        }
+        // Vincular eventos oninput a los campos de cantidad y precio
+        var inputs = tbody.querySelectorAll('input[type="number"]');
+        for (var j = 0; j < inputs.length; j++) {
+            inputs[j].addEventListener('input', recalcular);
+        }
+        recalcular();
+    }
+
+    window.agregarItem = function() {
+        items.push({descripcion: '', cantidad: 1, precio_unitario: 0});
+        render();
+    };
+
+    window.eliminarItem = function(i) {
+        items.splice(i, 1);
+        render();
+    };
+
+    function recalcular() {
+        var tbody = document.getElementById('itemsBody');
+        var filas = tbody.querySelectorAll('tr');
+        var nuevosItems = [];
+        var subtotal = 0;
+        for (var i = 0; i < filas.length; i++) {
+            var celdas = filas[i].querySelectorAll('input');
+            if (celdas.length >= 3) {
+                var cant = parseFloat(celdas[1].value) || 0;
+                var pu = parseFloat(celdas[2].value) || 0;
+                var totalItem = cant * pu;
+                nuevosItems.push({
+                    descripcion: celdas[0].value,
+                    cantidad: cant,
+                    precio_unitario: pu
+                });
+                subtotal += totalItem;
+                // Actualizar total x fila (4ª celda)
+                var tds = filas[i].cells;
+                if (tds.length >= 4) tds[3].textContent = fmt(totalItem);
+            }
+        }
+        items = nuevosItems;
+
+        var descPct = parseFloat(document.querySelector('[name=descuento_porcentaje]')?.value || 0);
+        var impPct = parseFloat(document.querySelector('[name=impuesto_porcentaje]')?.value || 0);
+
+        var descMonto = subtotal * (descPct / 100);
+        var baseImp = subtotal - descMonto;
+        var impMonto = baseImp * (impPct / 100);
+        var total = baseImp + impMonto;
+
+        document.getElementById('subtotalDisplay').textContent = fmt(subtotal);
+        document.getElementById('descuentoDisplay').textContent = '-' + fmt(descMonto);
+        document.getElementById('impuestoDisplay').textContent = fmt(impMonto);
+        document.getElementById('totalDisplay').textContent = fmt(total);
+
+        document.getElementById('id_items').value = JSON.stringify(items);
+    }
+
+    // Al enviar el formulario, recalcular para asegurar datos actualizados
+    document.getElementById('proformaForm').addEventListener('submit', function() {
+        recalcular();
+    });
+
+    // Inicializar
+    render();
+
+    // Actualizar cálculos cuando cambien descuento/impuesto
+    document.querySelector('[name=descuento_porcentaje]')?.addEventListener('input', recalcular);
+    document.querySelector('[name=impuesto_porcentaje]')?.addEventListener('input', recalcular);
+})();
+</script>
+{% endblock %}

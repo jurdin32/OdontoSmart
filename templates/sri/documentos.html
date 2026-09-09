@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='sri_docs' %}
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+        <div class="dashboard-content">
+            <div class="page-header">
+                <h1 class="page-title"><i class="fas fa-file-invoice"></i> Documentos Electrónicos</h1>
+                <p class="page-subtitle">Comprobantes emitidos al SRI</p>                <a href="{% url 'sri_log' %}" class="btn btn-secondary">
+                    <i class="fas fa-history"></i> Ver Log SRI
+                </a>            </div>
+
+            <div class="form-card">
+                <div style="overflow-x:auto;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>N° Documento</th>
+                                <th>Tipo</th>
+                                <th>Estado</th>
+                                <th>Total</th>
+                                <th>Comprador</th>
+                                <th>Emisión</th>
+                                <th>Clave de Acceso</th>
+                                <th>XML</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doc in documentos %}
+                            <tr>
+                                <td><strong>{{ doc.numero_documento }}</strong></td>
+                                <td>{{ doc.get_tipo_display }}</td>
+                                <td>
+                                    {% if doc.estado == 'AUTORIZADO' %}
+                                    <span class="badge badge-success">✅ Autorizado</span>
+                                    {% elif doc.estado == 'ENVIADO' %}
+                                    <span class="badge badge-info">📤 Enviado</span>
+                                    {% elif doc.estado == 'NO_AUTORIZADO' %}
+                                    <span class="badge badge-danger">❌ No autorizado</span>
+                                    {% elif doc.estado == 'ERROR' %}
+                                    <span class="badge badge-danger">⚠️ Error</span>
+                                    {% else %}
+                                    <span class="badge badge-warning">⏳ Pendiente</span>
+                                    {% endif %}
+                                </td>
+                                <td><strong>${{ doc.total|floatformat:2 }}</strong></td>
+                                <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                                    {{ doc.razon_social_comprador|truncatechars:30 }}
+                                </td>
+                                <td>{{ doc.created_at|date:"d/m/Y H:i" }}</td>
+                                <td style="font-family:monospace;font-size:.75rem;word-break:break-all;max-width:130px;">
+                                    {{ doc.clave_acceso }}
+                                </td>
+                                <td>
+                                    {% if doc.estado != 'AUTORIZADO' %}
+                                    <a href="{% url 'consultar_autorizacion' doc.id %}" class="btn btn-sm btn-primary" title="Consultar autorización">
+                                        <i class="fas fa-sync"></i>
+                                    </a>
+                                    {% endif %}
+                                    {% if doc.archivo_xml_firmado %}
+                                    <a href="{{ doc.archivo_xml_firmado.url }}" target="_blank" class="btn btn-sm btn-secondary" title="XML Firmado">
+                                        <i class="fas fa-file-code"></i>
+                                    </a>
+                                    {% endif %}
+                                    {% if doc.archivo_xml_autorizado %}
+                                    <a href="{{ doc.archivo_xml_autorizado.url }}" target="_blank" class="btn btn-sm btn-success" title="XML Autorizado">
+                                        <i class="fas fa-file-invoice"></i>
+                                    </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" style="text-align:center;padding:40px;color:var(--gray-400);">
+                                    <i class="fas fa-file-invoice" style="font-size:2rem;display:block;margin-bottom:8px;"></i>
+                                    No se han emitido documentos electrónicos aún.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

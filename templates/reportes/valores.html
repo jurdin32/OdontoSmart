@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='reportes' %}
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+        <div class="dashboard-content">
+            <div class="page-header page-header--between">
+                <div>
+                    <h1 class="page-title">Reporte de Valores</h1>
+                    <p class="page-subtitle">Ingresos por tratamientos odontológicos</p>
+                </div>
+                <div class="header-actions">
+                    <a href="{% url 'reportes' %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver</a>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <form method="GET" class="report-filters">
+                <div class="filter-group">
+                    <label class="filter-label">Período</label>
+                    <select name="periodo" class="form-input filter-input">
+                        <option value="dia" {% if periodo == 'dia' %}selected{% endif %}>Por día</option>
+                        <option value="semana" {% if periodo == 'semana' %}selected{% endif %}>Por semana</option>
+                        <option value="mes" {% if periodo == 'mes' %}selected{% endif %}>Por mes</option>
+                        <option value="ano" {% if periodo == 'ano' %}selected{% endif %}>Por año</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Desde</label>
+                    <input type="date" name="desde" value="{{ desde }}" class="form-input filter-input">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Hasta</label>
+                    <input type="date" name="hasta" value="{{ hasta }}" class="form-input filter-input">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">&nbsp;</label>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Filtrar</button>
+                </div>
+            </form>
+
+            <!-- KPI Cards -->
+            <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);">
+                <div class="stat-card stat-card--blue">
+                    <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-number">$ {{ total_ingresos|floatformat:2 }}</span>
+                        <span class="stat-label">Total ingresos</span>
+                    </div>
+                </div>
+                <div class="stat-card stat-card--green">
+                    <div class="stat-icon"><i class="fas fa-notes-medical"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-number">{{ total_consultas }}</span>
+                        <span class="stat-label">Consultas con costo</span>
+                    </div>
+                </div>
+                <div class="stat-card stat-card--orange">
+                    <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-number">$ {{ promedio|floatformat:2 }}</span>
+                        <span class="stat-label">Promedio por consulta</span>
+                    </div>
+                </div>
+                <div class="stat-card stat-card--purple">
+                    <div class="stat-icon"><i class="fas fa-arrow-up"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-number">$ {{ max_costo|floatformat:2 }}</span>
+                        <span class="stat-label">Costo máximo</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico -->
+            <div class="report-section">
+                <div class="detail-card">
+                    <h3><i class="fas fa-chart-bar"></i> Ingresos por {{ periodo|default:'mes' }}</h3>
+                    <canvas id="valoresChart" height="100"></canvas>
+                </div>
+            </div>
+
+            <!-- Tabla de datos -->
+            <div class="report-section">
+                <div class="detail-card">
+                    <h3><i class="fas fa-table"></i> Detalle por período</h3>
+                    <div class="table-container" style="margin-top:12px;">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Período</th>
+                                    <th>Consultas</th>
+                                    <th>Total</th>
+                                    <th>Promedio</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for d in datos_periodo %}
+                                <tr>
+                                    <td><strong>{{ d.periodo|date }}</strong></td>
+                                    <td>{{ d.cantidad }}</td>
+                                    <td><strong>$ {{ d.total|floatformat:2 }}</strong></td>
+                                    <td>$ {{ d.promedio|floatformat:2 }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" style="text-align:center;padding:30px;color:var(--gray-400);">
+                                        <i class="fas fa-inbox" style="font-size:1.5rem;display:block;margin-bottom:8px;"></i>
+                                        No hay datos para el período seleccionado
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Por médico -->
+            <div class="report-section">
+                <div class="detail-card">
+                    <h3><i class="fas fa-user-md"></i> Ingresos por médico</h3>
+                    <div class="table-container" style="margin-top:12px;">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Médico</th>
+                                    <th>Consultas</th>
+                                    <th>Total</th>
+                                    <th>Promedio</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for m in por_medico %}
+                                <tr>
+                                    <td><strong>Dr. {{ m.medico__nombres }} {{ m.medico__apellidos }}</strong></td>
+                                    <td>{{ m.cantidad }}</td>
+                                    <td><strong>$ {{ m.total|floatformat:2 }}</strong></td>
+                                    <td>$ {{ m.total|floatformat:2|default:'0.00' }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" style="text-align:center;padding:30px;color:var(--gray-400);">
+                                        No hay datos
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('valoresChart').getContext('2d');
+const etiquetas = {{ etiquetas|safe }};
+const valores = {{ valores|safe }};
+const cantidades = {{ cantidades|safe }};
+
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: etiquetas,
+        datasets: [
+            {
+                label: 'Ingresos ($)',
+                data: valores,
+                backgroundColor: 'rgba(37, 99, 235, 0.7)',
+                borderColor: '#2563eb',
+                borderWidth: 2,
+                borderRadius: 4,
+                yAxisID: 'y',
+            },
+            {
+                label: 'Consultas',
+                data: cantidades,
+                backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                borderColor: '#10b981',
+                borderWidth: 2,
+                borderRadius: 4,
+                yAxisID: 'y1',
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        interaction: {
+            mode: 'index',
+            intersect: false,
+        },
+        plugins: {
+            legend: {
+                position: 'top',
+            }
+        },
+        scales: {
+            y: {
+                type: 'linear',
+                display: true,
+                position: 'left',
+                title: {
+                    display: true,
+                    text: 'Ingresos ($)'
+                }
+            },
+            y1: {
+                type: 'linear',
+                display: true,
+                position: 'right',
+                grid: {
+                    drawOnChartArea: false,
+                },
+                title: {
+                    display: true,
+                    text: 'Consultas'
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

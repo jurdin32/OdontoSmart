@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='usuarios' %}
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+
+        <div class="dashboard-content">
+            <div class="page-header page-header--between">
+                <div>
+                    <h1 class="page-title">👥 Usuarios</h1>
+                    <p class="page-subtitle">Gestión de usuarios del sistema</p>
+                </div>
+                {% if es_admin %}
+                <div class="header-actions" style="display:flex;gap:8px;">
+                    <a href="{% url 'medicos_sin_usuario' %}" class="btn btn-secondary">
+                        <i class="fas fa-user-md"></i> Vincular Médicos
+                    </a>
+                    <a href="{% url 'registrar_usuario' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Nuevo Usuario
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if usuarios %}
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Nombre</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in usuarios %}
+                        <tr>
+                            <td><strong>{{ u.username }}</strong></td>
+                            <td>{{ u.get_full_name|default:'-' }}</td>
+                            <td>
+                                {% if u.profile.rol %}
+                                <span class="badge badge-{{ u.profile.rol.nombre|lower }}">
+                                    {{ u.profile.rol.get_nombre_display }}
+                                </span>
+                                {% else %}
+                                <span class="badge badge-secondary">Sin rol</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if u.is_active %}
+                                <span class="badge badge-success">Activo</span>
+                                {% else %}
+                                <span class="badge badge-danger">Inactivo</span>
+                                {% endif %}
+                            </td>
+                            <td class="actions-cell">
+                                <div style="display:flex;gap:4px;">
+                                    {% if es_admin %}
+                                    <a href="{% url 'editar_usuario' u.id %}" class="btn-action btn-edit" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'asignar_permisos' u.id %}" class="btn-action btn-view" title="Permisos">
+                                        <i class="fas fa-shield-alt"></i>
+                                    </a>
+                                    <form method="POST" action="{% url 'toggle_usuario_activo' u.id %}" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-action" title="{% if u.is_active %}Desactivar{% else %}Activar{% endif %}"
+                                            style="background:#fee2e2;color:var(--error);border:none;cursor:pointer;border-radius:8px;width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;">
+                                            {% if u.is_active %}
+                                            <i class="fas fa-user-slash"></i>
+                                            {% else %}
+                                            <i class="fas fa-user-check" style="color:var(--success);"></i>
+                                            {% endif %}
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Tarjetas móvil -->
+            <div class="data-cards">
+                {% for u in usuarios %}
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <div class="data-card-icon"><i class="fas fa-user-circle"></i></div>
+                        <div class="data-card-info">
+                            <h3 class="data-card-title">{{ u.username }}</h3>
+                            <span class="data-card-sub">
+                                {% if u.is_active %}
+                                <span class="badge badge-success">Activo</span>
+                                {% else %}
+                                <span class="badge badge-danger">Inactivo</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="data-card-actions">
+                            {% if es_admin %}
+                            <a href="{% url 'editar_usuario' u.id %}" class="data-card-btn data-card-btn-warning" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'asignar_permisos' u.id %}" class="data-card-btn data-card-btn-primary" title="Permisos">
+                                <i class="fas fa-shield-alt"></i>
+                            </a>
+                            <form method="POST" action="{% url 'toggle_usuario_activo' u.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="data-card-btn data-card-btn-danger" title="{% if u.is_active %}Desactivar{% else %}Activar{% endif %}">
+                                    {% if u.is_active %}
+                                    <i class="fas fa-user-slash"></i>
+                                    {% else %}
+                                    <i class="fas fa-user-check"></i>
+                                    {% endif %}
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="data-card-body">
+                        <div class="data-card-row">
+                            <i class="fas fa-user"></i>
+                            <span class="data-card-row-label">Nombre</span>
+                            <span class="data-card-row-value">{{ u.get_full_name|default:'—' }}</span>
+                        </div>
+                        <div class="data-card-row">
+                            <i class="fas fa-envelope"></i>
+                            <span class="data-card-row-label">Email</span>
+                            <span class="data-card-row-value">{{ u.email|default:'—' }}</span>
+                        </div>
+                        <div class="data-card-row">
+                            <i class="fas fa-tag"></i>
+                            <span class="data-card-row-label">Rol</span>
+                            <span class="data-card-row-value">{{ u.profile.rol.get_nombre_display|default:'Sin rol' }}</span>
+                        </div>
+                        <div class="data-card-row">
+                            <i class="fas fa-user-md"></i>
+                            <span class="data-card-row-label">Médico</span>
+                            <span class="data-card-row-value">{% if u.medico %}Dr. {{ u.medico.nombre_completo }}{% else %}—{% endif %}</span>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty-state">
+                    <i class="fas fa-users" style="font-size:3rem;color:var(--gray-300);margin-bottom:12px;"></i>
+                    <h3>No hay usuarios registrados</h3>
+                    <p>Los usuarios se crean al registrar personal de la clínica.</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-users" style="font-size:3rem;color:var(--gray-300);margin-bottom:16px;"></i>
+                <h3>No hay usuarios registrados</h3>
+                <p>Los usuarios se crean al registrar personal de la clínica.</p>
+                {% if es_admin %}
+                <a href="{% url 'registrar_usuario' %}" class="btn btn-primary" style="margin-top:12px;">
+                    <i class="fas fa-plus"></i> Crear primer usuario
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% include 'componentes/modal_detalle.html' %}
+{% endblock %}

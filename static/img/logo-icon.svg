@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="iconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e3a5f;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2563eb;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Círculo de fondo -->
+  <circle cx="50" cy="50" r="48" fill="url(#iconGrad)" />
+  <!-- Diente blanco -->
+  <g transform="translate(32, 22)" fill="white">
+    <path d="M0,0 
+             C0,0 6,-10 18,-10 
+             C30,-10 36,0 36,0
+             C36,12 28,24 22,44
+             C20,52 18,56 18,56
+             C18,56 16,52 14,44
+             C8,24 0,12 0,0Z" />
+    <path d="M14,44 C12,52 10,58 10,62 C10,66 14,66 18,66 C22,66 26,66 26,62 C26,58 24,52 22,44" />
+  </g>
+</svg>

@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='medicos' %}
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+        <div class="dashboard-content">
+            <div class="page-header">
+                <h1 class="page-title">{% if medico %}Editar Médico{% else %}Registrar Médico{% endif %}</h1>
+                <p class="page-subtitle">{% if medico %}Actualiza los datos del médico{% else %}Ingresa los datos del nuevo médico{% endif %}</p>
+            </div>
+            <div class="form-card">
+                <form method="POST" novalidate>
+                    {% csrf_token %}
+                    <div class="form-section">
+                        <h3 class="form-section-title"><i class="fas fa-user-md"></i> Datos del Médico</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.nombres.label }}</label>
+                                {{ form.nombres }}
+                                {% if form.nombres.errors %}<div class="form-error">{% for e in form.nombres.errors %}<span>{{ e }}</span>{% endfor %}</div>{% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">{{ form.apellidos.label }}</label>
+                                {{ form.apellidos }}
+                                {% if form.apellidos.errors %}<div class="form-error">{% for e in form.apellidos.errors %}<span>{{ e }}</span>{% endfor %}</div>{% endif %}
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.cedula.label }}</label>
+                                {{ form.cedula }}
+                                {% if form.cedula.errors %}<div class="form-error">{% for e in form.cedula.errors %}<span>{{ e }}</span>{% endfor %}</div>{% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">{{ form.especialidad.label }}</label>
+                                {{ form.especialidad }}
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.registro_profesional.label }}</label>
+                                {{ form.registro_profesional }}
+                                {% if form.registro_profesional.errors %}<div class="form-error">{% for e in form.registro_profesional.errors %}<span>{{ e }}</span>{% endfor %}</div>{% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">{{ form.telefono.label }}</label>
+                                {{ form.telefono }}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">{{ form.email.label }}</label>
+                            {{ form.email }}
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <a href="{% url 'lista_medicos' %}" class="btn btn-secondary"><i class="fas fa-times"></i> Cancelar</a>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> {% if medico %}Actualizar{% else %}Guardar Médico{% endif %}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

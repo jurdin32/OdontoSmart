@@ -1,0 +1,447 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='pacientes' %}
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+        <div class="dashboard-content">
+            <div class="page-header page-header--between">
+                <div>
+                    <h1 class="page-title">{% if es_infantil %}Odontograma Infantil{% else %}Odontograma{% endif %}</h1>
+                    <p class="page-subtitle">{{ paciente.nombres }} {{ paciente.apellidos }} <small style="color:var(--gray-400)">{% if es_infantil %}(Dentición decidua){% else %}(Dentición permanente){% endif %}</small></p>
+                </div>
+                <div class="header-actions">
+                    {% if es_infantil %}
+                    <a href="{% url 'odontograma' paciente.id %}" class="btn btn-primary" style="font-size:.8rem;padding:8px 14px;"><i class="fas fa-tooth"></i> Odontograma Adulto</a>
+                    {% else %}
+                    <a href="{% url 'odontograma_infantil' paciente.id %}" class="btn btn-primary" style="font-size:.8rem;padding:8px 14px;"><i class="fas fa-baby"></i> Odontograma Infantil</a>
+                    {% endif %}
+                    <a href="{% url 'historia' paciente.id %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver</a>
+                </div>
+            </div>
+
+            {% if object_version %}
+            <div class="concurrency-banner" id="concurrencyBanner" style="display:none;">
+                <i class="fas fa-lock"></i>
+                <span id="concurrencyMessage">⚠️ Editando...</span>
+            </div>
+            {% endif %}
+
+            <form method="POST" id="odontoForm"
+                  data-object-type="Odontograma"
+                  data-object-id="{{ odontograma.id }}"
+                  data-object-version="{{ object_version }}">
+                {% csrf_token %}
+                {% if object_version %}
+                <input type="hidden" name="object_version" value="{{ object_version }}">
+                {% endif %}
+                <input type="hidden" name="dientes" id="dientesInput" value="">
+                <input type="hidden" name="prestaciones" id="prestacionesInput" value="">
+
+                <div class="odonto-wrap">
+                    <!-- Referencias -->
+                    <div class="oref">
+                        <span><span class="odr"></span> EXISTENTE</span>
+                        <span><span class="odb"></span> REQUERIDO</span>
+                        <span><span class="odg"></span> PRÓTESIS FIJA</span>
+                        <span><span class="odo"></span> PRÓTESIS REMOVIBLE</span>
+                        <span><span class="ody"></span> CORONAS</span>
+                        <span><span class=\"odr\"></span><span class=\"odb\" style=\"margin-left:2px;\"></span> REST. CON FILTRACIÓN</span>
+                        <span class="ox">✕ — AUSENTE</span>
+                    </div>
+
+                    <!-- Herramientas -->
+                    <div class="otools">
+                        <button type="button" class="otb active" data-tool="existente"><span class="odr"></span> Existente</button>
+                        <button type="button" class="otb" data-tool="requerido"><span class="odb"></span> Requerido</button>
+                        <button type="button" class="otb" data-tool="protesis_fija" style="border-color:#10b981;"><span class="odg"></span> Prótesis Fija</button>
+                        <button type="button" class="otb" data-tool="protesis_removible" style="border-color:#f59e0b;"><span class="odo"></span> Prótesis Removible</button>
+                        <button type="button" class="otb" data-tool="corona" style="border-color:#eab308;"><span class="ody"></span> Coronas</button>
+                        <button type="button" class="otb" data-tool="filtracion" style="border-color:#ef4444;"><span class="odr"></span><span class="odb" style="margin-left:2px;"></span> Rest. con Filtración</button>
+                        <button type="button" class="otb" data-tool="ausente">✕ Ausente</button>
+                        <button type="button" class="otb" data-tool="erase">🗑️ Borrar</button>
+                    </div>
+
+                    {% if es_infantil %}
+                    <!-- SUPERIOR DECIDUO -->
+                    <div class="oarch">
+                        <div class="oalabel">SUPERIOR</div>
+                        <div class="orow odec-row">
+                            <div class="oside">DERECHA</div>
+                            {% for n in dientes_sup|slice:"0:5" %}
+                            <div class="otooth" data-tooth="{{ n }}">
+                                <svg class="tooth-svg" viewBox="0 0 46 46" width="46" height="46">
+                                    <rect x="3" y="3" width="40" height="40" class="t-border t-border-dec" rx="1"/>
+                                    <line x1="3" y1="3" x2="43" y2="43" class="t-border t-border-dec"/>
+                                    <line x1="43" y1="3" x2="3" y2="43" class="t-border t-border-dec"/>
+                                    <polygon points="23,23 3,3 43,3" class="tsurf tsurf-vestibular" data-superf="vestibular"/>
+                                    <polygon points="23,23 43,3 43,43" class="tsurf tsurf-distal" data-superf="distal"/>
+                                    <polygon points="23,23 43,43 3,43" class="tsurf tsurf-lingual" data-superf="lingual"/>
+                                    <polygon points="23,23 3,43 3,3" class="tsurf tsurf-mesial" data-superf="mesial"/>
+                                    <circle cx="23" cy="23" r="6" class="tsurf tsurf-oclusal" data-superf="oclusal"/>
+                                </svg>
+                                <span class="onum">{{ n }}</span>
+                            </div>
+                            {% endfor %}
+                            <div class="ospacer"></div>
+                            {% for n in dientes_sup|slice:"5:10" %}
+                            <div class="otooth" data-tooth="{{ n }}">
+                                <svg class="tooth-svg" viewBox="0 0 46 46" width="46" height="46">
+                                    <rect x="3" y="3" width="40" height="40" class="t-border t-border-dec" rx="1"/>
+                                    <line x1="3" y1="3" x2="43" y2="43" class="t-border t-border-dec"/>
+                                    <line x1="43" y1="3" x2="3" y2="43" class="t-border t-border-dec"/>
+                                    <polygon points="23,23 3,3 43,3" class="tsurf tsurf-vestibular" data-superf="vestibular"/>
+                                    <polygon points="23,23 43,3 43,43" class="tsurf tsurf-distal" data-superf="distal"/>
+                                    <polygon points="23,23 43,43 3,43" class="tsurf tsurf-lingual" data-superf="lingual"/>
+                                    <polygon points="23,23 3,43 3,3" class="tsurf tsurf-mesial" data-superf="mesial"/>
+                                    <circle cx="23" cy="23" r="6" class="tsurf tsurf-oclusal" data-superf="oclusal"/>
+                                </svg>
+                                <span class="onum">{{ n }}</span>
+                            </div>
+                            {% endfor %}
+                            <div class="oside">IZQUIERDA</div>
+                        </div>
+                    </div>
+
+                    <!-- INFERIOR DECIDUO -->
+                    <div class="oarch">
+                        <div class="oalabel">INFERIOR</div>
+                        <div class="orow odec-row">
+                            <div class="oside">DERECHA</div>
+                            {% for n in dientes_inf|slice:"0:5" %}
+                            <div class="otooth" data-tooth="{{ n }}">
+                                <svg class="tooth-svg" viewBox="0 0 46 46" width="46" height="46">
+                                    <rect x="3" y="3" width="40" height="40" class="t-border t-border-dec" rx="1"/>
+                                    <line x1="3" y1="3" x2="43" y2="43" class="t-border t-border-dec"/>
+                                    <line x1="43" y1="3" x2="3" y2="43" class="t-border t-border-dec"/>
+                                    <polygon points="23,23 3,3 43,3" class="tsurf tsurf-vestibular" data-superf="vestibular"/>
+                                    <polygon points="23,23 43,3 43,43" class="tsurf tsurf-distal" data-superf="distal"/>
+                                    <polygon points="23,23 43,43 3,43" class="tsurf tsurf-lingual" data-superf="lingual"/>
+                                    <polygon points="23,23 3,43 3,3" class="tsurf tsurf-mesial" data-superf="mesial"/>
+                                    <circle cx="23" cy="23" r="6" class="tsurf tsurf-oclusal" data-superf="oclusal"/>
+                                </svg>
+                                <span class="onum">{{ n }}</span>
+                            </div>
+                            {% endfor %}
+                            <div class="ospacer"></div>
+                            {% for n in dientes_inf|slice:"5:10" %}
+                            <div class="otooth" data-tooth="{{ n }}">
+                                <svg class="tooth-svg" viewBox="0 0 46 46" width="46" height="46">
+                                    <rect x="3" y="3" width="40" height="40" class="t-border t-border-dec" rx="1"/>
+                                    <line x1="3" y1="3" x2="43" y2="43" class="t-border t-border-dec"/>
+                                    <line x1="43" y1="3" x2="3" y2="43" class="t-border t-border-dec"/>
+                                    <polygon points="23,23 3,3 43,3" class="tsurf tsurf-vestibular" data-superf="vestibular"/>
+                                    <polygon points="23,23 43,3 43,43" class="tsurf tsurf-distal" data-superf="distal"/>
+                                    <polygon points="23,23 43,43 3,43" class="tsurf tsurf-lingual" data-superf="lingual"/>
+                                    <polygon points="23,23 3,43 3,3" class="tsurf tsurf-mesial" data-superf="mesial"/>
+                                    <circle cx="23" cy="23" r="6" class="tsurf tsurf-oclusal" data-superf="oclusal"/>
+                                </svg>
+                                <span class="onum">{{ n }}</span>
+                            </div>
+                            {% endfor %}
+                            <div class="oside">IZQUIERDA</div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <!-- SUPERIOR PERMANENTE -->
+                    <div class="oarch">
+                        <div class="oalabel">SUPERIOR</div>
+                        <div class="orow">
+                            <div class="oside">DERECHA</div>
+                            {% for n in dientes_sup|slice:"0:8" %}
+                            <div class="otooth" data-tooth="{{ n }}">
+                                <svg class="tooth-svg" viewBox="0 0 46 46" width="46" height="46">
+                                    <rect x="3" y="3" width="40" height="40" class="t-border" rx="1"/>
+                                    <line x1="3" y1="3" x2="43" y2="43" class="t-border"/>
+                                    <line x1="43" y1="3" x2="3" y2="43" class="t-border"/>
+                                    <polygon points="23,23 3,3 43,3" class="tsurf tsurf-vestibular" data-superf="vestibular"/>
+                                    <polygon points="23,23 43,3 43,43" class="tsurf tsurf-distal" data-superf="distal"/>
+                                    <polygon points="23,23 43,43 3,43" class="tsurf tsurf-lingual" data-superf="lingual"/>
+                                    <polygon points="23,23 3,43 3,3" class="tsurf tsurf-mesial" data-superf="mesial"/>
+                                    <circle cx="23" cy="23" r="6" class="tsurf tsurf-oclusal" data-superf="oclusal"/>
+                                </svg>
+                                <span class="onum">{{ n }}</span>
+                            </div>
+                            {% endfor %}
+                            <div class="ospacer"></div>
+                            {% for n in dientes_sup|slice:"8:16" %}
+                            <div class="otooth" data-tooth="{{ n }}">
+                                <svg class="tooth-svg" viewBox="0 0 46 46" width="46" height="46">
+                                    <rect x="3" y="3" width="40" height="40" class="t-border" rx="1"/>
+                                    <line x1="3" y1="3" x2="43" y2="43" class="t-border"/>
+                                    <line x1="43" y1="3" x2="3" y2="43" class="t-border"/>
+                                    <polygon points="23,23 3,3 43,3" class="tsurf tsurf-vestibular" data-superf="vestibular"/>
+                                    <polygon points="23,23 43,3 43,43" class="tsurf tsurf-distal" data-superf="distal"/>
+                                    <polygon points="23,23 43,43 3,43" class="tsurf tsurf-lingual" data-superf="lingual"/>
+                                    <polygon points="23,23 3,43 3,3" class="tsurf tsurf-mesial" data-superf="mesial"/>
+                                    <circle cx="23" cy="23" r="6" class="tsurf tsurf-oclusal" data-superf="oclusal"/>
+                                </svg>
+                                <span class="onum">{{ n }}</span>
+                            </div>
+                            {% endfor %}
+                            <div class="oside">IZQUIERDA</div>
+                        </div>
+                    </div>
+
+                    <!-- INFERIOR PERMANENTE -->
+                    <div class="oarch">
+                        <div class="oalabel">INFERIOR</div>
+                        <div class="orow">
+                            <div class="oside">DERECHA</div>
+                            {% for n in dientes_inf|slice:"0:8" %}
+                            <div class="otooth" data-tooth="{{ n }}">
+                                <svg class="tooth-svg" viewBox="0 0 46 46" width="46" height="46">
+                                    <rect x="3" y="3" width="40" height="40" class="t-border" rx="1"/>
+                                    <line x1="3" y1="3" x2="43" y2="43" class="t-border"/>
+                                    <line x1="43" y1="3" x2="3" y2="43" class="t-border"/>
+                                    <polygon points="23,23 3,3 43,3" class="tsurf tsurf-vestibular" data-superf="vestibular"/>
+                                    <polygon points="23,23 43,3 43,43" class="tsurf tsurf-distal" data-superf="distal"/>
+                                    <polygon points="23,23 43,43 3,43" class="tsurf tsurf-lingual" data-superf="lingual"/>
+                                    <polygon points="23,23 3,43 3,3" class="tsurf tsurf-mesial" data-superf="mesial"/>
+                                    <circle cx="23" cy="23" r="6" class="tsurf tsurf-oclusal" data-superf="oclusal"/>
+                                </svg>
+                                <span class="onum">{{ n }}</span>
+                            </div>
+                            {% endfor %}
+                            <div class="ospacer"></div>
+                            {% for n in dientes_inf|slice:"8:16" %}
+                            <div class="otooth" data-tooth="{{ n }}">
+                                <svg class="tooth-svg" viewBox="0 0 46 46" width="46" height="46">
+                                    <rect x="3" y="3" width="40" height="40" class="t-border" rx="1"/>
+                                    <line x1="3" y1="3" x2="43" y2="43" class="t-border"/>
+                                    <line x1="43" y1="3" x2="3" y2="43" class="t-border"/>
+                                    <polygon points="23,23 3,3 43,3" class="tsurf tsurf-vestibular" data-superf="vestibular"/>
+                                    <polygon points="23,23 43,3 43,43" class="tsurf tsurf-distal" data-superf="distal"/>
+                                    <polygon points="23,23 43,43 3,43" class="tsurf tsurf-lingual" data-superf="lingual"/>
+                                    <polygon points="23,23 3,43 3,3" class="tsurf tsurf-mesial" data-superf="mesial"/>
+                                    <circle cx="23" cy="23" r="6" class="tsurf tsurf-oclusal" data-superf="oclusal"/>
+                                </svg>
+                                <span class="onum">{{ n }}</span>
+                            </div>
+                            {% endfor %}
+                            <div class="oside">IZQUIERDA</div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="ofooter">
+                        <div class="ofoot-right" style="margin-left:0;">
+                            <span class="ocount-label">CANTIDAD DE DIENTES EXISTENTES:</span>
+                            {{ form.cantidad_dientes_existentes }}
+                        </div>
+                    </div>
+
+                    <div class="obot">
+                        <label class="ocl">{{ form.presencia_sarro }} <span class="ocb"></span> Presencia de sarro</label>
+                        <label class="ocl">{{ form.enfermedad_periodontal }} <span class="ocb"></span> Enfermedad Periodontal</label>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Odontograma</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+
+<script>
+const SUPERFICIES = {{ superficies|safe }};
+const D = {{ dientes_json|safe }};
+const P = {{ prestaciones_json|safe }};
+const VISIBLES = {{ dientes_visibles|safe }};
+let T = 'existente';
+const TOOTH_SIZE = 40; // Lado del cuadrado (de 3 a 43)
+const TOOTH_MIN = 3;   // Coordenada mínima
+const TOOTH_MAX = 43;  // Coordenada máxima
+const CENTER = 23;     // Centro del SVG
+
+// Inicializar datos si vienen vacíos del backend
+function initToothData(n) {
+    if (!D[n] || typeof D[n] === 'string') {
+        D[n] = {};
+        SUPERFICIES.forEach(s => D[n][s] = '');
+    }
+    if (!P[n] || typeof P[n] === 'string') {
+        P[n] = {};
+    }
+}
+
+function paintTooth(n) {
+    const container = document.querySelector(`[data-tooth="${n}"]`);
+    if (!container) return;
+    
+    // Verificar si el diente está ausente
+    const isAusente = Object.values(D[n]||{}).every(v => v === 'ausente');
+    
+    if (isAusente) {
+        container.querySelectorAll('.tsurf').forEach(el => {
+            el.classList.remove('ts-existente', 'ts-requerido');
+            el.classList.add('ts-ausente');
+        });
+        container.classList.add('tooth-missing');
+        return;
+    }
+    
+    container.classList.remove('tooth-missing');
+    
+    SUPERFICIES.forEach(s => {
+        const el = container.querySelector(`[data-superf="${s}"]`);
+        if (!el) return;
+        el.classList.remove('ts-existente', 'ts-requerido', 'ts-ausente', 'ts-protesis_fija', 'ts-protesis_removible', 'ts-corona');
+        const val = D[n]?.[s] || '';
+        if (val === 'existente') el.classList.add('ts-existente');
+        else if (val === 'requerido') el.classList.add('ts-requerido');
+        else if (val === 'protesis_fija') el.classList.add('ts-protesis_fija');
+        else if (val === 'protesis_removible') el.classList.add('ts-protesis_removible');
+        else if (val === 'corona') el.classList.add('ts-corona');
+        
+        // Overlay de filtración por superficie (círculo rojo + punto azul)
+        const existingOverlay = container.querySelector(`.tf-overlay[data-sf="${s}"]`);
+        if (val === 'filtracion') {
+            if (!existingOverlay) {
+                const svg = container.querySelector('.tooth-svg');
+                const NS = 'http://www.w3.org/2000/svg';
+                const g = document.createElementNS(NS, 'g');
+                g.setAttribute('class', 'tf-overlay');
+                g.setAttribute('data-sf', s);
+                const centers = { vestibular: '23,10', distal: '36,23', lingual: '23,36', mesial: '10,23', oclusal: '23,23' };
+                const [cx, cy] = centers[s].split(',').map(Number);
+                const ring = document.createElementNS(NS, 'circle');
+                ring.setAttribute('cx', cx); ring.setAttribute('cy', cy);
+                ring.setAttribute('r', '5'); ring.setAttribute('fill', 'rgba(239,68,68,0.5)');
+                ring.setAttribute('stroke', '#dc2626'); ring.setAttribute('stroke-width', '1.5');
+                const dot = document.createElementNS(NS, 'circle');
+                dot.setAttribute('cx', cx); dot.setAttribute('cy', cy);
+                dot.setAttribute('r', '2'); dot.setAttribute('fill', '#3b82f6');
+                dot.setAttribute('stroke', '#2563eb'); dot.setAttribute('stroke-width', '0.8');
+                g.appendChild(ring); g.appendChild(dot); svg.appendChild(g);
+            }
+        } else if (existingOverlay) {
+            existingOverlay.remove();
+        }
+    });
+}
+
+function calcCount() {
+    let count = 0;
+    VISIBLES.forEach(k => {
+        const vals = D[k];
+        if (!vals) return;
+        if (typeof vals === 'object' && vals !== null) {
+            const hasAny = Object.values(vals).some(v => v && v !== 'ausente');
+            if (hasAny) count++;
+        } else if (vals && vals !== 'ausente') {
+            count++;
+        }
+    });
+    const input = document.querySelector('[name="cantidad_dientes_existentes"]');
+    if (input) input.value = count;
+}
+
+function sync() {
+    document.getElementById('dientesInput').value = JSON.stringify(D);
+    document.getElementById('prestacionesInput').value = JSON.stringify(P);
+    calcCount();
+}
+
+// Obtener superficie según coordenadas del click dentro del SVG
+function getSuperficieFromClick(svgEl, clientX, clientY) {
+    const rect = svgEl.getBoundingClientRect();
+    const scale = rect.width / 46; // 46 = viewBox size
+    const x = (clientX - rect.left) / scale;
+    const y = (clientY - rect.top) / scale;
+    
+    // Verificar si está fuera del cuadrado del diente
+    if (x < TOOTH_MIN || x > TOOTH_MAX || y < TOOTH_MIN || y > TOOTH_MAX) return null;
+    
+    const dx = x - CENTER;
+    const dy = y - CENTER;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    
+    // Centro (oclusal)
+    if (dist <= 6) return 'oclusal';
+    
+    // Determinar cuadrante por ángulo
+    const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+    
+    // angle 0 = derecha, 90 = abajo, -90 = arriba, ±180 = izquierda
+    // Las diagonales del cuadrado dividen en 4 triángulos a 45°, 135°, -135°, -45°
+    if (angle >= -45 && angle < 45) return 'distal';      // Triángulo derecho
+    if (angle >= 45 && angle < 135) return 'lingual';     // Triángulo inferior
+    if (angle >= -135 && angle < -45) return 'vestibular';// Triángulo superior
+    return 'mesial'; // Triángulo izquierdo
+}
+
+// Inicializar datos solo para dientes visibles
+VISIBLES.forEach(n => {
+    if (typeof D[n] === 'string') {
+        const oldVal = D[n];
+        D[n] = {};
+        if (oldVal === 'ausente') {
+            SUPERFICIES.forEach(s => D[n][s] = 'ausente');
+        } else if (oldVal === 'existente' || oldVal === 'requerido') {
+            SUPERFICIES.forEach(s => D[n][s] = oldVal);
+        } else {
+            SUPERFICIES.forEach(s => D[n][s] = '');
+        }
+    } else if (!D[n]) {
+        initToothData(n);
+    }
+});
+VISIBLES.forEach(paintTooth);
+calcCount();
+
+// Click en el contenedor del diente (calcula qué superficie se clickeó)
+document.querySelectorAll('.otooth').forEach(container => {
+    container.addEventListener('click', function(e) {
+        const n = this.dataset.tooth;
+        const svg = this.querySelector('.tooth-svg');
+        if (!svg) return;
+        
+        const s = getSuperficieFromClick(svg, e.clientX, e.clientY);
+        if (!s) return; // Click fuera del diente
+        
+        initToothData(n);
+        
+        if (T === 'erase') {
+            D[n][s] = '';
+            paintTooth(n);
+            sync();
+            return;
+        }
+        if (T === 'ausente') {
+            SUPERFICIES.forEach(sup => D[n][sup] = 'ausente');
+            paintTooth(n);
+            sync();
+            return;
+        }
+        if (T === 'filtracion') {
+            // Alternar filtración en la superficie clickeada
+            D[n][s] = (D[n][s] === 'filtracion') ? '' : 'filtracion';
+            paintTooth(n);
+            sync();
+            return;
+        }
+        
+        D[n][s] = T;
+        SUPERFICIES.forEach(sup => {
+            if (D[n][sup] === 'ausente') D[n][sup] = '';
+        });
+        paintTooth(n);
+        sync();
+    });
+});
+
+// Click en tool buttons
+document.querySelectorAll('.otb').forEach(b => {
+    b.addEventListener('click', function() {
+        document.querySelectorAll('.otb').forEach(x => x.classList.remove('active'));
+        this.classList.add('active');
+        T = this.dataset.tool;
+    });
+});
+</script>
+{% endblock %}

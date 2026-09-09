@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='usuarios' %}
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+
+        <div class="dashboard-content">
+            <div class="page-header">
+                <h1 class="page-title">🛡️ Permisos de Usuario</h1>
+                <p class="page-subtitle">{{ user_perm.get_full_name|default:user_perm.username }}</p>
+            </div>
+
+            <div class="form-card">
+                <form method="POST" id="permisosForm">
+                    {% csrf_token %}
+
+                    {% regroup permisos by get_modulo_display as modulos %}
+
+                    {% for modulo in modulos %}
+                    <div class="form-section">
+                        <h3 class="form-section-title">{{ modulo.grouper }}</h3>
+                        <div class="permisos-grid">
+                            {% for permiso in modulo.list %}
+                            <label class="permiso-item">
+                                <input type="checkbox" name="permisos" value="{{ permiso.codigo }}"
+                                       {% if permiso.codigo in permisos_asignados %}checked{% endif %}>
+                                <div class="permiso-info">
+                                    <span class="permiso-nombre">{{ permiso.nombre }}</span>
+                                    <span class="permiso-codigo">{{ permiso.codigo }}</span>
+                                </div>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <div class="form-actions" style="margin-top:24px;">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Guardar Permisos
+                        </button>
+                        <a href="{% url 'lista_usuarios' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+
+<style>
+.permisos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 8px;
+}
+.permiso-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+}
+.permiso-item:hover {
+    background: var(--gray-50);
+    border-color: var(--primary);
+}
+.permiso-item input[type="checkbox"] {
+    margin-top: 3px;
+    accent-color: var(--primary);
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+.permiso-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.permiso-nombre {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--gray-800);
+}
+.permiso-codigo {
+    font-size: 0.72rem;
+    color: var(--gray-400);
+    font-family: monospace;
+}
+.form-section {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--gray-100);
+}
+.form-section:last-of-type {
+    border-bottom: none;
+}
+.form-section-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--primary);
+    display: inline-block;
+}
+</style>
+{% endblock %}

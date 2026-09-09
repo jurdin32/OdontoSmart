@@ -1,0 +1,144 @@
+<header class="topbar">
+    <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+    <div class="topbar-search">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Buscar pacientes por nombre o cédula..." class="search-input" id="globalSearch">
+        <div class="search-results" id="searchResults"></div>
+    </div>
+    <div class="topbar-right">
+        <div class="notif-wrapper">
+            <button class="notification-btn" id="notifBtn"><i class="fas fa-bell"></i><span class="notification-badge">3</span></button>
+            <div class="notif-dropdown" id="notifDropdown">
+                <div class="notif-header">Notificaciones</div>
+                <div class="notif-list">
+                    <div class="notif-item">
+                        <i class="fas fa-calendar-check notif-icon" style="color:#2563eb;"></i>
+                        <div class="notif-content">
+                            <span class="notif-text">Citas pendientes por revisar</span>
+                            <span class="notif-time">Hoy</span>
+                        </div>
+                    </div>
+                    <div class="notif-item">
+                        <i class="fas fa-users notif-icon" style="color:#10b981;"></i>
+                        <div class="notif-content">
+                            <span class="notif-text">Pacientes nuevos registrados</span>
+                            <span class="notif-time">Hoy</span>
+                        </div>
+                    </div>
+                    <div class="notif-item">
+                        <i class="fas fa-notes-medical notif-icon" style="color:#d97706;"></i>
+                        <div class="notif-content">
+                            <span class="notif-text">Historias clínicas pendientes</span>
+                            <span class="notif-time">Hoy</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="user-wrapper">
+            <div class="user-profile" id="userProfileBtn">
+                <div class="user-avatar">
+                    {% if user.profile.foto %}
+                    <img src="{{ user.profile.foto.url }}" alt="{{ user.get_full_name }}">
+                    {% else %}
+                    <div class="avatar-placeholder">{{ user.get_full_name|default:user.username|first|upper }}</div>
+                    {% endif %}
+                </div>
+                <div class="user-info">
+                    <span class="user-name">{{ user.get_full_name|default:user.username }}</span>
+                    <span class="user-role">{{ user.profile.rol.get_nombre_display|default:"Sin rol" }}</span>
+                </div>
+                <i class="fas fa-chevron-down user-arrow"></i>
+            </div>
+            <div class="user-dropdown" id="userDropdown">
+                <div class="dropdown-header">
+                    <strong>{{ user.get_full_name|default:user.username }}</strong>
+                    <small>{{ user.email|default:'' }}</small>
+                </div>
+                <div class="dropdown-divider"></div>
+                <a href="{% url 'dashboard' %}" class="dropdown-item"><i class="fas fa-th-large"></i> Panel Principal</a>
+                <a href="{% url 'logout' %}" class="dropdown-item dropdown-danger"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // --- Search ---
+    const searchInput = document.getElementById('globalSearch');
+    const resultsBox = document.getElementById('searchResults');
+    let timeout = null;
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(timeout);
+            const q = this.value.trim();
+            if (q.length < 2) { resultsBox.innerHTML = ''; resultsBox.classList.remove('show'); return; }
+
+            timeout = setTimeout(function() {
+                fetch('/buscar/?q=' + encodeURIComponent(q))
+                    .then(r => r.json())
+                    .then(data => {
+                        if (!data.results || data.results.length === 0) {
+                            resultsBox.innerHTML = '<div class="search-result-item empty">Sin resultados</div>';
+                        } else {
+                            resultsBox.innerHTML = data.results.map(r =>
+                                '<a href="' + r.url + '" class="search-result-item">' +
+                                '<i class="fas fa-user"></i> ' +
+                                '<div><strong>' + r.nombre + '</strong><br><small>' + r.cedula + '</small></div>' +
+                                '</a>'
+                            ).join('');
+                        }
+                        resultsBox.classList.add('show');
+                    });
+            }, 300);
+        });
+
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const q = this.value.trim();
+                if (q.length > 0) {
+                    window.location.href = '/pacientes/?q=' + encodeURIComponent(q);
+                }
+            }
+        });
+    }
+
+    // --- Notifications toggle ---
+    const notifBtn = document.getElementById('notifBtn');
+    const notifDropdown = document.getElementById('notifDropdown');
+    if (notifBtn && notifDropdown) {
+        notifBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            notifDropdown.classList.toggle('show');
+            document.getElementById('userDropdown')?.classList.remove('show');
+        });
+    }
+
+    // --- User dropdown toggle ---
+    const userBtn = document.getElementById('userProfileBtn');
+    const userDropdown = document.getElementById('userDropdown');
+    if (userBtn && userDropdown) {
+        userBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            userDropdown.classList.toggle('show');
+            notifDropdown?.classList.remove('show');
+        });
+    }
+
+    // --- Close dropdowns on outside click ---
+    document.addEventListener('click', function(e) {
+        if (notifDropdown && !e.target.closest('.notif-wrapper')) {
+            notifDropdown.classList.remove('show');
+        }
+        if (userDropdown && !e.target.closest('.user-wrapper')) {
+            userDropdown.classList.remove('show');
+        }
+        if (resultsBox && !e.target.closest('.topbar-search')) {
+            resultsBox?.classList.remove('show');
+        }
+    });
+});
+</script>

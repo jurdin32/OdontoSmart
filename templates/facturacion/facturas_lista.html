@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load permisos_tags %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='facturas' %}
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+        <div class="dashboard-content">
+            <div class="page-header page-header--between">
+                <div>
+                    <h1 class="page-title"><i class="fas fa-file-invoice-dollar"></i> Facturas</h1>
+                    <p class="page-subtitle">Facturación de servicios odontológicos</p>
+                </div>
+                {% tiene_permiso 'crear_facturas' as puede_crear %}
+                {% if puede_crear %}
+                <a href="{% url 'crear_factura' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nueva Factura
+                </a>
+                {% endif %}
+            </div>
+
+            <!-- Filtros -->
+            <div class="search-filter-bar" style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+                <form method="GET" style="display:flex;gap:12px;flex-wrap:wrap;width:100%;">
+                    <div style="flex:1;min-width:200px;">
+                        <input type="text" name="q" class="form-input" placeholder="Buscar por número o paciente..." value="{{ query }}" style="width:100%;">
+                    </div>
+                    <select name="estado" class="form-input" style="width:auto;min-width:150px;">
+                        <option value="">Todos los estados</option>
+                        <option value="PENDIENTE" {% if estado_activo == 'PENDIENTE' %}selected{% endif %}>Pendiente</option>
+                        <option value="PAGADA" {% if estado_activo == 'PAGADA' %}selected{% endif %}>Pagada</option>
+                        <option value="ANULADA" {% if estado_activo == 'ANULADA' %}selected{% endif %}>Anulada</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Filtrar</button>
+                </form>
+            </div>
+
+            {% if sri_info.sri_configurado %}
+            <!-- Estado SRI -->
+            <div class="form-card sri-banner">
+                <div class="sri-banner-row">
+                    <div class="sri-banner-left">
+                        <span class="badge {% if sri_info.sri_ambiente == '1' %}badge-warning{% else %}badge-success{% endif %}">
+                            <i class="fas fa-cloud"></i>
+                            {{ sri_info.sri_ambiente_nombre }}
+                        </span>
+                        <span class="sri-label">SRI</span>
+                    </div>
+                    {% if sri_info.sri_certificado_valido %}
+                    <div class="sri-banner-center">
+                        <i class="fas fa-certificate sri-cert-icon"></i>
+                        <span>
+                            <strong>{{ sri_info.sri_certificado_dias }} días</strong> restantes
+                            <span class="sri-date">(vence {{ sri_info.sri_certificado_hasta }})</span>
+                        </span>
+                        {% if sri_info.sri_certificado_dias <= 30 %}
+                        <span class="badge badge-danger">⚠️ Próximo a vencer</span>
+                        {% elif sri_info.sri_certificado_dias <= 60 %}
+                        <span class="badge badge-warning">Vence pronto</span>
+                        {% else %}
+                        <span class="badge badge-success">Vigente</span>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <div class="sri-banner-center sri-banner-error">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>
+                            {% if sri_info.sri_certificado_hasta %}
+                                Certificado vencido ({{ sri_info.sri_certificado_hasta }})
+                            {% else %}
+                                Certificado no configurado o contraseña incorrecta
+                            {% endif %}
+                        </span>
+                        <a href="{% url 'sri_configuracion' %}" class="btn btn-sm btn-danger">
+                            <i class="fas fa-cog"></i> Configurar
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Tabla escritorio -->
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>N°</th>
+                                <th>Paciente</th>
+                                <th>Total</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for f in facturas %}
+                            <tr data-href="{% url 'detalle_factura' f.id %}"
+                                data-titulo="{{ f.numero }}"
+                                data-detalle-paciente="{{ f.paciente.apellidos }}, {{ f.paciente.nombres }}"
+                                data-detalle-cedula="{{ f.paciente.cedula }}"
+                                data-detalle-emision="{{ f.fecha_emision|date:'d/m/Y' }}"
+                                data-detalle-forma-pago="{{ f.get_forma_pago_display }}"
+                                data-detalle-estado-sri="{% if f.sri_estado %}{{ f.sri_estado }}{% else %}—{% endif %}"
+                                data-detalle-total="${{ f.total|floatformat:2 }}">
+                                <td><strong>{{ f.numero }}</strong></td>
+                                <td>{{ f.paciente }}</td>
+                                <td><strong>${{ f.total|floatformat:2 }}</strong></td>
+                                <td>
+                                    {% if f.estado == 'PENDIENTE' %}
+                                    <span class="badge badge-warning">Pendiente</span>
+                                    {% elif f.estado == 'PAGADA' %}
+                                    <span class="badge badge-success">Pagada</span>
+                                    {% elif f.estado == 'ANULADA' %}
+                                    <span class="badge badge-danger">Anulada</span>
+                                    {% endif %}
+                                </td>
+                                <td class="actions-cell">
+                                    <a href="{% url 'detalle_factura' f.id %}" class="btn-action btn-view" title="Ver">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'imprimir_factura' f.id %}" class="btn-action btn-view" title="Imprimir" target="_blank">
+                                        <i class="fas fa-print"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" style="text-align:center;padding:40px;color:var(--gray-400);">
+                                    <i class="fas fa-file-invoice-dollar" style="font-size:2rem;display:block;margin-bottom:8px;"></i>
+                                    No hay facturas registradas.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+           
+
+            <!-- Tarjetas móvil -->
+            <div class="data-cards">
+                {% for f in facturas %}
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <div class="data-card-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+                        <div class="data-card-info">
+                            <h3 class="data-card-title">{{ f.numero }}</h3>
+                            <span class="data-card-sub">
+                                {% if f.estado == 'PENDIENTE' %}
+                                <span class="badge badge-warning">Pendiente</span>
+                                {% elif f.estado == 'PAGADA' %}
+                                <span class="badge badge-success">Pagada</span>
+                                {% elif f.estado == 'ANULADA' %}
+                                <span class="badge badge-danger">Anulada</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="data-card-actions">
+                            <a href="{% url 'detalle_factura' f.id %}" class="data-card-btn data-card-btn-primary" title="Ver">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{% url 'imprimir_factura' f.id %}" class="data-card-btn data-card-btn-secondary" title="Imprimir" target="_blank">
+                                <i class="fas fa-print"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="data-card-body">
+                        <div class="data-card-row">
+                            <i class="fas fa-user"></i>
+                            <span class="data-card-row-label">Paciente</span>
+                            <span class="data-card-row-value">{{ f.paciente }}</span>
+                        </div>
+                        <div class="data-card-row">
+                            <i class="fas fa-calendar"></i>
+                            <span class="data-card-row-label">Emisión</span>
+                            <span class="data-card-row-value">{{ f.fecha_emision|date:"d/m/Y" }}</span>
+                        </div>
+                        <div class="data-card-row">
+                            <i class="fas fa-credit-card"></i>
+                            <span class="data-card-row-label">Pago</span>
+                            <span class="data-card-row-value">{{ f.get_forma_pago_display }}</span>
+                        </div>
+                        <div class="data-card-row">
+                            <i class="fas fa-dollar-sign" style="color:var(--primary);font-weight:700;"></i>
+                            <span class="data-card-row-label" style="color:var(--primary);font-weight:700;">Total</span>
+                            <span class="data-card-row-value"><strong>${{ f.total|floatformat:2 }}</strong></span>
+                        </div>
+                    </div>
+                    <div class="data-card-footer">
+                        <a href="{% url 'detalle_factura' f.id %}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-eye"></i> Ver detalle
+                        </a>
+                        <a href="{% url 'imprimir_factura' f.id %}" class="btn btn-sm btn-secondary" target="_blank">
+                            <i class="fas fa-print"></i> Imprimir
+                        </a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty-state">
+                    <i class="fas fa-file-invoice-dollar" style="font-size:3rem;color:var(--gray-300);margin-bottom:12px;"></i>
+                    <h3>No hay facturas registradas</h3>
+                    <p>Crea la primera factura</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </main>
+</div>
+{% include 'componentes/modal_detalle.html' %}
+{% endblock %}

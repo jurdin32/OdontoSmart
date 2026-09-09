@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load permisos_tags %}
+{% load empresa_tags %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='proformas' %}
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+        <div class="dashboard-content">
+            <div class="page-header page-header--between">
+                <div>
+                    <h1 class="page-title">{{ proforma.numero }}</h1>
+                    <p class="page-subtitle">
+                        {{ proforma.paciente }} — {{ proforma.fecha_emision|date:"d/m/Y" }}
+                    </p>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <a href="{% url 'imprimir_proforma' proforma.id %}" class="btn btn-secondary" target="_blank">
+                        <i class="fas fa-print"></i> Imprimir
+                    </a>
+                    {% tiene_permiso 'editar_proformas' as puede_editar %}
+                    {% if puede_editar and proforma.estado != 'FACTURADA' %}
+                    <a href="{% url 'editar_proforma' proforma.id %}" class="btn btn-secondary">
+                        <i class="fas fa-edit"></i> Editar
+                    </a>
+                    {% endif %}
+                    {% tiene_permiso 'crear_facturas' as puede_facturar %}
+                    {% if puede_facturar and proforma.estado == 'APROBADA' or puede_facturar and proforma.estado == 'PENDIENTE' %}
+                    <form method="POST" action="{% url 'proforma_a_factura' proforma.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-file-invoice"></i> Generar Factura
+                        </button>
+                    </form>
+                    {% endif %}
+                    {% tiene_permiso 'eliminar_proformas' as puede_eliminar %}
+                    {% if puede_eliminar and proforma.estado != 'FACTURADA' %}
+                    <form method="POST" action="{% url 'eliminar_proforma' proforma.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('¿Eliminar esta proforma?')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="detail-grid-2col">
+                <!-- Detalle -->
+                <div class="form-card">
+                    <h3 style="margin-bottom:16px;">Servicios</h3>
+                    <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Descripción</th>
+                                <th>Cant.</th>
+                                <th>P. Unit.</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in proforma.items %}
+                            <tr>
+                                <td data-label="Descripción">{{ item.descripcion }}</td>
+                                <td data-label="Cant.">{{ item.cantidad }}</td>
+                                <td data-label="P. Unit.">${{ item.precio_unitario|floatformat:2 }}</td>
+                                <td data-label="Total">${{ item.cantidad|multiply:item.precio_unitario|floatformat:2 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4" style="text-align:center;">Sin items</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+
+                <!-- Totales -->
+                <div class="detail-sidebar">
+                    <!-- Resumen -->
+                    <div class="detail-card">
+                        <div class="detail-card-header">
+                            <div class="detail-card-icon" style="background:#ecfdf5;color:var(--success);"><i class="fas fa-calculator"></i></div>
+                            <span class="detail-card-title">Resumen</span>
+                        </div>
+                        <div class="detail-card-body">
+                            <div class="detail-row"><span>Subtotal</span><strong>${{ proforma.subtotal|floatformat:2 }}</strong></div>
+                            {% if proforma.descuento_porcentaje > 0 %}
+                            <div class="detail-row detail-row-red"><span>Descuento ({{ proforma.descuento_porcentaje }}%)</span><strong>-${{ proforma.descuento_monto|floatformat:2 }}</strong></div>
+                            {% endif %}
+                            {% if proforma.impuesto_porcentaje > 0 %}
+                            <div class="detail-row"><span>Impuesto ({{ proforma.impuesto_porcentaje }}%)</span><strong>${{ proforma.impuesto_monto|floatformat:2 }}</strong></div>
+                            {% endif %}
+                            <div class="detail-row detail-row-total"><span>TOTAL</span><strong>${{ proforma.total|floatformat:2 }}</strong></div>
+                        </div>
+                    </div>
+
+                    <!-- Información -->
+                    <div class="detail-card">
+                        <div class="detail-card-header">
+                            <div class="detail-card-icon" style="background:#eff6ff;color:var(--primary);"><i class="fas fa-info-circle"></i></div>
+                            <span class="detail-card-title">Información</span>
+                        </div>
+                        <div class="detail-card-body">
+                            <div class="detail-row"><span>Paciente</span><span>{{ proforma.paciente }}</span></div>
+                            <div class="detail-row"><span>Médico</span><span>{{ proforma.medico|default:"-" }}</span></div>
+                            <div class="detail-row"><span>Emisión</span><span>{{ proforma.fecha_emision|date:"d/m/Y" }}</span></div>
+                            <div class="detail-row"><span>Validez</span><span>{{ proforma.fecha_validez|date:"d/m/Y" }}</span></div>
+                            <div class="detail-row"><span>Estado</span><span>{{ proforma.get_estado_display }}</span></div>
+                            <div class="detail-row"><span>Creado por</span><span>{{ proforma.registrado_por.get_full_name|default:proforma.registrado_por.username }}</span></div>
+                        </div>
+                    </div>
+
+                    {% if proforma.notas %}
+                    <div class="detail-card">
+                        <div class="detail-card-header">
+                            <div class="detail-card-icon" style="background:#fef3c7;color:#d97706;"><i class="fas fa-sticky-note"></i></div>
+                            <span class="detail-card-title">Notas</span>
+                        </div>
+                        <div class="detail-card-body">
+                            <p style="font-size:.85rem;color:var(--gray-600);padding:4px 0;">{{ proforma.notas|linebreaks }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

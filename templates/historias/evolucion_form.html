@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='pacientes' %}
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+        <div class="dashboard-content">
+            <div class="page-header">
+                <h1 class="page-title">{% if evolucion %}Editar Evolución{% else %}Nueva Evolución{% endif %}</h1>
+                <p class="page-subtitle">{{ paciente.nombres }} {{ paciente.apellidos }}</p>
+            </div>
+            <div class="form-card">
+                {% if object_version %}
+                <div class="concurrency-banner" id="concurrencyBanner" style="display:none;">
+                    <i class="fas fa-lock"></i>
+                    <span id="concurrencyMessage">⚠️ Editando...</span>
+                </div>
+                {% endif %}
+
+                <form method="POST" novalidate
+                      data-object-type="Evolucion"
+                      data-object-id="{{ evolucion.id }}"
+                      data-object-version="{{ object_version }}">
+                    {% csrf_token %}
+                    {% if object_version %}
+                    <input type="hidden" name="object_version" value="{{ object_version }}">
+                    {% endif %}
+
+                    <div class="form-section">
+                        <h3 class="form-section-title"><i class="fas fa-notes-medical"></i> Datos de la Consulta</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.medico.label }}</label>
+                                {{ form.medico }}
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">{{ form.fecha.label }}</label>
+                                {{ form.fecha }}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">{{ form.motivo.label }}</label>
+                            {{ form.motivo }}
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">{{ form.diagnostico.label }}</label>
+                            {{ form.diagnostico }}
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">{{ form.tratamiento.label }}</label>
+                            {{ form.tratamiento }}
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">{{ form.observaciones.label }}</label>
+                            {{ form.observaciones }}
+                        </div>
+                        <div class="form-row" style="margin-top:16px;">
+                            <div class="form-group">
+                                <label class="form-label"><i class="fas fa-dollar-sign"></i> {{ form.costo.label }}</label>
+                                <div style="display:flex;align-items:center;gap:4px;">
+                                    <span style="font-size:1.1rem;font-weight:600;color:var(--gray-500);">$</span>
+                                    {{ form.costo }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Consentimiento Informado -->
+                    <div class="form-section">
+                        <h3 class="form-section-title"><i class="fas fa-file-signature"></i> Consentimiento Informado</h3>
+                        <div class="consent-text">
+                            <p>Usted tiene derecho a conocer el procedimiento al que va a ser sometido y las complicaciones más frecuentes que ocurren. El presente documento tiene por objeto explicarle en qué consiste, con el fin de que usted, o su representante legal, lo firme.</p>
+                            <p style="margin-top:10px;">Le recordamos que por imperativo legal, tendrá que firmar, usted o su representante legal, el consentimiento informado para que pueda realizarse dicho procedimiento.</p>
+                            <p style="margin-top:10px;"><strong>Sr/Sra.</strong> <em>{{ paciente.nombres }} {{ paciente.apellidos }}</em>, con N° <strong>{{ paciente.cedula }}</strong> como paciente, ha sido informada(o) por el Dr./Dra. <em class="medico-en-consentimiento" id="medicoNombre">_______________</em> sobre los procedimientos propios clínicos de ortodoncia y ortopedia, que constan en el plan de tratamiento, otorgando mi consentimiento para realizar las prácticas necesarias al caso clínico.</p>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.consentimiento_acepta.label }}</label>
+                                <label class="ocl">{{ form.consentimiento_acepta }} <span class="ocb"></span> Acepta el tratamiento</label>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Lugar y fecha</label>
+                                <input type="text" class="form-input" id="lugarFecha" value="Cuenca, {{ evolucion.fecha|date:"j \\d\\e F \\d\\e\\l Y"|default:'' }}" readonly style="font-weight:500;">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">{{ form.consentimiento_medico.label }}</label>
+                            <div style="display:flex;gap:8px;align-items:start;">
+                                {{ form.consentimiento_medico }}
+                                {% if evolucion %}
+                                <a href="{% url 'imprimir_consentimiento' evolucion.id %}" target="_blank" class="btn btn-sm btn-secondary" style="white-space:nowrap;padding:6px 12px;font-size:.8rem;margin-top:0;">
+                                    <i class="fas fa-print"></i> Imprimir
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Firmas -->
+                        <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--gray-200);">
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+                                <div>
+                                    <label style="font-size:.85rem;font-weight:600;color:var(--gray-600);display:block;margin-bottom:4px;">Firma del Paciente / Tutor</label>
+                                    <div style="border-bottom:2px solid var(--gray-300);height:50px;margin-bottom:4px;"></div>
+                                    <input type="text" class="form-input" value="{{ paciente.nombres }} {{ paciente.apellidos }}" readonly style="font-size:.8rem;padding:6px 10px;">
+                                </div>
+                                <div>
+                                    <label style="font-size:.85rem;font-weight:600;color:var(--gray-600);display:block;margin-bottom:4px;">Firma del Odontólogo</label>
+                                    <div style="border-bottom:2px solid var(--gray-300);height:50px;margin-bottom:4px;"></div>
+                                    <input type="text" class="form-input" id="firmaOdontologo" value="{{ form.consentimiento_medico.value|default:'' }}" readonly style="font-size:.8rem;padding:6px 10px;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Próxima consulta -->
+                    <div class="form-section">
+                        <h3 class="form-section-title"><i class="fas fa-calendar-plus"></i> Próxima Consulta</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.proxima_consulta.label }}</label>
+                                {{ form.proxima_consulta }}
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">{{ form.proxima_consulta_nota.label }}</label>
+                                {{ form.proxima_consulta_nota }}
+                            </div>
+                        </div>
+                        <p style="font-size:.8rem;color:var(--gray-500);margin-top:6px;">Si ingresas una fecha, se generará automáticamente una cita en el sistema.</p>
+                    </div>
+
+                    <div class="form-actions">
+                        <a href="{% url 'historia' paciente.id %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> {% if evolucion %}Actualizar{% else %}Guardar Evolución{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+    function updateConsentMedico() {
+        const sel = document.querySelector('select[name="medico"]');
+        const input = document.querySelector('input[name="consentimiento_medico"]');
+        const span = document.getElementById('medicoNombre');
+        const firma = document.getElementById('firmaOdontologo');
+        if (sel && input) {
+            const selected = sel.options[sel.selectedIndex];
+            const nombre = selected && selected.value ? selected.text : '';
+            input.value = nombre;
+            if (span) span.textContent = nombre || '_______________';
+            if (firma) firma.value = nombre;
+        }
+    }
+
+    function formatLugarFecha() {
+        const fechaInput = document.querySelector('input[name="fecha"]');
+        const lugarField = document.getElementById('lugarFecha');
+        if (fechaInput && lugarField && fechaInput.value) {
+            const [y, m, d] = fechaInput.value.split('-');
+            const fecha = new Date(parseInt(y), parseInt(m)-1, parseInt(d));
+            lugarField.value = 'Cuenca, ' + parseInt(d) + ' de ' + MESES[fecha.getMonth()] + ' del ' + y;
+        }
+    }
+
+    document.querySelector('select[name="medico"]')?.addEventListener('change', updateConsentMedico);
+    document.querySelector('input[name="fecha"]')?.addEventListener('change', formatLugarFecha);
+    document.addEventListener('DOMContentLoaded', function() {
+        updateConsentMedico();
+        formatLugarFecha();
+    });
+</script>
+{% endblock %}

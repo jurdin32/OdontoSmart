@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='dashboard' %}
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+
+        <!-- Dashboard Content -->
+        <div class="dashboard-content">
+            <div class="page-header">
+                <h1 class="page-title">Panel Principal</h1>
+                <p class="page-subtitle">Bienvenido de nuevo, {{ user.first_name|default:user.username }}</p>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card stat-card--blue">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-number">{{ citas_hoy }}</span>
+                        <span class="stat-label">Citas Hoy</span>
+                    </div>
+                </div>
+                <div class="stat-card stat-card--green">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-number">{{ total_pacientes }}</span>
+                        <span class="stat-label">Pacientes</span>
+                    </div>
+                </div>
+                <div class="stat-card stat-card--purple">
+                    <div class="stat-icon">
+                        <i class="fas fa-user-md"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-number">{{ total_medicos }}</span>
+                        <span class="stat-label">Médicos</span>
+                    </div>
+                </div>
+                <div class="stat-card stat-card--orange">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-number">{{ citas_pendientes }}</span>
+                        <span class="stat-label">Citas Pendientes</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <h2>Acciones Rápidas</h2>
+                <div class="actions-grid">
+                    <a href="{% url 'registrar_cita' %}" class="action-card">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Nueva Cita</span>
+                    </a>
+                   
+                    <a href="{% url 'lista_pacientes' %}" class="action-card">
+                        <i class="fas fa-file-medical"></i>
+                        <span>Nuevo Historial</span>
+                    </a>
+                    <a href="{% url 'registrar_paciente' %}" class="action-card">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Nuevo Paciente</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="recent-activity">
+                <h2>
+                    Actividad Reciente
+                    <span class="activity-count">{{ grupos_actividad|length }} categorías</span>
+                </h2>
+                <div class="activity-list">
+                    {% if grupos_actividad %}
+                    <div class="activity-feed">
+                        {% for grupo in grupos_actividad %}
+                        <div class="activity-group">
+                            <div class="activity-group-header">
+                                <div class="activity-group-icon activity-{{ grupo.accion|lower }}">
+                                    {% if grupo.accion == 'CREAR' %}
+                                    <i class="fas fa-plus-circle"></i>
+                                    {% elif grupo.accion == 'EDITAR' %}
+                                    <i class="fas fa-edit"></i>
+                                    {% elif grupo.accion == 'ELIMINAR' %}
+                                    <i class="fas fa-trash-alt"></i>
+                                    {% elif grupo.accion == 'LOGIN' %}
+                                    <i class="fas fa-sign-in-alt"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="activity-group-info">
+                                    <span class="activity-group-title">
+                                        {% if grupo.accion == 'CREAR' %}Creación{% elif grupo.accion == 'EDITAR' %}Edición{% elif grupo.accion == 'ELIMINAR' %}Eliminación{% elif grupo.accion == 'LOGIN' %}Inicio de sesión{% else %}{{ grupo.accion }}{% endif %} en {{ grupo.modelo }}
+                                    </span>
+                                    <span class="activity-group-count">{{ grupo.total }} registro{{ grupo.total|pluralize }}</span>
+                                </div>
+                            </div>
+                            <div class="activity-group-items">
+                                {% for act in grupo.items %}
+                                <div class="activity-item">
+                                    <div class="activity-item-content">
+                                        <span class="activity-item-text">{{ act.descripcion }}</span>
+                                        <span class="activity-item-time">{{ act.fecha|date:"d/m/Y H:i" }}</span>
+                                    </div>
+                                    <span class="activity-item-user">{{ act.usuario.get_full_name|default:act.usuario.username }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="activity-empty">
+                        <i class="fas fa-inbox fa-3x"></i>
+                        <p>No hay actividad reciente</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

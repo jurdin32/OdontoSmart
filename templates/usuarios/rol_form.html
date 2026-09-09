@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='roles' %}
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+        <div class="dashboard-content">
+            <div class="page-header">
+                <h1 class="page-title">{% if rol %}✏️ Editar Rol{% else %}🏷️ Nuevo Rol{% endif %}</h1>
+                <p class="page-subtitle">{% if rol %}Actualiza el nombre y descripción del rol{% else %}Crea un nuevo rol para el sistema{% endif %}</p>
+            </div>
+            <div class="form-card">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Nombre del rol</label>
+                            <input type="text" name="nombre" class="form-input"
+                                   value="{{ rol.get_nombre_display|default:'' }}"
+                                   maxlength="20" required
+                                   placeholder="Ej: RECEPCIONISTA, LABORATORIO, etc.">
+                            <small style="color:var(--gray-400);">Máx. 20 caracteres, se guardará en mayúsculas</small>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Descripción</label>
+                            <textarea name="descripcion" class="form-input" rows="3"
+                                      placeholder="¿Qué funciones tiene este rol?">{{ rol.descripcion|default:'' }}</textarea>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> {% if rol %}Guardar Cambios{% else %}Crear Rol{% endif %}
+                        </button>
+                        <a href="{% url 'lista_roles' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='reportes' %}
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+        <div class="dashboard-content">
+            <div class="page-header page-header--between">
+                <div>
+                    <h1 class="page-title">Reporte de Historias Clínicas</h1>
+                    <p class="page-subtitle">Estadísticas de condiciones médicas y evoluciones</p>
+                </div>
+                <a href="{% url 'reportes' %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver</a>
+            </div>
+
+            <form class="report-filters" method="GET">
+                <div class="filter-group"><label class="filter-label">Desde</label><input type="date" name="desde" class="form-input filter-input" value="{{ desde }}"></div>
+                <div class="filter-group"><label class="filter-label">Hasta</label><input type="date" name="hasta" class="form-input filter-input" value="{{ hasta }}"></div>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Filtrar</button>
+                {% if desde or hasta %}<a href="{% url 'reporte_historias' %}" class="btn btn-secondary"><i class="fas fa-times"></i> Limpiar</a>{% endif %}
+            </form>
+
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-icon" style="background:#dbeafe;color:#2563eb;"><i class="fas fa-notes-medical"></i></div><div class="stat-info"><span class="stat-number">{{ total_historias }}</span><span class="stat-label">Historias</span></div></div>
+                <div class="stat-card"><div class="stat-icon" style="background:#ecfdf5;color:#10b981;"><i class="fas fa-check-circle"></i></div><div class="stat-info"><span class="stat-number">{{ con_historia }}</span><span class="stat-label">Pacientes con Historia</span></div></div>
+                <div class="stat-card"><div class="stat-icon" style="background:#fef3c7;color:#d97706;"><i class="fas fa-exclamation-circle"></i></div><div class="stat-info"><span class="stat-number">{{ sin_historia }}</span><span class="stat-label">Sin Historia</span></div></div>
+                <div class="stat-card"><div class="stat-icon" style="background:#f5f3ff;color:#7c3aed;"><i class="fas fa-clipboard-list"></i></div><div class="stat-info"><span class="stat-number">{{ total_evoluciones }}</span><span class="stat-label">Evoluciones</span></div></div>
+            </div>
+
+            <div class="report-section">
+                <h3 class="form-section-title">Condiciones Médicas Frecuentes</h3>
+                <div class="condiciones-grid">
+                    {% for nombre, cantidad in condiciones.items %}
+                    <div class="condicion-card">
+                        <div class="condicion-header">
+                            <span class="condicion-nombre">{{ nombre }}</span>
+                            <span class="condicion-valor">{{ cantidad }}</span>
+                        </div>
+                        <div class="condicion-bar">
+                            <div class="condicion-fill" style="width:{% widthratio cantidad total_historias 100 %}%"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="report-section">
+                <h3 class="form-section-title">Últimas Evoluciones</h3>
+                <div class="table-container">
+                    <table class="table">
+                        <thead><tr><th>Paciente</th><th>Médico</th><th>Fecha</th><th>Motivo</th></tr></thead>
+                        <tbody>
+                            {% for e in ultimas_evoluciones %}
+                            <tr>
+                                <td><strong>{{ e.historia.paciente.nombres }} {{ e.historia.paciente.apellidos }}</strong></td>
+                                <td>Dr. {{ e.medico.nombres }} {{ e.medico.apellidos }}</td>
+                                <td>{{ e.fecha|date:"d/m/Y" }}</td>
+                                <td>{{ e.motivo|truncatechars:40 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4" class="text-center">Sin evoluciones</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

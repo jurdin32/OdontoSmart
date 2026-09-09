@@ -1,0 +1,347 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='pacientes' %}
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+        <div class="dashboard-content">
+            <div class="page-header page-header--between">
+                <div>
+                    <h1 class="page-title">Historia Clínica</h1>
+                    <p class="page-subtitle">{{ paciente.nombres }} {{ paciente.apellidos }} - {{ paciente.cedula }}</p>
+                </div>
+                <div class="header-actions">
+                    <a href="{% url 'odontograma' paciente.id %}" class="btn btn-primary">
+                        <i class="fas fa-tooth"></i> Odontograma
+                    </a>
+                    <a href="{% url 'odontograma_infantil' paciente.id %}" class="btn btn-primary">
+                        <i class="fas fa-baby"></i> Odontograma Infantil
+                    </a>
+                    <a href="{% url 'nueva_evolucion' paciente.id %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Nueva Evolución
+                    </a>
+                    <a href="{% url 'detalle_paciente' paciente.id %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </a>
+                </div>
+            </div>
+
+            <!-- ===== FORMULARIO ÚNICO ===== -->
+            {% if object_version %}
+            <div class="concurrency-banner" id="concurrencyBanner" style="display:none;">
+                <i class="fas fa-lock"></i>
+                <span id="concurrencyMessage">⚠️ Editando...</span>
+            </div>
+            {% endif %}
+
+            <form method="POST"
+                  data-object-type="HistoriaClinica"
+                  data-object-id="{{ historia.id }}"
+                  data-object-version="{{ object_version }}">
+                {% csrf_token %}
+                {% if object_version %}
+                <input type="hidden" name="object_version" value="{{ object_version }}">
+                {% endif %}
+
+            <!-- Antecedentes -->
+            <div class="form-card" style="margin-bottom: 24px;">
+                <h3 class="form-section-title" style="margin-bottom: 20px;">
+                    <i class="fas fa-notes-medical"></i> Antecedentes y Datos Generales
+                </h3>
+                <!-- Preguntas Sí/No como en la ficha -->
+                <div class="med-questions">
+                    <div class="med-question">
+                        <span class="med-q-text">{{ form.alergia_drogas.label }}</span>
+                        <label class="med-q-options">{{ form.alergia_drogas }} <span class="checkbox-custom"></span> <span class="checkbox-label-text">SI</span></label>
+                    </div>
+                    <div class="med-question">
+                        <span class="med-q-text">{{ form.exceso_saliva.label }}</span>
+                        <label class="med-q-options">{{ form.exceso_saliva }} <span class="checkbox-custom"></span> <span class="checkbox-label-text">SI</span></label>
+                    </div>
+                    <div class="med-question">
+                        <span class="med-q-text">{{ form.cicatrizacion.label }}</span>
+                        <label class="med-q-options">{{ form.cicatrizacion }} <span class="checkbox-custom"></span> <span class="checkbox-label-text">SI</span></label>
+                    </div>
+                    <div class="med-question">
+                        <span class="med-q-text">{{ form.sangrado.label }}</span>
+                        <label class="med-q-options">{{ form.sangrado }} <span class="checkbox-custom"></span> <span class="checkbox-label-text">SI</span></label>
+                    </div>
+                    <div class="med-question">
+                        <span class="med-q-text">{{ form.diabetes.label }}</span>
+                        <label class="med-q-options">{{ form.diabetes }} <span class="checkbox-custom"></span> <span class="checkbox-label-text">SI</span></label>
+                    </div>
+                    <div class="med-question">
+                        <span class="med-q-text">{{ form.diabetes_controlado.label }}</span>
+                        {{ form.diabetes_controlado }}
+                    </div>
+                    <div class="med-question">
+                        <span class="med-q-text">{{ form.cardiacos.label }}</span>
+                        <label class="med-q-options">{{ form.cardiacos }} <span class="checkbox-custom"></span> <span class="checkbox-label-text">SI</span></label>
+                    </div>
+                    <div class="med-question">
+                        <span class="med-q-text">{{ form.aspirina.label }}</span>
+                        <label class="med-q-options">{{ form.aspirina }} <span class="checkbox-custom"></span> <span class="checkbox-label-text">SI</span></label>
+                    </div>
+                    <div class="med-question">
+                        <span class="med-q-text">{{ form.frecuencia_aspirina.label }}</span>
+                        {{ form.frecuencia_aspirina }}
+                    </div>
+                    <div class="med-question">
+                        <span class="med-q-text">{{ form.alergias.label }}</span>
+                        <label class="med-q-options">{{ form.alergias }} <span class="checkbox-custom"></span> <span class="checkbox-label-text">SI</span></label>
+                    </div>
+                    <div class="med-question">
+                        <span class="med-q-text">{{ form.hipertension.label }}</span>
+                        <label class="med-q-options">{{ form.hipertension }} <span class="checkbox-custom"></span> <span class="checkbox-label-text">SI</span></label>
+                    </div>
+                    <div class="med-question">
+                        <span class="med-q-text">{{ form.medicacion.label }}</span>
+                        <label class="med-q-options">{{ form.medicacion }} <span class="checkbox-custom"></span> <span class="checkbox-label-text">SI</span></label>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top: 12px;">
+                    <label class="form-label"><i class="fas fa-notes-medical"></i> Observaciones</label>
+                    {{ form.observaciones_medicas }}
+                </div>
+                <div class="form-row" style="margin-top: 12px;">
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-tint"></i> {{ form.tipo_sangre.label }}</label>
+                        {{ form.tipo_sangre }}
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">{{ form.antecedentes_familiares.label }}</label>
+                        {{ form.antecedentes_familiares }}
+                    </div>
+                </div>
+
+                <h4 style="margin: 16px 0 12px; font-size: 0.95rem; color: var(--gray-700);">
+                    <i class="fas fa-smoking"></i> Hábitos
+                </h4>
+                <div class="form-row" style="display: flex; gap: 24px; align-items: center;">
+                    <label class="checkbox-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        {{ form.fumador }} <span class="checkbox-custom"></span> Fumador
+                    </label>
+                    <label class="checkbox-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        {{ form.alcohol }} <span class="checkbox-custom"></span> Consume alcohol
+                    </label>
+                    <label class="checkbox-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        {{ form.embarazo }} <span class="checkbox-custom"></span> Embarazada
+                    </label>
+                </div>
+                <div class="form-group" style="margin-top: 12px;">
+                    {{ form.observaciones_habitos }}
+                </div>
+            </div>
+
+            <!-- Diagnóstico y Tratamiento -->
+            <div class="form-card" style="margin-bottom: 24px;">
+                <h3 class="form-section-title" style="margin-bottom: 20px;">
+                    <i class="fas fa-stethoscope"></i> Diagnóstico y Tratamiento
+                </h3>
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label class="form-label" style="font-size: 1rem; font-weight: 700; color: var(--gray-800);">Diagnóstico presuntivo</label>
+                        {{ form.diagnostico_presuntivo }}
+                    </div>
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label class="form-label" style="font-size: 1rem; font-weight: 700; color: var(--gray-800);">Plan de tratamiento</label>
+                        {{ form.plan_tratamiento }}
+                    </div>
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label class="form-label" style="font-size: 1rem; font-weight: 700; color: var(--gray-800);">Observaciones</label>
+                        {{ form.observaciones }}
+                    </div>
+            </div>
+
+            <!-- Consentimiento Informado -->
+            <div class="form-card" style="margin-bottom: 24px;" id="consentSection">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+                    <h3 class="form-section-title" style="margin:0;">
+                        <i class="fas fa-file-signature"></i> Consentimiento Informado
+                    </h3>
+                    <button type="button" class="btn btn-secondary" onclick="window.print()">
+                        <i class="fas fa-print"></i> Imprimir
+                    </button>
+                </div>
+                    <div class="consent-text">
+                        <p>He recibido explicaciones claras en lenguaje sencillo sobre el diagnóstico, tratamiento y procedimientos odontológicos que se me realizarán. Comprendo los beneficios, riesgos y alternativas. En consecuencia, <strong>ACEPTO</strong> someterme al tratamiento indicado y autorizo al odontólogo a realizar todo lo necesario para rehabilitar mi salud bucal.</p>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">{{ form.consentimiento.label }}</label>
+                            <label class="ocl" style="margin-top:6px;">{{ form.consentimiento }} <span class="ocb"></span> Acepta el tratamiento</label>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">{{ form.consentimiento_fecha.label }}</label>
+                            {{ form.consentimiento_fecha }}
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">{{ form.consentimiento_paciente.label }}</label>
+                            <input type="text" name="consentimiento_paciente" class="form-input" value="{{ historia.consentimiento_paciente|default:'' }}" placeholder="{{ paciente.nombres }} {{ paciente.apellidos }}" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">{{ form.consentimiento_cedula.label }}</label>
+                            <input type="text" name="consentimiento_cedula" class="form-input" value="{{ historia.consentimiento_cedula|default:'' }}" placeholder="{{ paciente.cedula }}" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">{{ form.consentimiento_direccion.label }}</label>
+                        <input type="text" name="consentimiento_direccion" class="form-input" value="{{ historia.consentimiento_direccion|default:'' }}" placeholder="{{ paciente.direccion }}" readonly>
+                    </div>
+
+                    <!-- Firmas -->
+                    <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--gray-200);">
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+                            <div>
+                                <label style="font-size:.85rem;font-weight:600;color:var(--gray-600);display:block;margin-bottom:4px;">Firma del Paciente / Tutor</label>
+                                <div style="border-bottom:2px solid var(--gray-300);height:50px;margin-bottom:4px;"></div>
+                                <input type="text" class="form-input" value="{{ paciente.nombres }} {{ paciente.apellidos }}" readonly style="font-size:.8rem;padding:6px 10px;">
+                            </div>
+                            <div>
+                                <label style="font-size:.85rem;font-weight:600;color:var(--gray-600);display:block;margin-bottom:4px;">Firma del Odontólogo</label>
+                                <div style="border-bottom:2px solid var(--gray-300);height:50px;margin-bottom:4px;"></div>
+                                {{ form.consentimiento_medico }}
+                            </div>
+                        </div>
+                    </div>
+
+            </div> <!-- end consent-card -->
+
+                    <!-- Botón guardar único -->
+                    <div class="form-actions" style="margin-top: 24px;">
+                        <button type="submit" class="btn btn-primary" style="min-width: 200px; padding: 14px 32px; font-size: 1rem;">
+                            <i class="fas fa-save"></i> Guardar Historia Clínica
+                        </button>
+                    </div>
+            </form>
+            <!-- ===== FIN FORMULARIO ÚNICO ===== -->
+
+            <!-- Evoluciones -->
+            <h3 style="margin-bottom: 16px;"><i class="fas fa-timeline"></i> Evoluciones / Consultas</h3>
+            {% if evoluciones %}
+            <div class="evoluciones-list">
+                {% for e in evoluciones %}
+                <div class="evolucion-card">
+                    <div class="evolucion-header">
+                        <div class="evolucion-fecha">
+                            <span class="evolucion-day">{{ e.fecha|date:"d" }}</span>
+                            <span class="evolucion-month">{{ e.fecha|date:"M Y" }}</span>
+                        </div>
+                        <div class="evolucion-info">
+                            <span class="evolucion-medico">
+                                <i class="fas fa-user-md"></i> {{ e.medico.nombre_completo|default:"No asignado" }}
+                            </span>
+                        </div>
+                        <div class="evolucion-actions">
+                            <a href="{% url 'imprimir_consentimiento' e.id %}" target="_blank" class="btn-action btn-print-evo" title="Imprimir consentimiento">
+                                <i class="fas fa-print"></i>
+                            </a>
+                            <a href="{% url 'editar_evolucion' e.id %}" class="btn-action btn-edit" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button type="button" class="btn-action btn-delete" title="Eliminar"
+                                data-evolucion-id="{{ e.id }}"
+                                onclick="openDeleteEvolucion({{ e.id }})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="evolucion-body">
+                        <div class="evolucion-section">
+                            <span class="evolucion-label"><i class="fas fa-stethoscope"></i> Motivo</span>
+                            <p>{{ e.motivo }}</p>
+                        </div>
+                        {% if e.diagnostico %}
+                        <div class="evolucion-section">
+                            <span class="evolucion-label"><i class="fas fa-file-diagnose"></i> Diagnóstico</span>
+                            <p>{{ e.diagnostico }}</p>
+                        </div>
+                        {% endif %}
+                        {% if e.tratamiento %}
+                        <div class="evolucion-section">
+                            <span class="evolucion-label"><i class="fas fa-bandage"></i> Tratamiento</span>
+                            <p>{{ e.tratamiento }}</p>
+                        </div>
+                        {% endif %}
+                        {% if e.observaciones %}
+                        <div class="evolucion-section">
+                            <span class="evolucion-label"><i class="fas fa-comment"></i> Observaciones</span>
+                            <p>{{ e.observaciones }}</p>
+                        </div>
+                        {% endif %}
+                        {% if e.costo %}
+                        <div class="evolucion-section" style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--gray-200);">
+                            <span class="evolucion-label"><i class="fas fa-dollar-sign"></i> Costo del tratamiento</span>
+                            <p style="font-size:1.1rem;font-weight:700;color:var(--primary);">$ {{ e.costo|floatformat:2 }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-notes-medical fa-4x"></i>
+                <h3>Sin evoluciones</h3>
+                <p>No hay consultas registradas para este paciente</p>
+                <a href="{% url 'nueva_evolucion' paciente.id %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nueva Evolución
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+
+<!-- Modal Eliminar -->
+<div class="modal-overlay" id="deleteEvolModal">
+    <div class="modal-container">
+        <div class="modal-icon"><i class="fas fa-exclamation-triangle"></i></div>
+        <h2 class="modal-title">¿Eliminar evolución?</h2>
+        <p class="modal-text">Esta acción no se puede deshacer.</p>
+        <form method="POST" id="deleteEvolForm" class="modal-actions">
+            {% csrf_token %}
+            <button type="button" class="btn btn-secondary" onclick="closeDeleteEvolucion()"><i class="fas fa-times"></i> Cancelar</button>
+            <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> Sí, Eliminar</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function openDeleteEvolucion(id) {
+    document.getElementById('deleteEvolForm').action = '/historias/evolucion/' + id + '/eliminar/';
+    document.getElementById('deleteEvolModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+function closeDeleteEvolucion() {
+    document.getElementById('deleteEvolModal').classList.remove('active');
+    document.body.style.overflow = '';
+}
+document.getElementById('deleteEvolModal')?.addEventListener('click', function(e) {
+    if (e.target === this) closeDeleteEvolucion();
+});
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeDeleteEvolucion();
+});
+
+// Auto-completar consentimiento con datos del paciente
+document.addEventListener('DOMContentLoaded', function() {
+    const fields = [
+        { name: 'consentimiento_paciente', value: '{{ paciente.nombres }} {{ paciente.apellidos }}' },
+        { name: 'consentimiento_cedula', value: '{{ paciente.cedula }}' },
+        { name: 'consentimiento_direccion', value: '{{ paciente.direccion }}' },
+    ];
+    fields.forEach(function(f) {
+        const input = document.querySelector(`input[name="${f.name}"]`);
+        if (input && !input.value.trim()) {
+            input.value = f.value;
+        }
+    });
+});
+</script>
+{% endblock %}

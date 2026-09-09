@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+{% load empresa_tags %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ proforma.numero }}</title>
+    <style>
+        @page { margin: 15mm; }
+        body { font-family: 'Inter', Arial, sans-serif; font-size: 12px; color: #1e293b; }
+        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #2563eb; padding-bottom: 10px; }
+        .header h1 { font-size: 18px; color: #2563eb; margin: 0 0 4px; }
+        .header p { margin: 2px 0; color: #64748b; }
+        .info { display: flex; justify-content: space-between; margin-bottom: 20px; }
+        .info div { flex: 1; }
+        .info h3 { font-size: 11px; color: #94a3b8; text-transform: uppercase; margin: 0 0 4px; }
+        .info p { margin: 2px 0; font-size: 13px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th { background: #f1f5f9; padding: 8px 10px; text-align: left; font-size: 11px; text-transform: uppercase; color: #64748b; }
+        td { padding: 8px 10px; border-bottom: 1px solid #e2e8f0; }
+        .totals { width: 300px; margin-left: auto; }
+        .totals td { padding: 4px 10px; border: none; }
+        .totals .total-row td { font-size: 16px; font-weight: 700; color: #2563eb; border-top: 2px solid #1e293b; padding-top: 8px; }
+        .footer { text-align: center; color: #94a3b8; font-size: 10px; margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 10px; }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+        .badge-pending { background: #fef3c7; color: #92400e; }
+        .badge-approved { background: #d1fae5; color: #065f46; }
+        @media print { .no-print { display: none; } }
+    </style>
+</head>
+<body>
+    <div class="no-print" style="text-align:center;margin-bottom:20px;">
+        <button onclick="window.print()" style="padding:8px 20px;background:#2563eb;color:#fff;border:none;border-radius:6px;cursor:pointer;">
+            🖨️ Imprimir
+        </button>
+        <button onclick="window.close()" style="padding:8px 20px;background:#e2e8f0;border:none;border-radius:6px;cursor:pointer;margin-left:8px;">
+            Cerrar
+        </button>
+    </div>
+
+    <div class="header">
+        <h1>PROFORMA</h1>
+        <p style="font-size:20px;font-weight:700;">{{ proforma.numero }}</p>
+    </div>
+
+    <div class="info">
+        <div>
+            <h3>Paciente</h3>
+            <p><strong>{{ proforma.paciente.nombres }} {{ proforma.paciente.apellidos }}</strong></p>
+            <p>Cédula: {{ proforma.paciente.cedula|default:"-" }}</p>
+            <p>Tel: {{ proforma.paciente.celular|default:proforma.paciente.telefono|default:"-" }}</p>
+        </div>
+        <div style="text-align:right;">
+            <h3>Detalles</h3>
+            <p>Emisión: {{ proforma.fecha_emision|date:"d/m/Y" }}</p>
+            <p>Validez: {{ proforma.fecha_validez|date:"d/m/Y" }}</p>
+            <p>Médico: {{ proforma.medico|default:"-" }}</p>
+            <p>Estado: <span class="badge {% if proforma.estado == 'APROBADA' %}badge-approved{% else %}badge-pending{% endif %}">{{ proforma.get_estado_display }}</span></p>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width:55%;">Descripción</th>
+                <th style="width:15%;text-align:center;">Cantidad</th>
+                <th style="width:15%;text-align:right;">P. Unit.</th>
+                <th style="width:15%;text-align:right;">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in proforma.items %}
+            <tr>
+                <td>{{ item.descripcion }}</td>
+                <td style="text-align:center;">{{ item.cantidad }}</td>
+                <td style="text-align:right;">${{ item.precio_unitario|floatformat:2 }}</td>
+                <td style="text-align:right;">${{ item.cantidad|multiply:item.precio_unitario|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <table class="totals">
+        <tr><td>Subtotal</td><td style="text-align:right;">${{ proforma.subtotal|floatformat:2 }}</td></tr>
+        {% if proforma.descuento_porcentaje > 0 %}
+        <tr><td>Descuento ({{ proforma.descuento_porcentaje }}%)</td><td style="text-align:right;">-${{ proforma.descuento_monto|floatformat:2 }}</td></tr>
+        {% endif %}
+        {% if proforma.impuesto_porcentaje > 0 %}
+        <tr><td>Impuesto ({{ proforma.impuesto_porcentaje }}%)</td><td style="text-align:right;">${{ proforma.impuesto_monto|floatformat:2 }}</td></tr>
+        {% endif %}
+        <tr class="total-row"><td>TOTAL</td><td style="text-align:right;">${{ proforma.total|floatformat:2 }}</td></tr>
+    </table>
+
+    {% if proforma.notas %}
+    <div style="margin-top:20px;padding:10px;background:#f8fafc;border-radius:6px;">
+        <strong style="font-size:11px;color:#94a3b8;">NOTAS:</strong>
+        <p style="margin:4px 0 0;font-size:12px;">{{ proforma.notas }}</p>
+    </div>
+    {% endif %}
+
+    <div class="footer">
+        <p>Documento generado por OdontSmart — {{ proforma.registrado_por.get_full_name|default:proforma.registrado_por.username }}</p>
+    </div>
+
+    <script>window.onload = function() { setTimeout(function() { window.print(); }, 500); };</script>
+</body>
+</html>

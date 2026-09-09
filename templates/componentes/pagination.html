@@ -1,0 +1,27 @@
+{% if page_obj.paginator.num_pages > 1 %}
+<div class="pagination">
+    <span class="pagination-info">
+        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+        ({{ page_obj.paginator.count }} registro{{ page_obj.paginator.count|pluralize:'s' }})
+    </span>
+    <div class="pagination-links">
+        {% if page_obj.has_previous %}
+        <a href="?{% if query %}q={{ query|urlencode }}&{% endif %}page=1" class="pag-btn" title="Primera">&laquo;</a>
+        <a href="?{% if query %}q={{ query|urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}" class="pag-btn" title="Anterior">&lsaquo;</a>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if num == page_obj.number %}
+                <span class="pag-btn pag-current">{{ num }}</span>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <a href="?{% if query %}q={{ query|urlencode }}&{% endif %}page={{ num }}" class="pag-btn">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <a href="?{% if query %}q={{ query|urlencode }}&{% endif %}page={{ page_obj.next_page_number }}" class="pag-btn" title="Siguiente">&rsaquo;</a>
+        <a href="?{% if query %}q={{ query|urlencode }}&{% endif %}page={{ page_obj.paginator.num_pages }}" class="pag-btn" title="Última">&raquo;</a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}

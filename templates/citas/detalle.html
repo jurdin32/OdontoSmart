@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='citas' %}
+
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+
+        <div class="dashboard-content">
+            <div class="page-header page-header--between">
+                <div>
+                    <h1 class="page-title">Detalle de Cita</h1>
+                    <p class="page-subtitle">{{ cita.paciente.nombres }} {{ cita.paciente.apellidos }}</p>
+                </div>
+                <div class="header-actions">
+                    <a href="{% url 'editar_cita' cita.id %}" class="btn btn-primary">
+                        <i class="fas fa-edit"></i> Editar
+                    </a>
+                    <a href="{% url 'lista_citas' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </a>
+                </div>
+            </div>
+
+            <!-- Estado bar -->
+            <div class="estado-bar">
+                <span class="estado-badge estado-badge--lg estado-{{ cita.estado|lower }}">
+                    {{ cita.get_estado_display }}
+                </span>
+                {% if cita.estado != 'CANCELADA' and cita.estado != 'COMPLETADA' %}
+                <form method="POST" action="{% url 'cambiar_estado_cita' cita.id %}" class="estado-form">
+                    {% csrf_token %}
+                    <select name="estado" class="form-input form-input-sm" onchange="this.form.submit()">
+                        <option value="">Cambiar estado...</option>
+                        {% for key, val in cita.ESTADO_CHOICES %}
+                            {% if key != cita.estado %}
+                            <option value="{{ key }}">{{ val }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </form>
+                {% endif %}
+            </div>
+
+            <div class="detail-grid">
+                <div class="detail-card">
+                    <h3><i class="fas fa-calendar"></i> Fecha y Hora</h3>
+                    <div class="detail-row"><span class="detail-label">Fecha:</span><span>{{ cita.fecha|date:"d/m/Y" }}</span></div>
+                    <div class="detail-row"><span class="detail-label">Hora:</span><span>{{ cita.hora|time:"H:i" }} hrs</span></div>
+                </div>
+                <div class="detail-card">
+                    <h3><i class="fas fa-user"></i> Paciente</h3>
+                    <div class="detail-row"><span class="detail-label">Nombre:</span><span>{{ cita.paciente.nombres }} {{ cita.paciente.apellidos }}</span></div>
+                    <div class="detail-row"><span class="detail-label">Cédula:</span><span>{{ cita.paciente.cedula }}</span></div>
+                    <div class="detail-row"><span class="detail-label">Teléfono:</span><span>{{ cita.paciente.telefono }}</span></div>
+                </div>
+                <div class="detail-card">
+                    <h3><i class="fas fa-user-md"></i> Doctor</h3>
+                    <div class="detail-row"><span class="detail-label">Doctor:</span><span>{{ cita.doctor.nombre_completo|default:"Sin asignar" }}</span></div>
+                </div>
+                <div class="detail-card">
+                    <h3><i class="fas fa-notes-medical"></i> Motivo de Consulta</h3>
+                    <p style="color: var(--gray-700); font-size: 0.9rem; line-height: 1.6;">{{ cita.motivo }}</p>
+                    {% if cita.notas %}
+                    <h4 style="margin-top: 16px; font-size: 0.9rem; color: var(--gray-500);">Notas adicionales:</h4>
+                    <p style="color: var(--gray-700); font-size: 0.9rem; line-height: 1.6;">{{ cita.notas }}</p>
+                    {% endif %}
+                </div>
+                <div class="detail-card">
+                    <h3><i class="fas fa-clock"></i> Registro</h3>
+                    <div class="detail-row"><span class="detail-label">Creado por:</span><span>{{ cita.registrado_por.get_full_name|default:cita.registrado_por.username }}</span></div>
+                    <div class="detail-row"><span class="detail-label">Fecha registro:</span><span>{{ cita.fecha_registro|date:"d/m/Y H:i" }}</span></div>
+                    <div class="detail-row"><span class="detail-label">Últ. actualización:</span><span>{{ cita.fecha_actualizacion|date:"d/m/Y H:i" }}</span></div>
+                </div>
+            </div>
+
+            <div class="form-actions" style="margin-top: 24px;">
+                <button type="button" class="btn btn-danger" onclick="openDeleteCita({{ cita.id }}, '{{ cita.paciente.nombres }} {{ cita.paciente.apellidos }}', '{{ cita.fecha|date:"d/m/Y" }}')">
+                    <i class="fas fa-trash"></i> Eliminar Cita
+                </button>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+function openDeleteCita(id, paciente, fecha) {
+    const m = document.getElementById('deleteCitaModal');
+    const f = document.getElementById('deleteCitaForm');
+    f.action = '/citas/' + id + '/eliminar/';
+    document.getElementById('modalCitaPaciente2').textContent = paciente;
+    document.getElementById('modalCitaFecha2').textContent = fecha;
+    m.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+</script>
+
+<!-- Modal Eliminar -->
+<div class="modal-overlay" id="deleteCitaModal">
+    <div class="modal-container">
+        <div class="modal-icon"><i class="fas fa-exclamation-triangle"></i></div>
+        <h2 class="modal-title">¿Eliminar cita?</h2>
+        <p class="modal-text">
+            Estás a punto de eliminar la cita de <strong id="modalCitaPaciente2"></strong>
+            <br>del <span id="modalCitaFecha2"></span>.
+            <br>Esta acción no se puede deshacer.
+        </p>
+        <form method="POST" id="deleteCitaForm" class="modal-actions">
+            {% csrf_token %}
+            <button type="button" class="btn btn-secondary" onclick="document.getElementById('deleteCitaModal').classList.remove('active'); document.body.style.overflow = ''">
+                <i class="fas fa-times"></i> Cancelar
+            </button>
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Sí, Eliminar
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

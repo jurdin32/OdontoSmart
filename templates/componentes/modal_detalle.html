@@ -1,0 +1,96 @@
+<!-- Modal de detalles reutilizable -->
+<div id="detalleModal" class="modal-overlay" style="display:none;">
+    <div class="modal-backdrop" onclick="cerrarModal()"></div>
+    <div class="modal-container" role="dialog" aria-modal="true">
+        <div class="modal-header">
+            <h3 class="modal-title" id="modalTitle">Detalles</h3>
+            <button type="button" class="modal-close-btn" onclick="cerrarModal()" aria-label="Cerrar">&times;</button>
+        </div>
+        <div class="modal-body" id="modalBody">
+            <!-- Contenido dinámico -->
+        </div>
+        <div class="modal-footer" style="display:flex;justify-content:space-between;gap:8px;">
+            <div id="modalFooterBtn"></div>
+            <button type="button" class="btn btn-secondary" onclick="cerrarModal()">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+function abrirModal(titulo, html, href) {
+    document.getElementById('modalTitle').textContent = titulo;
+    document.getElementById('modalBody').innerHTML = html;
+    var footerBtn = document.getElementById('modalFooterBtn');
+    if (href) {
+        footerBtn.innerHTML = '<a href="' + href + '" class="btn btn-primary"><i class="fas fa-external-link-alt"></i> Ver detalle completo</a>';
+        footerBtn.style.display = '';
+    } else {
+        footerBtn.innerHTML = '';
+        footerBtn.style.display = 'none';
+    }
+    document.getElementById('detalleModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function cerrarModal() {
+    document.getElementById('detalleModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+// Cerrar con tecla Escape
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') cerrarModal();
+});
+
+// Manejar clicks en botones y filas con data-detalle-*
+document.addEventListener('click', function(e) {
+    var target = e.target.closest('[data-detalle-paciente], .btn-ver-detalle, tr[data-href]');
+    if (!target) return;
+
+    // Si es un link o botón dentro de la fila, no interceptar
+    if (e.target.closest('a, button, form, .btn, .action-buttons')) return;
+
+    var titulo, html, href;
+
+    if (target.tagName === 'TR' && target.getAttribute('data-href')) {
+        // Click en toda la fila
+        titulo = target.getAttribute('data-titulo') || 'Detalles';
+        href = target.getAttribute('data-href');
+        html = '<div class="detalle-grid">';
+        for (var i = 0; i < target.attributes.length; i++) {
+            var attr = target.attributes[i];
+            if (attr.name.indexOf('data-detalle-') === 0) {
+                var label = attr.name.replace('data-detalle-', '')
+                    .replace(/-/g, ' ')
+                    .replace(/\b\w/g, function(l) { return l.toUpperCase(); });
+                var extraClass = label === 'Total' ? ' detalle-total' : '';
+                html += '<div class="detalle-item' + extraClass + '"><span class="detalle-label">' + label + '</span><span class="detalle-valor">' + attr.value + '</span></div>';
+            }
+        }
+        html += '</div>';
+        abrirModal(titulo, html, href);
+        return;
+    }
+
+    // Click en botón .btn-ver-detalle
+    var btn = target.closest('.btn-ver-detalle');
+    if (!btn) return;
+    e.preventDefault();
+
+    titulo = btn.getAttribute('data-titulo') || 'Detalles';
+    href = btn.getAttribute('data-href');
+    html = '<div class="detalle-grid">';
+    for (var i = 0; i < btn.attributes.length; i++) {
+        var attr = btn.attributes[i];
+        if (attr.name.indexOf('data-detalle-') === 0) {
+            var label = attr.name.replace('data-detalle-', '')
+                .replace(/-/g, ' ')
+                .replace(/\b\w/g, function(l) { return l.toUpperCase(); });
+            var extraClass = label === 'Total' ? ' detalle-total' : '';
+            html += '<div class="detalle-item' + extraClass + '"><span class="detalle-label">' + label + '</span><span class="detalle-valor">' + attr.value + '</span></div>';
+        }
+    }
+    html += '</div>';
+    abrirModal(titulo, html, href);
+});
+</script>

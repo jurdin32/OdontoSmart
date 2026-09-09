@@ -1,0 +1,108 @@
+{% load static %}
+{% load permisos_tags %}
+{% tiene_permiso 'ver_citas' as puede_ver_citas %}
+{% tiene_permiso 'ver_pacientes' as puede_ver_pacientes %}
+{% tiene_permiso 'ver_historia' as puede_ver_historia %}
+{% tiene_permiso 'ver_medicos' as puede_ver_medicos %}
+{% tiene_permiso 'ver_reportes' as puede_ver_reportes %}
+{% tiene_permiso 'ver_proformas' as puede_ver_proformas %}
+{% tiene_permiso 'ver_facturas' as puede_ver_facturas %}
+{% tiene_permiso 'ver_usuarios' as puede_ver_usuarios %}
+{% tiene_permiso 'ver_configuracion' as puede_ver_configuracion %}
+{% tiene_permiso 'sri_config' as puede_sri_config %}
+{% tiene_permiso 'sri_consultar' as puede_sri_consultar %}
+{% es_admin as es_admin_user %}
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <a href="{% url 'dashboard' %}" style="display:flex;flex-direction:column;align-items:center;gap:8px;text-decoration:none;">
+            {% if config_empresa and config_empresa.logo %}
+            <img src="{{ config_empresa.logo.url }}" alt="{{ empresa.nombre }}" class="sidebar-logo">
+            {% endif %}
+            <div class="sidebar-brand-name">{{ empresa.nombre|default:'OdontSmart' }}</div>
+        </a>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="{% url 'dashboard' %}" class="nav-item {% if active == 'dashboard' %}active{% endif %}">
+            <i class="fas fa-th-large"></i><span>Panel Principal</span>
+        </a>
+        {% if puede_ver_citas %}
+        <a href="{% url 'lista_citas' %}" class="nav-item {% if active == 'citas' %}active{% endif %}">
+            <i class="fas fa-calendar-check"></i><span>Citas</span>
+        </a>
+        {% endif %}
+        {% if puede_ver_pacientes %}
+        <a href="{% url 'lista_pacientes' %}" class="nav-item {% if active == 'pacientes' %}active{% endif %}">
+            <i class="fas fa-users"></i><span>Pacientes</span>
+        </a>
+        {% endif %}
+        {% if puede_ver_historia %}
+        <a href="{% url 'lista_pacientes' %}" class="nav-item {% if active == 'pacientes' %}active{% endif %}">
+            <i class="fas fa-notes-medical"></i><span>Historial Clínico</span>
+        </a>
+        {% endif %}
+        {% if puede_ver_medicos %}
+        <a href="{% url 'lista_medicos' %}" class="nav-item {% if active == 'medicos' %}active{% endif %}">
+            <i class="fas fa-user-md"></i><span>Médicos</span>
+        </a>
+        {% endif %}
+        {% if puede_ver_reportes %}
+        <a href="{% url 'reportes' %}" class="nav-item {% if active == 'reportes' %}active{% endif %}">
+            <i class="fas fa-chart-bar"></i><span>Reportes</span>
+        </a>
+        {% endif %}
+        {% if puede_ver_proformas %}
+        <a href="{% url 'lista_proformas' %}" class="nav-item {% if active == 'proformas' %}active{% endif %}">
+            <i class="fas fa-file-invoice"></i><span>Proformas</span>
+        </a>
+        {% endif %}
+        {% if puede_ver_facturas %}
+        <a href="{% url 'lista_facturas' %}" class="nav-item {% if active == 'facturas' %}active{% endif %}">
+            <i class="fas fa-file-invoice-dollar"></i><span>Facturas</span>
+        </a>
+        {% endif %}
+        {% if puede_ver_usuarios %}
+        <a href="{% url 'lista_usuarios' %}" class="nav-item {% if active == 'usuarios' %}active{% endif %}">
+            <i class="fas fa-user-shield"></i><span>Usuarios</span>
+        </a>
+        <a href="{% url 'lista_roles' %}" class="nav-item {% if active == 'roles' %}active{% endif %}">
+            <i class="fas fa-tags"></i><span>Roles</span>
+        </a>
+        <a href="{% url 'lista_permisos' %}" class="nav-item {% if active == 'permisos' %}active{% endif %}">
+            <i class="fas fa-key"></i><span>Permisos</span>
+        </a>
+        {% endif %}
+        {% if es_admin_user %}
+        <a href="{% url 'tareas_list' %}" class="nav-item {% if active == 'tareas' %}active{% endif %}">
+            <i class="fas fa-tasks"></i><span>Tareas Programadas</span>
+        </a>
+        {% endif %}
+        {% if puede_sri_config or puede_sri_consultar %}
+        <div style="padding:8px 16px 4px;font-size:.7rem;text-transform:uppercase;color:var(--gray-500);letter-spacing:1px;">
+            <i class="fas fa-file-contract"></i> SRI
+        </div>
+        {% if puede_sri_config %}
+        <a href="{% url 'sri_configuracion' %}" class="nav-item {% if active == 'sri_config' %}active{% endif %}">
+            <i class="fas fa-cog"></i><span>Config. SRI</span>
+        </a>
+        {% endif %}
+        {% if puede_sri_consultar %}
+        <a href="{% url 'sri_documentos' %}" class="nav-item {% if active == 'sri_docs' %}active{% endif %}">
+            <i class="fas fa-file-invoice"></i><span>Docs. Electrónicos</span>
+        </a>
+        <a href="{% url 'sri_log' %}" class="nav-item {% if active == 'sri_log' %}active{% endif %}">
+            <i class="fas fa-history"></i><span>Log SRI</span>
+        </a>
+        {% endif %}
+        {% endif %}
+        {% if puede_ver_configuracion %}
+        <a href="{% url 'configuracion_empresa' %}" class="nav-item {% if active == 'configuracion' %}active{% endif %}">
+            <i class="fas fa-cog"></i><span>Configuración</span>
+        </a>
+        {% endif %}
+    </nav>
+    <div class="sidebar-footer">
+        <a href="{% url 'logout' %}" class="nav-item logout-btn">
+            <i class="fas fa-sign-out-alt"></i><span>Cerrar Sesión</span>
+        </a>
+    </div>
+</aside>

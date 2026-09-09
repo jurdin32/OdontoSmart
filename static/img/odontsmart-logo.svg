@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(255,255,255,0.25);stop-opacity:1" />
+      <stop offset="100%" style="stop-color:rgba(255,255,255,0.04);stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- Anillo exterior delgado -->
+  <circle cx="60" cy="60" r="56" fill="none" stroke="url(#ringGrad)" stroke-width="1.5"/>
+
+  <!-- Círculo interior sutil -->
+  <circle cx="60" cy="60" r="46" fill="rgba(255,255,255,0.05)"/>
+
+  <!-- Diente minimalista -->
+  <g filter="url(#shadow)">
+    <path d="M60 22 
+             C48 22 38 34 38 50 
+             C38 64 46 72 50 76 
+             L50 90 
+             C50 94 52 96 54 96 
+             L66 96 
+             C68 96 70 94 70 90 
+             L70 76 
+             C74 72 82 64 82 50 
+             C82 34 72 22 60 22 Z" 
+          fill="white" opacity="0.95"/>
+    <!-- Línea central de raíz -->
+    <path d="M60 76 L60 92" stroke="rgba(0,0,0,0.06)" stroke-width="2" stroke-linecap="round"/>
+    <!-- Reflejo suave -->
+    <ellipse cx="52" cy="46" rx="5" ry="10" fill="white" opacity="0.5" transform="rotate(-12 52 46)"/>
+  </g>
+
+  <!-- Punto decorativo arriba -->
+  <circle cx="60" cy="12" r="2" fill="rgba(255,255,255,0.2)"/>
+</svg>

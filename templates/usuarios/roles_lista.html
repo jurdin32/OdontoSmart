@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='roles' %}
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+        <div class="dashboard-content">
+            <div class="page-header page-header--between">
+                <div>
+                    <h1 class="page-title">🏷️ Roles</h1>
+                    <p class="page-subtitle">Gestiona los roles del sistema y asigna permisos</p>
+                </div>
+                <a href="{% url 'crear_rol' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nuevo Rol
+                </a>
+            </div>
+            {% if roles %}
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Rol</th>
+                            <th>Descripción</th>
+                            <th>Usuarios</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in roles %}
+                        <tr>
+                            <td><span class="badge badge-{{ r.nombre|lower }}">{{ r.get_nombre_display }}</span></td>
+                            <td>{{ r.descripcion|default:'—' }}</td>
+                            <td>{{ r.profile_set.count }}</td>
+                            <td class="actions-cell">
+                                <a href="{% url 'editar_rol' r.id %}" class="btn-action btn-edit" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'permisos_rol' r.id %}" class="btn-action btn-view" title="Permisos">
+                                    <i class="fas fa-shield-alt"></i>
+                                </a>
+                                <form method="POST" action="{% url 'eliminar_rol' r.id %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-action" title="Eliminar"
+                                            style="background:#fee2e2;color:var(--error);border:none;cursor:pointer;border-radius:8px;width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;"
+                                            onclick="return confirm('¿Eliminar rol {{ r.get_nombre_display }}?');">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Tarjetas móvil -->
+            <div class="data-cards">
+                {% for r in roles %}
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <div class="data-card-icon"><i class="fas fa-tag"></i></div>
+                        <div class="data-card-info">
+                            <h3 class="data-card-title">{{ r.get_nombre_display }}</h3>
+                            <span class="data-card-sub"><span class="badge badge-{{ r.nombre|lower }}">{{ r.get_nombre_display }}</span></span>
+                        </div>
+                        <div class="data-card-actions">
+                            <a href="{% url 'editar_rol' r.id %}" class="data-card-btn data-card-btn-warning" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'permisos_rol' r.id %}" class="data-card-btn data-card-btn-primary" title="Permisos">
+                                <i class="fas fa-shield-alt"></i>
+                            </a>
+                            <form method="POST" action="{% url 'eliminar_rol' r.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="data-card-btn data-card-btn-danger" title="Eliminar"
+                                        onclick="return confirm('¿Eliminar rol {{ r.get_nombre_display }}?');">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="data-card-body">
+                        <div class="data-card-row">
+                            <i class="fas fa-align-left"></i>
+                            <span class="data-card-row-label">Descripción</span>
+                            <span class="data-card-row-value">{{ r.descripcion|default:'—' }}</span>
+                        </div>
+                        <div class="data-card-row">
+                            <i class="fas fa-users"></i>
+                            <span class="data-card-row-label">Usuarios</span>
+                            <span class="data-card-row-value">{{ r.profile_set.count }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty-state">
+                    <i class="fas fa-tags" style="font-size:3rem;color:var(--gray-300);margin-bottom:12px;"></i>
+                    <h3>No hay roles creados</h3>
+                    <p>Los roles permiten agrupar permisos por función.</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-tags" style="font-size:3rem;color:var(--gray-300);margin-bottom:16px;"></i>
+                <h3>No hay roles creados</h3>
+                <p>Los roles permiten agrupar permisos por función.</p>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% endblock %}

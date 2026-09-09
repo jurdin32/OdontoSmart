@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='sri_log' %}
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+        <div class="dashboard-content">
+            <div class="page-header page-header--between">
+                <div>
+                    <h1 class="page-title"><i class="fas fa-history"></i> Log SRI</h1>
+                    <p class="page-subtitle">Registro de eventos del SRI (media/sri/sri.log)</p>
+                </div>
+                <a href="{% url 'sri_documentos' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
+            </div>
+
+            <div class="form-card">
+                <div style="background:#1e293b;color:#e2e8f0;padding:20px;border-radius:10px;font-family:'Cascadia Code','Fira Code',monospace;font-size:.8rem;line-height:1.6;overflow-x:auto;max-height:600px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;">
+                    {{ contenido|linebreaks }}
+                </div>
+                <div style="margin-top:12px;display:flex;justify-content:flex-end;">
+                    <button onclick="window.location.reload()" class="btn btn-primary btn-sm">
+                        <i class="fas fa-sync"></i> Refrescar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

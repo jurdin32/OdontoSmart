@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='permisos' %}
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+        <div class="dashboard-content">
+            <div class="page-header page-header--between">
+                <div>
+                    <h1 class="page-title">🔑 Permisos</h1>
+                    <p class="page-subtitle">Catálogo de funciones del sistema. Crea nuevos permisos si el sistema crece.</p>
+                </div>
+                <a href="{% url 'crear_permiso' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nuevo Permiso
+                </a>
+            </div>
+            {% regroup permisos by get_modulo_display as modulos %}
+            {% for modulo in modulos %}
+            <div class="form-card" style="margin-bottom:16px;">
+                <h3 style="font-size:0.95rem;font-weight:600;color:var(--gray-700);margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--primary);display:inline-block;">
+                    {{ modulo.grouper }}
+                </h3>
+                <!-- Tabla escritorio -->
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Permiso</th>
+                                <th>Código</th>
+                                <th>Descripción</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in modulo.list %}
+                            <tr>
+                                <td><strong>{{ p.nombre }}</strong></td>
+                                <td><code>{{ p.codigo }}</code></td>
+                                <td>{{ p.descripcion|default:'—' }}</td>
+                                <td class="actions-cell">
+                                    <a href="{% url 'editar_permiso' p.id %}" class="btn-action btn-edit" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="POST" action="{% url 'eliminar_permiso' p.id %}" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-action" title="Eliminar"
+                                                style="background:#fee2e2;color:var(--error);border:none;cursor:pointer;border-radius:8px;width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;"
+                                                onclick="return confirm('¿Eliminar permiso {{ p.nombre }}?');">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Tarjetas móvil -->
+                <div class="data-cards">
+                    {% for p in modulo.list %}
+                    <div class="data-card">
+                        <div class="data-card-header">
+                            <div class="data-card-icon"><i class="fas fa-key"></i></div>
+                            <div class="data-card-info">
+                                <h3 class="data-card-title">{{ p.nombre }}</h3>
+                                <span class="data-card-sub"><span class="badge badge-secondary">{{ modulo.grouper }}</span></span>
+                            </div>
+                            <div class="data-card-actions">
+                                <a href="{% url 'editar_permiso' p.id %}" class="data-card-btn data-card-btn-warning" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form method="POST" action="{% url 'eliminar_permiso' p.id %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="data-card-btn data-card-btn-danger" title="Eliminar"
+                                            onclick="return confirm('¿Eliminar permiso {{ p.nombre }}?');">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="data-card-body">
+                            <div class="data-card-row">
+                                <i class="fas fa-code"></i>
+                                <span class="data-card-row-label">Código</span>
+                                <span class="data-card-row-value"><code>{{ p.codigo }}</code></span>
+                            </div>
+                            <div class="data-card-row">
+                                <i class="fas fa-align-left"></i>
+                                <span class="data-card-row-label">Descripción</span>
+                                <span class="data-card-row-value">{{ p.descripcion|default:'—' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-state">
+                <i class="fas fa-key" style="font-size:3rem;color:var(--gray-300);margin-bottom:16px;"></i>
+                <h3>No hay permisos creados</h3>
+                <p>Ejecuta <code>python manage.py seed_permisos</code> para crear los permisos por defecto.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+</div>
+{% endblock %}

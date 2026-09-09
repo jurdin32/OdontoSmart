@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='reportes' %}
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+        <div class="dashboard-content">
+            <div class="page-header page-header--between">
+                <div>
+                    <h1 class="page-title">Reporte de Citas</h1>
+                    <p class="page-subtitle">Estadísticas de citas odontológicas</p>
+                </div>
+                <a href="{% url 'reportes' %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver</a>
+            </div>
+
+            <form class="report-filters" method="GET">
+                <div class="filter-group"><label class="filter-label">Desde</label><input type="date" name="desde" class="form-input filter-input" value="{{ desde }}"></div>
+                <div class="filter-group"><label class="filter-label">Hasta</label><input type="date" name="hasta" class="form-input filter-input" value="{{ hasta }}"></div>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Filtrar</button>
+                {% if desde or hasta %}<a href="{% url 'reporte_citas' %}" class="btn btn-secondary"><i class="fas fa-times"></i> Limpiar</a>{% endif %}
+            </form>
+
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-icon stat-card--blue"><i class="fas fa-calendar"></i></div><div class="stat-info"><span class="stat-number">{{ total }}</span><span class="stat-label">Total Citas</span></div></div>
+                <div class="stat-card"><div class="stat-icon" style="background:#fef3c7;color:#d97706;"><i class="fas fa-clock"></i></div><div class="stat-info"><span class="stat-number">{{ pendientes }}</span><span class="stat-label">Pendientes</span></div></div>
+                <div class="stat-card"><div class="stat-icon" style="background:#dbeafe;color:#2563eb;"><i class="fas fa-check-circle"></i></div><div class="stat-info"><span class="stat-number">{{ confirmadas }}</span><span class="stat-label">Confirmadas</span></div></div>
+                <div class="stat-card"><div class="stat-icon" style="background:#ecfdf5;color:#10b981;"><i class="fas fa-check-double"></i></div><div class="stat-info"><span class="stat-number">{{ completadas }}</span><span class="stat-label">Completadas</span></div></div>
+                <div class="stat-card"><div class="stat-icon" style="background:#fef2f2;color:#ef4444;"><i class="fas fa-ban"></i></div><div class="stat-info"><span class="stat-number">{{ canceladas }}</span><span class="stat-label">Canceladas</span></div></div>
+            </div>
+
+            <div class="report-section">
+                <h3 class="form-section-title">Citas por Médico</h3>
+                <div class="table-container">
+                    <table class="table">
+                        <thead><tr><th>Médico</th><th>Especialidad</th><th>Total Citas</th></tr></thead>
+                        <tbody>
+                            {% for m in por_medico %}
+                            <tr>
+                                <td><strong>Dr. {{ m.nombres }} {{ m.apellidos }}</strong></td>
+                                <td>{{ m.get_especialidad_display }}</td>
+                                <td><span class="badge badge-blue">{{ m.total_citas }}</span></td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="3" class="text-center">Sin datos</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="report-section">
+                <h3 class="form-section-title">Próximas Citas</h3>
+                <div class="table-container">
+                    <table class="table">
+                        <thead><tr><th>Paciente</th><th>Médico</th><th>Fecha</th><th>Hora</th><th>Estado</th></tr></thead>
+                        <tbody>
+                            {% for c in proximas %}
+                            <tr>
+                                <td><strong>{{ c.paciente.nombres }} {{ c.paciente.apellidos }}</strong></td>
+                                <td>Dr. {{ c.doctor.nombres }} {{ c.doctor.apellidos }}</td>
+                                <td>{{ c.fecha|date:"d/m/Y" }}</td>
+                                <td>{{ c.hora|time:"H:i" }}</td>
+                                <td><span class="estado-badge estado-{{ c.estado|lower }}">{{ c.get_estado_display }}</span></td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="5" class="text-center">No hay próximas citas</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

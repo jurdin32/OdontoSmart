@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='usuarios' %}
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+        <div class="dashboard-content">
+            <div class="page-header">
+                <h1 class="page-title">👤 Crear Usuario para Dr. {{ medico.nombre_completo }}</h1>
+                <p class="page-subtitle">Los datos del médico se preservarán y vincularán al nuevo usuario</p>
+            </div>
+            <div class="form-card">
+                <div class="form-section">
+                    <h3 class="form-section-title">Datos del Médico</h3>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:0.9rem;">
+                        <div><strong>Nombre:</strong> Dr. {{ medico.nombre_completo }}</div>
+                        <div><strong>Cédula:</strong> {{ medico.cedula }}</div>
+                        <div><strong>Especialidad:</strong> {{ medico.get_especialidad_display }}</div>
+                        <div><strong>Registro:</strong> {{ medico.registro_profesional }}</div>
+                        <div><strong>Teléfono:</strong> {{ medico.telefono }}</div>
+                        <div><strong>Email:</strong> {{ medico.email|default:'-' }}</div>
+                    </div>
+                </div>
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="form-section">
+                        <h3 class="form-section-title">Credenciales</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Nombre de usuario</label>
+                                <input type="text" name="username" class="form-input"
+                                       value="{{ medico.cedula }}" required
+                                       placeholder="nombre_usuario">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Contraseña</label>
+                                <input type="password" name="password" class="form-input"
+                                       placeholder="•••••••• (mín. 8 caracteres)" minlength="8" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-user-plus"></i> Crear Usuario y Vincular
+                        </button>
+                        <a href="{% url 'medicos_sin_usuario' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

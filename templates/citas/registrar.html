@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='citas' %}
+
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+
+        <div class="dashboard-content">
+            <div class="page-header">
+                <h1 class="page-title">
+                    {% if cita %}Editar Cita{% else %}Nueva Cita{% endif %}
+                </h1>
+                <p class="page-subtitle">
+                    {% if cita %}Actualiza los datos de la cita{% else %}Agenda una nueva cita odontológica{% endif %}
+                </p>
+            </div>
+
+            <div class="form-card">
+                {% if object_version %}
+                <div class="concurrency-banner" id="concurrencyBanner" style="display:none;">
+                    <i class="fas fa-lock"></i>
+                    <span id="concurrencyMessage">⚠️ Editando...</span>
+                </div>
+                {% endif %}
+
+                <form method="POST" novalidate
+                      data-object-type="Cita"
+                      data-object-id="{{ cita.id }}"
+                      data-object-version="{{ object_version }}">
+                    {% csrf_token %}
+                    {% if object_version %}
+                    <input type="hidden" name="object_version" value="{{ object_version }}">
+                    {% endif %}
+
+                    <div class="form-section">
+                        <h3 class="form-section-title">
+                            <i class="fas fa-calendar-check"></i> Datos de la Cita
+                        </h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.paciente.label }}</label>
+                                {{ form.paciente }}
+                                {% if form.paciente.errors %}<div class="form-error">{% for e in form.paciente.errors %}<span>{{ e }}</span>{% endfor %}</div>{% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">{{ form.doctor.label }}</label>
+                                {{ form.doctor }}
+                                {% if form.doctor.errors %}<div class="form-error">{% for e in form.doctor.errors %}<span>{{ e }}</span>{% endfor %}</div>{% endif %}
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">{{ form.fecha.label }}</label>
+                                {{ form.fecha }}
+                                {% if form.fecha.errors %}<div class="form-error">{% for e in form.fecha.errors %}<span>{{ e }}</span>{% endfor %}</div>{% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">{{ form.hora.label }}</label>
+                                {{ form.hora }}
+                                {% if form.hora.errors %}<div class="form-error">{% for e in form.hora.errors %}<span>{{ e }}</span>{% endfor %}</div>{% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">{{ form.estado.label }}</label>
+                                {{ form.estado }}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">{{ form.motivo.label }}</label>
+                            {{ form.motivo }}
+                            {% if form.motivo.errors %}<div class="form-error">{% for e in form.motivo.errors %}<span>{{ e }}</span>{% endfor %}</div>{% endif %}
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">{{ form.notas.label }}</label>
+                            {{ form.notas }}
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <a href="{% url 'lista_citas' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            {% if cita %}Actualizar Cita{% else %}Registrar Cita{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    $(document).ready(function() {
+        $('select[name="paciente"]').select2({
+            placeholder: 'Buscar paciente por nombre o cédula...',
+            allowClear: true,
+            width: '100%',
+            language: {
+                noResults: function() { return 'No se encontraron pacientes'; },
+                searching: function() { return 'Buscando...'; }
+            }
+        });
+        $('select[name="doctor"]').select2({
+            placeholder: 'Seleccione un doctor',
+            allowClear: true,
+            width: '100%',
+            language: {
+                noResults: function() { return 'No se encontraron doctores'; }
+            }
+        });
+    });
+</script>
+{% endblock %}
