@@ -1,98 +1,34 @@
 """
-Middleware y utilidades para el sistema multi-tenant (OdontSmart).
+Modo CLÍNICA ÚNICA (OdontSmart).
 
-Detecta la empresa desde:
-1. Subdominio (producción): empresa1.odontsmart.com
-2. Parámetro GET / sesión (desarrollo): ?empresa_id=1
-3. Perfil del usuario autenticado (fallback)
+La aplicación está pensada para una sola clínica: no hay subdominios ni
+selección de empresa. Todas las peticiones trabajan con la misma empresa
+(el registro único de `core.Empresa`).
 """
 
-import re
-from django.conf import settings
 from django.utils.deprecation import MiddlewareMixin
-from django.shortcuts import redirect
-from django.urls import reverse
 
 
 class EmpresaMiddleware(MiddlewareMixin):
-    """
-    Middleware que identifica la empresa actual desde el subdominio
-    y la asigna a request.empresa.
-    """
+    """Asigna la clínica única del sistema a cada request."""
 
     def process_request(self, request):
-        user = getattr(request, 'user', None)
-        authed = bool(user and user.is_authenticated)
-
-        # 1. Empresa por subdominio (identifica el tenant en producción)
-        empresa_sub = self._get_empresa_from_subdomain(request)
-
-        if authed:
-            # Usuarios autenticados: la empresa SIEMPRE sale de su perfil.
-            # No se respeta '?empresa_id=' ni un subdominio ajeno, para evitar
-            # la suplantación de tenant (fuga de datos entre empresas).
-            profile = getattr(user, 'profile', None)
-            empresa = profile.empresa if (profile and profile.empresa_id) else None
-        else:
-            # Anónimos (login/landing): subdominio o '?empresa_id' (dev).
-            empresa = empresa_sub
-            if not empresa and 'empresa_id' in request.GET:
-                from core.models import Empresa
-                try:
-                    empresa = Empresa.objects.get(
-                        id=int(request.GET.get('empresa_id')),
-                        activo=True
-                    )
-                except (Empresa.DoesNotExist, ValueError, TypeError):
-                    pass
-
-        # 2. Guardar en request y sesión
-        request.empresa = empresa
-        if empresa:
-            request.session['empresa_id'] = empresa.id
-        elif 'empresa_id' in request.session:
-            # Si se cambió de sesión, limpiar
-            del request.session['empresa_id']
-
-    def _get_empresa_from_subdomain(self, request):
-        """Extrae el subdominio del host y busca la empresa."""
-        host = request.get_host().split(':')[0]  # quitar puerto
-        # En desarrollo sin subdominio, retornar None
-        if host in ('localhost', '127.0.0.1'):
-            return None
-
-        parts = host.split('.')
-        if len(parts) < 3:
-            return None
-
-        subdomain = parts[0]
-        if subdomain == 'www':
-            return None
-
         from core.models import Empresa
-        try:
-            return Empresa.objects.get(subdominio=subdomain, activo=True)
-        except Empresa.DoesNotExist:
-            return None
+        request.empresa = Empresa.get_solo()
 
 
-def get_empresa(request):
+def get_empresa(request=None):
+    """Devuelve la clínica única del sistema.
+
+    Funciona con o sin middleware: si el request ya trae la empresa la
+    reutiliza; en caso contrario consulta el registro único de `Empresa`.
     """
-    Devuelve la empresa vigente para el request.
-
-    Para usuarios autenticados el middleware ya garantiza que request.empresa
-    coincide con la empresa de su perfil; aquí solo hay un fallback para
-    contextos donde el middleware no corrió (tests, tareas, etc.).
-    """
-    empresa = getattr(request, 'empresa', None)
-    if empresa:
-        return empresa
-    user = getattr(request, 'user', None)
-    if user and user.is_authenticated:
-        profile = getattr(user, 'profile', None)
-        if profile and profile.empresa_id:
-            return profile.empresa
-    return None
+    from core.models import Empresa
+    if request is not None:
+        empresa = getattr(request, 'empresa', None)
+        if empresa is not None:
+            return empresa
+    return Empresa.get_solo()
 
 
 def empresa_context(request):

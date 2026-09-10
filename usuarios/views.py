@@ -28,24 +28,14 @@ def login_view(request):
             password = form.cleaned_data.get('password')
             user = authenticate(username=username, password=password)
             if user is not None:
-                # Verificar que el usuario pertenece a la empresa actual
-                user_empresa = getattr(user.profile, 'empresa', None) if hasattr(user, 'profile') else None
-                if empresa and user_empresa and user_empresa.id != empresa.id:
-                    messages.error(
-                        request,
-                        'Este usuario no pertenece a la empresa solicitada.'
-                    )
-                elif empresa and not user_empresa:
-                    # Asignar empresa al perfil si no tiene
-                    user.profile.empresa = empresa
-                    user.profile.save()
-                    login(request, user)
-                    _registrar_login(user)
-                    return redirect('dashboard')
-                else:
-                    login(request, user)
-                    _registrar_login(user)
-                    return redirect('dashboard')
+                # Modo clínica única: garantizamos que el perfil pertenezca a la clínica
+                profile = getattr(user, 'profile', None)
+                if profile and empresa and profile.empresa_id != empresa.id:
+                    profile.empresa = empresa
+                    profile.save()
+                login(request, user)
+                _registrar_login(user)
+                return redirect('dashboard')
             else:
                 messages.error(request, 'Usuario o contraseña incorrectos.')
         else:

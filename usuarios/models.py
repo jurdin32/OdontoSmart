@@ -84,7 +84,9 @@ class Profile(models.Model):
 @receiver(post_save, sender=User)
 def crear_perfil_usuario(sender, instance, created, **kwargs):
     if created:
-        Profile.objects.create(user=instance)
+        # Modo clínica única: el perfil se asocia a la clínica del sistema
+        from core.models import Empresa
+        Profile.objects.create(user=instance, empresa=Empresa.get_solo())
 
 
 @receiver(post_save, sender=User)

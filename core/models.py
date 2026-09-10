@@ -36,6 +36,18 @@ class Empresa(models.Model):
     def __str__(self):
         return self.nombre
 
+    @classmethod
+    def get_solo(cls):
+        """Devuelve la clínica única del sistema (primera empresa activa).
+
+        OdontSmart funciona en modo de una sola clínica: no hay selección de
+        empresa ni subdominios, siempre se usa este registro.
+        """
+        empresa = cls.objects.filter(activo=True).order_by('id').first()
+        if empresa is None:
+            empresa = cls.objects.order_by('id').first()
+        return empresa
+
 
 # ===========================================================================
 #  CONFIGURACIÓN DE EMPRESA
