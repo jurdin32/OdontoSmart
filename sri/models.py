@@ -245,3 +245,47 @@ class SriDocumento(models.Model):
     @property
     def autorizado(self):
         return self.estado == 'AUTORIZADO'
+
+    def marcar_autorizado(self, resultado, clave_acceso=None):
+        """Registra la respuesta de autorización del SRI en este documento.
+
+        Guarda estado, número de autorización, fecha de autorización y el XML
+        autorizado. Devuelve `self` para encadenar `guardar_xml_autorizado()`.
+        """
+        from django.utils.dateparse import parse_datetime
+
+        self.estado = 'AUTORIZADO'
+        # El SRI devuelve el número de autorización (normalmente = clave de
+        # acceso); si no lo manda, se usa la clave de acceso del documento.
+        self.numero_autorizacion = (
+            resultado.get('numero_autorizacion') or clave_acceso or self.clave_acceso
+        )
+
+        fecha = resultado.get('fecha_autorizacion')
+        fecha_dt = None
+        if isinstance(fecha, str) and fecha:
+            fecha_dt = parse_datetime(fecha.replace('Z', '+00:00'))
+        elif fecha:
+            fecha_dt = fecha
+        # Si el SRI no devuelve fecha, se registra el momento de la consulta
+        self.fecha_autorizacion = fecha_dt or timezone.now()
+
+        if resultado.get('xml_autorizado'):
+            self.xml_autorizado = resultado['xml_autorizado']
+        if resultado.get('mensajes'):
+            self.mensajes = resultado['mensajes']
+        return self
+
+    def guardar_xml_autorizado(self):
+        """Adjunta el XML autorizado como archivo. Devuelve el nombre o ''."""
+        if not self.xml_autorizado:
+            return ''
+        from django.core.files.base import ContentFile
+
+        nombre = f'sri_autorizado_{self.numero_documento.replace("-", "_")}.xml'
+        if self.archivo_xml_autorizado:
+            self.archivo_xml_autorizado.delete(save=False)
+        self.archivo_xml_autorizado.save(
+            nombre, ContentFile(self.xml_autorizado.encode('utf-8'))
+        )
+        return nombre

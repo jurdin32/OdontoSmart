@@ -142,6 +142,33 @@ class RespuestaSriEnListaTests(TestCase):
         self.assertContains(response, 'FAC-SRI-9')
         self.assertNotContains(response, 'FAC-SRI-10')
 
+    def test_lista_incluye_el_json_de_respuesta_del_sri(self):
+        """El visor JSON se alimenta de un bloque json_script con la respuesta."""
+        factura = self._factura('FAC-SRI-11')
+        self._documento(
+            factura, estado='AUTORIZADO', numero_autorizacion='ABC123',
+            fecha_autorizacion=timezone.now(),
+        )
+
+        response = self.client.get('/facturacion/facturas/')
+        html = response.content.decode()
+
+        self.assertIn('id="sriRespuestasData"', html)
+        self.assertIn('btn-sri-json', html)
+        self.assertIn('ABC123', html)
+
+        import json as _json
+        payload = _json.loads(
+            html.split('id="sriRespuestasData" type="application/json">')[1].split('</script>')[0]
+        )
+        self.assertEqual(payload[str(factura.id)]['estado'], 'AUTORIZADO')
+        self.assertEqual(payload[str(factura.id)]['numero_autorizacion'], 'ABC123')
+
+    def test_respuesta_sri_json_vacia_si_no_se_envio(self):
+        factura = self._factura('FAC-SRI-12')
+
+        self.assertEqual(factura.respuesta_sri_json(), {})
+
     def test_lista_no_hace_consultas_por_factura(self):
         """El estado del SRI se carga en una sola consulta (sin N+1)."""
         factura = self._factura('FAC-SRI-N0')

@@ -241,6 +241,12 @@
                             </td>
                             <td class="whitespace-nowrap px-6 py-4">
                                 <div class="flex items-center justify-end gap-2">
+                                    {% if f.sri_documento %}
+                                    <button type="button" class="btn-sri-json inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-600"
+                                            data-factura="{{ f.id }}" title="Ver JSON de respuesta del SRI">
+                                        <i class="fas fa-code"></i>
+                                    </button>
+                                    {% endif %}
                                     <a href="{% url 'detalle_factura' f.id %}" title="Ver"
                                        class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-600">
                                         <i class="fas fa-eye"></i>
@@ -317,7 +323,13 @@
                         {% endif %}
                     </div>
 
-                    <div class="mt-4 flex gap-2">
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        {% if f.sri_documento %}
+                        <button type="button" class="btn-sri-json inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-emerald-400 hover:bg-emerald-50 hover:text-emerald-700"
+                                data-factura="{{ f.id }}">
+                            <i class="fas fa-code"></i> JSON SRI
+                        </button>
+                        {% endif %}
                         <a href="{% url 'detalle_factura' f.id %}"
                            class="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-sky-400 hover:bg-sky-50 hover:text-sky-700">
                             <i class="fas fa-eye"></i> Ver detalle
@@ -356,6 +368,9 @@
     </main>
 </div>
 {% include 'componentes/modal_detalle.html' %}
+
+<!-- Respuestas del SRI por factura (para el visor JSON) -->
+{{ sri_respuestas|json_script:"sriRespuestasData" }}
 
 <script>
     // Buscador en la página (filtro rápido sobre filas/tarjetas)

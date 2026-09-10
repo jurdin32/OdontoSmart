@@ -264,10 +264,6 @@ def emitir_factura_electronica(request, factura_id):
         sri_doc.archivo_xml_firmado.save(
             filename_firmado, ContentFile(xml_firmado.encode('utf-8'))
         )
-        # Guardar XML firmado como archivo físico
-        sri_doc.archivo_xml_firmado.save(
-            filename_firmado, ContentFile(xml_firmado.encode('utf-8'))
-        )
         ruta_firmado = settings.MEDIA_ROOT / 'sri' / 'documentos' / 'firmados' / filename_firmado
         sri_logger.info(f'[3/4] Documento registrado ID={sri_doc.id}')
         sri_logger.info(f'      XML firmado guardado: {ruta_firmado}')
@@ -284,14 +280,8 @@ def emitir_factura_electronica(request, factura_id):
             if estado_sri == 'AUTORIZADO':
                 # SRI aceptó → consumir secuencial (si no se había consumido antes)
                 config.consumir_secuencial()
-                sri_doc.estado = 'AUTORIZADO'
-                sri_doc.numero_autorizacion = clave_acceso
-                sri_doc.xml_autorizado = resultado.get('xml_autorizado', '')
-                if sri_doc.xml_autorizado:
-                    filename_aut = f'sri_autorizado_{numero_doc.replace("-", "_")}.xml'
-                    sri_doc.archivo_xml_autorizado.save(
-                        filename_aut, ContentFile(sri_doc.xml_autorizado.encode('utf-8'))
-                    )
+                sri_doc.marcar_autorizado(resultado, clave_acceso)
+                sri_doc.guardar_xml_autorizado()
                 sri_doc.save()
                 sri_logger.info(f'      ✅ FACTURA AUTORIZADA - N° {sri_doc.numero_autorizacion}')
                 messages.success(request, f'✅ Factura electrónica {numero_doc} autorizada por el SRI.')
@@ -316,14 +306,8 @@ def emitir_factura_electronica(request, factura_id):
                 if aut_estado == 'AUTORIZADO':
                     # SRI aceptó → consumir secuencial (si no se había consumido antes)
                     config.consumir_secuencial()
-                    sri_doc.estado = 'AUTORIZADO'
-                    sri_doc.numero_autorizacion = clave_acceso
-                    sri_doc.xml_autorizado = aut_resultado.get('xml_autorizado', '')
-                    if sri_doc.xml_autorizado:
-                        filename_aut = f'sri_autorizado_{numero_doc.replace("-", "_")}.xml'
-                        sri_doc.archivo_xml_autorizado.save(
-                            filename_aut, ContentFile(sri_doc.xml_autorizado.encode('utf-8'))
-                        )
+                    sri_doc.marcar_autorizado(aut_resultado, clave_acceso)
+                    sri_doc.guardar_xml_autorizado()
                     sri_doc.save()
                     sri_logger.info(f'      ✅ FACTURA AUTORIZADA - N° {sri_doc.numero_autorizacion}')
                     messages.success(request, f'✅ Factura electrónica {numero_doc} autorizada por el SRI.')
@@ -396,16 +380,8 @@ def consultar_autorizacion(request, documento_id):
         sri_logger.info(f'Resultado consulta: {estado}')
 
         if estado == 'AUTORIZADO':
-            sri_doc.estado = 'AUTORIZADO'
-            # En SRI real, el número de autorización es la misma clave de acceso
-            sri_doc.numero_autorizacion = sri_doc.clave_acceso
-            sri_doc.xml_autorizado = resultado.get('xml_autorizado', '')
-            if sri_doc.xml_autorizado:
-                from django.core.files.base import ContentFile
-                filename_aut = f'sri_autorizado_{sri_doc.numero_documento.replace("-", "_")}.xml'
-                sri_doc.archivo_xml_autorizado.save(
-                    filename_aut, ContentFile(sri_doc.xml_autorizado.encode('utf-8'))
-                )
+            sri_doc.marcar_autorizado(resultado, sri_doc.clave_acceso)
+            sri_doc.guardar_xml_autorizado()
             sri_doc.save()
             messages.success(request, f'✅ Documento {sri_doc.numero_documento} AUTORIZADO.')
         else:
@@ -541,14 +517,8 @@ def reintentar_envio(request, documento_id):
             # Consumir secuencial SOLO si no se había consumido antes
             if not sri_doc.secuencial:
                 config.consumir_secuencial()
-            sri_doc.estado = 'AUTORIZADO'
-            sri_doc.numero_autorizacion = clave_acceso
-            sri_doc.xml_autorizado = resultado.get('xml_autorizado', '')
-            if sri_doc.xml_autorizado:
-                filename_aut = f'sri_autorizado_{numero_doc.replace("-", "_")}.xml'
-                sri_doc.archivo_xml_autorizado.save(
-                    filename_aut, ContentFile(sri_doc.xml_autorizado.encode('utf-8'))
-                )
+            sri_doc.marcar_autorizado(resultado, clave_acceso)
+            sri_doc.guardar_xml_autorizado()
             sri_doc.save()
             sri_logger.info(f'  ✅ REINTENTO EXITOSO - AUTORIZADO')
             messages.success(request, f'✅ Factura {numero_doc} autorizada por el SRI.')
@@ -567,14 +537,8 @@ def reintentar_envio(request, documento_id):
             aut_estado = aut_resultado.get('estado', 'ERROR')
 
             if aut_estado == 'AUTORIZADO':
-                sri_doc.estado = 'AUTORIZADO'
-                sri_doc.numero_autorizacion = clave_acceso
-                sri_doc.xml_autorizado = aut_resultado.get('xml_autorizado', '')
-                if sri_doc.xml_autorizado:
-                    filename_aut = f'sri_autorizado_{numero_doc.replace("-", "_")}.xml'
-                    sri_doc.archivo_xml_autorizado.save(
-                        filename_aut, ContentFile(sri_doc.xml_autorizado.encode('utf-8'))
-                    )
+                sri_doc.marcar_autorizado(aut_resultado, clave_acceso)
+                sri_doc.guardar_xml_autorizado()
                 sri_doc.save()
                 sri_logger.info(f'  ✅ AUTORIZADO tras consulta')
                 messages.success(request, f'✅ Factura {numero_doc} autorizada por el SRI.')

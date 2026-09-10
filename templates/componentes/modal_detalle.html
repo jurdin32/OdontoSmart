@@ -1,74 +1,234 @@
-<!-- Modal de detalles reutilizable -->
-<div id="detalleModal" class="modal-overlay" style="display:none;">
-    <div class="modal-backdrop" onclick="cerrarModal()"></div>
-    <div class="modal-container" role="dialog" aria-modal="true">
-        <div class="modal-header">
-            <h3 class="modal-title" id="modalTitle">Detalles</h3>
-            <button type="button" class="modal-close-btn" onclick="cerrarModal()" aria-label="Cerrar">&times;</button>
+<!-- Modal de detalles reutilizable (Tailwind) -->
+<div id="detalleModal" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4"
+     role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="cerrarModal()"></div>
+    <div class="relative flex max-h-[85vh] w-full max-w-md flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div class="flex flex-shrink-0 items-center justify-between gap-3 bg-gradient-to-r from-sky-600 to-cyan-500 px-4 py-3">
+            <h3 class="truncate text-sm font-bold tracking-wide text-white" id="modalTitle">Detalles</h3>
+            <button type="button"
+                    class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-white/15 text-base leading-none text-white/80 transition hover:bg-white/25 hover:text-white"
+                    onclick="cerrarModal()" aria-label="Cerrar">&times;</button>
         </div>
-        <div class="modal-body" id="modalBody">
+        <div class="flex-1 overflow-y-auto px-4 py-2" id="modalBody">
             <!-- Contenido dinámico -->
         </div>
-        <div class="modal-footer" style="display:flex;justify-content:space-between;gap:8px;">
+        <div class="flex flex-shrink-0 items-center justify-between gap-2 border-t border-slate-100 bg-slate-50 px-4 py-2.5">
             <div id="modalFooterBtn"></div>
-            <button type="button" class="btn btn-secondary" onclick="cerrarModal()">Cerrar</button>
+            <button type="button"
+                    class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-100"
+                    onclick="cerrarModal()">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Visor del JSON de respuesta del SRI -->
+<div id="sriJsonModal" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4"
+     role="dialog" aria-modal="true" aria-labelledby="sriJsonTitulo">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="cerrarSriJson()"></div>
+    <div class="relative flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div class="flex flex-shrink-0 items-center justify-between gap-3 bg-gradient-to-r from-slate-800 to-slate-700 px-4 py-3">
+            <div class="min-w-0">
+                <h3 class="truncate text-sm font-bold tracking-wide text-white" id="sriJsonTitulo">Respuesta del SRI</h3>
+                <p class="truncate text-[0.7rem] text-slate-300" id="sriJsonSubtitulo"></p>
+            </div>
+            <button type="button"
+                    class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-white/15 text-base leading-none text-white/80 transition hover:bg-white/25 hover:text-white"
+                    onclick="cerrarSriJson()" aria-label="Cerrar">&times;</button>
+        </div>
+        <div class="flex-1 overflow-auto bg-slate-900 p-4">
+            <pre id="sriJsonPre" class="whitespace-pre-wrap break-all font-mono text-[0.7rem] leading-relaxed text-emerald-200"></pre>
+        </div>
+        <div class="flex flex-shrink-0 items-center justify-between gap-2 border-t border-slate-100 bg-slate-50 px-4 py-2.5">
+            <span id="sriJsonBadge"></span>
+            <div class="flex items-center gap-2">
+                <button type="button" id="sriJsonCopiar"
+                        class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-100">
+                    <i class="fas fa-copy"></i> Copiar JSON
+                </button>
+                <button type="button"
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-sky-600 to-cyan-500 px-3 py-1.5 text-xs font-semibold text-white shadow-md shadow-sky-600/20 transition hover:from-sky-700 hover:to-cyan-600"
+                        onclick="cerrarSriJson()">Cerrar</button>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
+// Etiquetas legibles para las claves data-detalle-*
+var ETIQUETAS_DETALLE = {
+    'paciente': 'Paciente',
+    'cedula': 'Cédula',
+    'medico': 'Médico',
+    'emision': 'Emisión',
+    'validez': 'Válido hasta',
+    'forma-pago': 'Forma de pago',
+    'estado': 'Estado',
+    'estado-sri': 'Estado SRI',
+    'sri-autorizacion': 'N° Autorización SRI',
+    'sri-fecha-autorizacion': 'Autorizado el',
+    'sri-mensaje': 'Mensaje SRI',
+    'total': 'Total'
+};
+
+function etiquetaDetalle(clave) {
+    if (ETIQUETAS_DETALLE[clave]) return ETIQUETAS_DETALLE[clave];
+    return clave.replace(/-/g, ' ').replace(/\b\w/g, function(l) { return l.toUpperCase(); });
+}
+
+function escaparHtml(texto) {
+    var div = document.createElement('div');
+    div.textContent = texto == null ? '' : String(texto);
+    return div.innerHTML;
+}
+
+function filaDetalle(clave, valor) {
+    var etiqueta = escaparHtml(etiquetaDetalle(clave));
+    if (clave === 'total') {
+        return '<div class="mt-2 flex items-baseline justify-between gap-3 rounded-xl border border-sky-200 bg-sky-50 px-3.5 py-2.5">'
+            + '<span class="text-[0.65rem] font-bold uppercase tracking-wider text-sky-700">' + etiqueta + '</span>'
+            + '<span class="text-base font-extrabold text-sky-700">' + escaparHtml(valor) + '</span>'
+            + '</div>';
+    }
+    return '<div class="flex items-baseline justify-between gap-3 border-b border-slate-100 py-1.5 last:border-0">'
+        + '<span class="flex-shrink-0 text-[0.65rem] font-bold uppercase tracking-wider text-slate-400">' + etiqueta + '</span>'
+        + '<span class="max-w-[65%] break-words text-right text-xs font-medium leading-relaxed text-slate-700">' + escaparHtml(valor) + '</span>'
+        + '</div>';
+}
+
+/** Construye el HTML de detalle a partir de los atributos data-detalle-* */
+function construirDetalle(elemento) {
+    var html = '';
+    for (var i = 0; i < elemento.attributes.length; i++) {
+        var attr = elemento.attributes[i];
+        if (attr.name.indexOf('data-detalle-') === 0) {
+            html += filaDetalle(attr.name.replace('data-detalle-', ''), attr.value);
+        }
+    }
+    return html;
+}
+
 function abrirModal(titulo, html, href) {
     document.getElementById('modalTitle').textContent = titulo;
     document.getElementById('modalBody').innerHTML = html;
     var footerBtn = document.getElementById('modalFooterBtn');
     if (href) {
-        footerBtn.innerHTML = '<a href="' + href + '" class="btn btn-primary"><i class="fas fa-external-link-alt"></i> Ver detalle completo</a>';
+        footerBtn.innerHTML = '<a href="' + href + '" class="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-sky-600 to-cyan-500 px-3 py-1.5 text-xs font-semibold text-white shadow-md shadow-sky-600/20 transition hover:from-sky-700 hover:to-cyan-600"><i class="fas fa-external-link-alt"></i> Ver detalle completo</a>';
         footerBtn.style.display = '';
     } else {
         footerBtn.innerHTML = '';
         footerBtn.style.display = 'none';
     }
-    document.getElementById('detalleModal').style.display = 'flex';
+    var modal = document.getElementById('detalleModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
     document.body.style.overflow = 'hidden';
 }
 
 function cerrarModal() {
-    document.getElementById('detalleModal').style.display = 'none';
+    var modal = document.getElementById('detalleModal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    document.body.style.overflow = '';
+}
+
+// ---- Visor del JSON de respuesta del SRI ----
+function leerRespuestasSri() {
+    var nodo = document.getElementById('sriRespuestasData');
+    if (!nodo) return {};
+    try {
+        return JSON.parse(nodo.textContent || '{}');
+    } catch (err) {
+        return {};
+    }
+}
+
+function abrirSriJson(facturaId) {
+    var datos = leerRespuestasSri()[String(facturaId)];
+    if (!datos || !Object.keys(datos).length) {
+        window.alert('Esta factura todavía no tiene respuesta del SRI.');
+        return;
+    }
+
+    document.getElementById('sriJsonPre').textContent = JSON.stringify(datos, null, 2);
+    document.getElementById('sriJsonTitulo').textContent = 'Respuesta del SRI — ' + (datos.factura || '');
+    var subtitulo = [];
+    if (datos.numero_documento) subtitulo.push(datos.numero_documento);
+    if (datos.ambiente_nombre) subtitulo.push('Ambiente: ' + datos.ambiente_nombre);
+    document.getElementById('sriJsonSubtitulo').textContent = subtitulo.join('  ·  ');
+
+    var estado = datos.estado || '';
+    var badge = document.getElementById('sriJsonBadge');
+    var clases = 'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold ';
+    if (estado === 'AUTORIZADO') {
+        badge.className = clases + 'bg-emerald-100 text-emerald-700';
+        badge.innerHTML = '<i class="fas fa-check-circle"></i> Autorizado por el SRI';
+    } else if (estado === 'ENVIADO' || estado === 'PENDIENTE') {
+        badge.className = clases + 'bg-sky-100 text-sky-700';
+        badge.innerHTML = '<i class="fas fa-paper-plane"></i> ' + escaparHtml(datos.estado_nombre || estado);
+    } else {
+        badge.className = clases + 'bg-red-100 text-red-700';
+        badge.innerHTML = '<i class="fas fa-times-circle"></i> ' + escaparHtml(datos.estado_nombre || estado);
+    }
+
+    var modal = document.getElementById('sriJsonModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+}
+
+function cerrarSriJson() {
+    var modal = document.getElementById('sriJsonModal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
     document.body.style.overflow = '';
 }
 
 // Cerrar con tecla Escape
 document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') cerrarModal();
+    if (e.key === 'Escape') {
+        cerrarModal();
+        cerrarSriJson();
+    }
+});
+
+// Copiar el JSON al portapapeles
+document.addEventListener('click', function(e) {
+    var copiar = e.target.closest('#sriJsonCopiar');
+    if (!copiar) return;
+    var texto = document.getElementById('sriJsonPre').textContent;
+    navigator.clipboard.writeText(texto).then(function() {
+        copiar.innerHTML = '<i class="fas fa-check"></i> Copiado';
+        setTimeout(function() {
+            copiar.innerHTML = '<i class="fas fa-copy"></i> Copiar JSON';
+        }, 1500);
+    });
 });
 
 // Manejar clicks en botones y filas con data-detalle-*
 document.addEventListener('click', function(e) {
+    // Botón "ver JSON del SRI"
+    var btnJson = e.target.closest('.btn-sri-json');
+    if (btnJson) {
+        e.preventDefault();
+        abrirSriJson(btnJson.getAttribute('data-factura'));
+        return;
+    }
+
     var target = e.target.closest('[data-detalle-paciente], .btn-ver-detalle, tr[data-href]');
     if (!target) return;
 
     // Si es un link o botón dentro de la fila, no interceptar
     if (e.target.closest('a, button, form, .btn, .action-buttons')) return;
 
-    var titulo, html, href;
-
     if (target.tagName === 'TR' && target.getAttribute('data-href')) {
         // Click en toda la fila
-        titulo = target.getAttribute('data-titulo') || 'Detalles';
-        href = target.getAttribute('data-href');
-        html = '<div class="detalle-grid">';
-        for (var i = 0; i < target.attributes.length; i++) {
-            var attr = target.attributes[i];
-            if (attr.name.indexOf('data-detalle-') === 0) {
-                var label = attr.name.replace('data-detalle-', '')
-                    .replace(/-/g, ' ')
-                    .replace(/\b\w/g, function(l) { return l.toUpperCase(); });
-                var extraClass = label === 'Total' ? ' detalle-total' : '';
-                html += '<div class="detalle-item' + extraClass + '"><span class="detalle-label">' + label + '</span><span class="detalle-valor">' + attr.value + '</span></div>';
-            }
-        }
-        html += '</div>';
-        abrirModal(titulo, html, href);
+        abrirModal(
+            target.getAttribute('data-titulo') || 'Detalles',
+            construirDetalle(target),
+            target.getAttribute('data-href')
+        );
         return;
     }
 
@@ -76,21 +236,10 @@ document.addEventListener('click', function(e) {
     var btn = target.closest('.btn-ver-detalle');
     if (!btn) return;
     e.preventDefault();
-
-    titulo = btn.getAttribute('data-titulo') || 'Detalles';
-    href = btn.getAttribute('data-href');
-    html = '<div class="detalle-grid">';
-    for (var i = 0; i < btn.attributes.length; i++) {
-        var attr = btn.attributes[i];
-        if (attr.name.indexOf('data-detalle-') === 0) {
-            var label = attr.name.replace('data-detalle-', '')
-                .replace(/-/g, ' ')
-                .replace(/\b\w/g, function(l) { return l.toUpperCase(); });
-            var extraClass = label === 'Total' ? ' detalle-total' : '';
-            html += '<div class="detalle-item' + extraClass + '"><span class="detalle-label">' + label + '</span><span class="detalle-valor">' + attr.value + '</span></div>';
-        }
-    }
-    html += '</div>';
-    abrirModal(titulo, html, href);
+    abrirModal(
+        btn.getAttribute('data-titulo') || 'Detalles',
+        construirDetalle(btn),
+        btn.getAttribute('data-href')
+    );
 });
 </script>

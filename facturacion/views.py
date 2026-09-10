@@ -362,6 +362,10 @@ def lista_facturas(request):
         'sri_activo': sri,
         'active': 'facturas',
         'sri_info': _get_sri_info(empresa),
+        # Respuesta del SRI por factura, para el visor JSON de la lista
+        'sri_respuestas': {
+            f.id: f.respuesta_sri_json() for f in facturas if f.sri_documento
+        },
     }
     return render(request, 'facturacion/facturas_lista.html', context)
 
@@ -454,15 +458,8 @@ def detalle_factura(request, factura_id):
             estado_sri = resultado.get('estado', 'ERROR')
             # Si el SRI dice AUTORIZADO, actualizar el documento
             if estado_sri == 'AUTORIZADO':
-                sri_doc.estado = 'AUTORIZADO'
-                sri_doc.numero_autorizacion = sri_doc.clave_acceso
-                sri_doc.xml_autorizado = resultado.get('xml_autorizado', '')
-                if sri_doc.xml_autorizado:
-                    from django.core.files.base import ContentFile
-                    filename_aut = f'sri_autorizado_{sri_doc.numero_documento.replace("-", "_")}.xml'
-                    sri_doc.archivo_xml_autorizado.save(
-                        filename_aut, ContentFile(sri_doc.xml_autorizado.encode('utf-8'))
-                    )
+                sri_doc.marcar_autorizado(resultado, sri_doc.clave_acceso)
+                sri_doc.guardar_xml_autorizado()
                 sri_doc.save()
             # Guardar los mensajes del SRI como JSON
             mensajes_sri = resultado.get('mensajes', [])

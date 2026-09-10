@@ -65,10 +65,8 @@ for m in r.get('mensajes', [])[:3]:
     print(f'    {m.get("identificador")}: {m.get("mensaje")} - {m.get("informacionAdicional", "")[:80]}')
 
 if estado == 'AUTORIZADO':
-    doc.estado = 'AUTORIZADO'; doc.numero_autorizacion = clave
-    doc.xml_autorizado = r.get('xml_autorizado', '')
-    if doc.xml_autorizado:
-        doc.archivo_xml_autorizado.save(f'sri_aut_{ndoc}.xml', ContentFile(doc.xml_autorizado.encode()))
+    doc.marcar_autorizado(r, clave)
+    doc.guardar_xml_autorizado()
     doc.save(); print('=> AUTORIZADO!')
 elif estado == 'RECIBIDA':
     time.sleep(2)
@@ -78,10 +76,8 @@ elif estado == 'RECIBIDA':
     for m in ar.get('mensajes', [])[:3]:
         print(f'    {m.get("identificador")}: {m.get("mensaje")} - {m.get("informacionAdicional", "")[:120]}')
     if ae == 'AUTORIZADO':
-        doc.estado = 'AUTORIZADO'; doc.numero_autorizacion = clave
-        doc.xml_autorizado = ar.get('xml_autorizado', '')
-        if doc.xml_autorizado:
-            doc.archivo_xml_autorizado.save(f'sri_aut_{ndoc}.xml', ContentFile(doc.xml_autorizado.encode()))
+        doc.marcar_autorizado(ar, clave)
+        doc.guardar_xml_autorizado()
         doc.save(); print('=> AUTORIZADO!')
     else:
         doc.estado = 'ENVIADO'; doc.mensajes = ar.get('mensajes', [])

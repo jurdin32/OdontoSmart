@@ -440,6 +440,38 @@ class Factura(models.Model):
         }
         return m.get(self.sri_estado_codigo, 'secondary')
 
+    def respuesta_sri_json(self):
+        """Respuesta del SRI consolidada, lista para serializar a JSON.
+
+        Devuelve {} si la factura todavía no se envió al SRI.
+        """
+        doc = self.sri_documento
+        if not doc:
+            return {}
+        return {
+            'factura': self.numero,
+            'estado': doc.estado,
+            'estado_nombre': doc.get_estado_display(),
+            'ambiente': doc.ambiente,
+            'ambiente_nombre': doc.get_ambiente_display(),
+            'tipo': doc.tipo,
+            'tipo_nombre': doc.get_tipo_display(),
+            'numero_documento': doc.numero_documento,
+            'clave_acceso': doc.clave_acceso,
+            'numero_autorizacion': doc.numero_autorizacion,
+            'fecha_autorizacion': (
+                doc.fecha_autorizacion.isoformat()
+                if doc.fecha_autorizacion else None
+            ),
+            'fecha_emision': (
+                doc.fecha_emision.isoformat() if doc.fecha_emision else None
+            ),
+            'total': str(doc.total),
+            'mensajes': list(doc.mensajes or []),
+            'xml_firmado': bool(doc.archivo_xml_firmado),
+            'xml_autorizado': bool(doc.archivo_xml_autorizado),
+        }
+
     def _recalcular_totales(self):
         """Recalcula subtotal, descuento, impuesto y total desde los items."""
         items = self.items or []
