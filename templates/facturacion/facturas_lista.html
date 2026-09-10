@@ -80,6 +80,7 @@
             <!-- Buscador -->
             <form method="GET" class="mb-4 flex flex-col gap-3 sm:flex-row">
                 {% if estado_activo %}<input type="hidden" name="estado" value="{{ estado_activo }}">{% endif %}
+                {% if sri_activo %}<input type="hidden" name="sri" value="{{ sri_activo }}">{% endif %}
                 <div class="relative flex-1">
                     <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
                         <i class="fas fa-search"></i>
@@ -103,27 +104,58 @@
             </div>
             {% endif %}
 
-            <!-- Filtros por estado -->
-            <div class="mb-6 flex flex-wrap gap-2">
+            <!-- Filtros por estado de la factura -->
+            <div class="mb-3 flex flex-wrap items-center gap-2">
+                <span class="mr-1 text-xs font-bold uppercase tracking-wider text-slate-400">Factura</span>
                 <a href="{% url 'lista_facturas' %}{% if query %}?q={{ query|urlencode }}{% endif %}"
                    class="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition
                    {% if not estado_activo %}border-slate-900 bg-slate-900 text-white{% else %}border-slate-300 bg-white text-slate-600 hover:border-slate-400{% endif %}">
                     <span class="h-2 w-2 rounded-full bg-slate-400"></span> Todas
                 </a>
-                <a href="{% url 'lista_facturas' %}?estado=PENDIENTE{% if query %}&q={{ query|urlencode }}{% endif %}"
+                <a href="{% url 'lista_facturas' %}?estado=PENDIENTE{% if query %}&q={{ query|urlencode }}{% endif %}{% if sri_activo %}&sri={{ sri_activo }}{% endif %}"
                    class="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition
                    {% if estado_activo == 'PENDIENTE' %}border-slate-900 bg-slate-900 text-white{% else %}border-slate-300 bg-white text-slate-600 hover:border-slate-400{% endif %}">
                     <span class="h-2 w-2 rounded-full bg-amber-400"></span> Pendientes
                 </a>
-                <a href="{% url 'lista_facturas' %}?estado=PAGADA{% if query %}&q={{ query|urlencode }}{% endif %}"
+                <a href="{% url 'lista_facturas' %}?estado=PAGADA{% if query %}&q={{ query|urlencode }}{% endif %}{% if sri_activo %}&sri={{ sri_activo }}{% endif %}"
                    class="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition
                    {% if estado_activo == 'PAGADA' %}border-slate-900 bg-slate-900 text-white{% else %}border-slate-300 bg-white text-slate-600 hover:border-slate-400{% endif %}">
                     <span class="h-2 w-2 rounded-full bg-emerald-400"></span> Pagadas
                 </a>
-                <a href="{% url 'lista_facturas' %}?estado=ANULADA{% if query %}&q={{ query|urlencode }}{% endif %}"
+                <a href="{% url 'lista_facturas' %}?estado=ANULADA{% if query %}&q={{ query|urlencode }}{% endif %}{% if sri_activo %}&sri={{ sri_activo }}{% endif %}"
                    class="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition
                    {% if estado_activo == 'ANULADA' %}border-slate-900 bg-slate-900 text-white{% else %}border-slate-300 bg-white text-slate-600 hover:border-slate-400{% endif %}">
                     <span class="h-2 w-2 rounded-full bg-red-400"></span> Anuladas
+                </a>
+            </div>
+
+            <!-- Filtros por estado del SRI (para corroborar la autorización) -->
+            <div class="mb-6 flex flex-wrap items-center gap-2">
+                <span class="mr-1 text-xs font-bold uppercase tracking-wider text-slate-400">SRI</span>
+                <a href="{% url 'lista_facturas' %}{% if query %}?q={{ query|urlencode }}{% elif estado_activo %}?estado={{ estado_activo }}{% endif %}"
+                   class="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition
+                   {% if not sri_activo %}border-sky-700 bg-sky-700 text-white{% else %}border-slate-300 bg-white text-slate-600 hover:border-slate-400{% endif %}">
+                    <i class="fas fa-list"></i> Todos
+                </a>
+                <a href="{% url 'lista_facturas' %}?sri=AUTORIZADO{% if query %}&q={{ query|urlencode }}{% endif %}{% if estado_activo %}&estado={{ estado_activo }}{% endif %}"
+                   class="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition
+                   {% if sri_activo == 'AUTORIZADO' %}border-emerald-600 bg-emerald-600 text-white{% else %}border-slate-300 bg-white text-slate-600 hover:border-slate-400{% endif %}">
+                    <span class="h-2 w-2 rounded-full bg-emerald-400"></span> Autorizadas
+                </a>
+                <a href="{% url 'lista_facturas' %}?sri=PROCESO{% if query %}&q={{ query|urlencode }}{% endif %}{% if estado_activo %}&estado={{ estado_activo }}{% endif %}"
+                   class="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition
+                   {% if sri_activo == 'PROCESO' %}border-sky-600 bg-sky-600 text-white{% else %}border-slate-300 bg-white text-slate-600 hover:border-slate-400{% endif %}">
+                    <span class="h-2 w-2 rounded-full bg-sky-400"></span> En proceso
+                </a>
+                <a href="{% url 'lista_facturas' %}?sri=RECHAZADO{% if query %}&q={{ query|urlencode }}{% endif %}{% if estado_activo %}&estado={{ estado_activo }}{% endif %}"
+                   class="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition
+                   {% if sri_activo == 'RECHAZADO' %}border-red-600 bg-red-600 text-white{% else %}border-slate-300 bg-white text-slate-600 hover:border-slate-400{% endif %}">
+                    <span class="h-2 w-2 rounded-full bg-red-400"></span> Con error
+                </a>
+                <a href="{% url 'lista_facturas' %}?sri=SIN_ENVIAR{% if query %}&q={{ query|urlencode }}{% endif %}{% if estado_activo %}&estado={{ estado_activo }}{% endif %}"
+                   class="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition
+                   {% if sri_activo == 'SIN_ENVIAR' %}border-slate-600 bg-slate-600 text-white{% else %}border-slate-300 bg-white text-slate-600 hover:border-slate-400{% endif %}">
+                    <span class="h-2 w-2 rounded-full bg-slate-300"></span> Sin enviar
                 </a>
             </div>
 
@@ -137,6 +169,7 @@
                             <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Paciente</th>
                             <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Total</th>
                             <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Estado</th>
+                            <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Respuesta SRI</th>
                             <th class="px-6 py-3 text-right text-xs font-bold uppercase tracking-wider text-slate-500">Acciones</th>
                         </tr>
                     </thead>
@@ -149,7 +182,10 @@
                             data-detalle-cedula="{{ f.paciente.cedula }}"
                             data-detalle-emision="{{ f.fecha_emision|date:'d/m/Y' }}"
                             data-detalle-forma-pago="{{ f.get_forma_pago_display }}"
-                            data-detalle-estado-sri="{% if f.sri_estado %}{{ f.sri_estado }}{% else %}—{% endif %}"
+                            data-detalle-estado-sri="{% if f.sri_documento %}{{ f.sri_estado }}{% else %}Sin enviar{% endif %}"
+                            {% if f.sri_numero_autorizacion %}data-detalle-sri-autorizacion="{{ f.sri_numero_autorizacion }}"{% endif %}
+                            {% if f.sri_fecha_autorizacion %}data-detalle-sri-fecha-autorizacion="{{ f.sri_fecha_autorizacion|date:'d/m/Y H:i' }}"{% endif %}
+                            {% if f.sri_mensaje_error %}data-detalle-sri-mensaje="{{ f.sri_mensaje_error }}"{% endif %}
                             data-detalle-total="${{ f.total|floatformat:2 }}">
                             <td class="whitespace-nowrap px-6 py-4 font-bold text-slate-800">{{ f.numero }}</td>
                             <td class="whitespace-nowrap px-6 py-4 text-slate-600">
@@ -164,6 +200,43 @@
                                 <span class="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">Pagada</span>
                                 {% elif f.estado == 'ANULADA' %}
                                 <span class="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-700">Anulada</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 align-top">
+                                {% if not f.sri_documento %}
+                                <span class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-500">
+                                    <i class="fas fa-minus-circle"></i> Sin enviar
+                                </span>
+                                {% elif f.sri_autorizado %}
+                                <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">
+                                    <i class="fas fa-check-circle"></i> Autorizado
+                                </span>
+                                <div class="mt-1.5 max-w-[13rem] truncate font-mono text-[0.7rem] text-slate-600"
+                                     title="{{ f.sri_numero_autorizacion }}">
+                                    {{ f.sri_numero_autorizacion }}
+                                </div>
+                                {% if f.sri_fecha_autorizacion %}
+                                <div class="text-[0.7rem] text-slate-400">{{ f.sri_fecha_autorizacion|date:"d/m/Y H:i" }}</div>
+                                {% endif %}
+                                {% elif f.sri_estado_codigo == 'ENVIADO' %}
+                                <span class="inline-flex items-center gap-1.5 rounded-full bg-sky-100 px-3 py-1 text-xs font-bold text-sky-700">
+                                    <i class="fas fa-paper-plane"></i> Enviado
+                                </span>
+                                <div class="mt-1 text-[0.7rem] text-slate-400">Esperando autorización</div>
+                                {% elif f.sri_estado_codigo == 'PENDIENTE' %}
+                                <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">
+                                    <i class="fas fa-clock"></i> Pendiente
+                                </span>
+                                {% else %}
+                                <span class="inline-flex items-center gap-1.5 rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-700">
+                                    <i class="fas fa-times-circle"></i> {{ f.sri_estado }}
+                                </span>
+                                {% if f.sri_mensaje_error %}
+                                <div class="mt-1.5 max-w-[15rem] text-[0.7rem] font-semibold leading-snug text-red-600"
+                                     title="{{ f.sri_mensaje_error }}">
+                                    {{ f.sri_mensaje_error|truncatechars:80 }}
+                                </div>
+                                {% endif %}
                                 {% endif %}
                             </td>
                             <td class="whitespace-nowrap px-6 py-4">
@@ -210,6 +283,40 @@
                         <div class="flex items-center gap-2"><i class="fas fa-credit-card w-4 text-center text-slate-400"></i><span>Pago:</span><span class="ml-auto font-medium text-slate-700">{{ f.get_forma_pago_display }}</span></div>
                         <div class="flex items-center gap-2"><i class="fas fa-dollar-sign w-4 text-center text-slate-400"></i><span>Total:</span><span class="ml-auto font-bold text-slate-800">${{ f.total|floatformat:2 }}</span></div>
                     </div>
+
+                    <!-- Respuesta del SRI -->
+                    <div class="mt-3 rounded-xl border px-3 py-2 text-xs
+                        {% if f.sri_autorizado %}border-emerald-200 bg-emerald-50
+                        {% elif f.sri_estado_codigo == 'ENVIADO' or f.sri_estado_codigo == 'PENDIENTE' %}border-sky-200 bg-sky-50
+                        {% elif f.sri_documento %}border-red-200 bg-red-50
+                        {% else %}border-slate-200 bg-slate-50{% endif %}">
+                        <div class="flex items-center gap-2 font-bold
+                            {% if f.sri_autorizado %}text-emerald-700
+                            {% elif f.sri_estado_codigo == 'ENVIADO' or f.sri_estado_codigo == 'PENDIENTE' %}text-sky-700
+                            {% elif f.sri_documento %}text-red-700
+                            {% else %}text-slate-500{% endif %}">
+                            {% if f.sri_autorizado %}<i class="fas fa-check-circle"></i> SRI: Autorizado
+                            {% elif f.sri_estado_codigo == 'ENVIADO' %}<i class="fas fa-paper-plane"></i> SRI: Enviado
+                            {% elif f.sri_estado_codigo == 'PENDIENTE' %}<i class="fas fa-clock"></i> SRI: Pendiente
+                            {% elif f.sri_documento %}<i class="fas fa-times-circle"></i> SRI: {{ f.sri_estado }}
+                            {% else %}<i class="fas fa-minus-circle"></i> SRI: Sin enviar{% endif %}
+                        </div>
+                        {% if f.sri_numero_autorizacion %}
+                        <div class="mt-1.5">
+                            <span class="text-slate-500">N° Autorización</span>
+                            <div class="mt-0.5 break-all font-mono text-[0.65rem] leading-relaxed text-slate-700">{{ f.sri_numero_autorizacion }}</div>
+                        </div>
+                        {% endif %}
+                        {% if f.sri_fecha_autorizacion %}
+                        <div class="mt-1 flex items-center gap-2 text-slate-500"><i class="fas fa-calendar-check w-4 text-center"></i><span>Autorizada:</span><span class="ml-auto font-medium text-slate-700">{{ f.sri_fecha_autorizacion|date:"d/m/Y H:i" }}</span></div>
+                        {% endif %}
+                        {% if f.sri_mensaje_error %}
+                        <div class="mt-1.5 border-t border-white/60 pt-1.5 leading-snug text-red-700">
+                            <i class="fas fa-exclamation-triangle"></i> {{ f.sri_mensaje_error }}
+                        </div>
+                        {% endif %}
+                    </div>
+
                     <div class="mt-4 flex gap-2">
                         <a href="{% url 'detalle_factura' f.id %}"
                            class="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-sky-400 hover:bg-sky-50 hover:text-sky-700">
@@ -226,7 +333,7 @@
             {% else %}
             <div class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white py-16 text-center">
                 <i class="fas fa-file-invoice-dollar mb-4 text-5xl text-slate-300"></i>
-                {% if query or estado_activo %}
+                {% if query or estado_activo or sri_activo %}
                 <h3 class="text-lg font-bold text-slate-700">Sin resultados</h3>
                 <p class="mt-1 text-sm text-slate-500">No se encontraron facturas con los filtros aplicados</p>
                 <a href="{% url 'lista_facturas' %}"

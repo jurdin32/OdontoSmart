@@ -206,6 +206,11 @@ class Proforma(models.Model):
 #  FACTURA
 # ===========================================================================
 
+# Valores de `SriDocumento.factura_origen_modelo` que apuntan a una Factura.
+# El SRI guarda 'facturacion.factura'; se admite 'Factura' por datos antiguos.
+MODELOS_SRI_FACTURA = ['facturacion.factura', 'Factura']
+
+
 class Factura(models.Model):
     """Factura emitida al paciente por servicios odontológicos."""
 
@@ -337,15 +342,36 @@ class Factura(models.Model):
 
     @property
     def sri_documento(self):
-        """Retorna el documento SRI asociado, si existe."""
+        """Documento SRI más reciente asociado a la factura (o None).
+
+        Si el listado ya lo cargó con `set_sri_documento()` se reutiliza
+        esa instancia en lugar de consultar la base de datos (evita N+1).
+        """
+        if 'sri_doc_prefetch' in self.__dict__:
+            return self.__dict__['sri_doc_prefetch']
+        return self.buscar_sri_documento()
+
+    def set_sri_documento(self, doc):
+        """Guarda el documento SRI en memoria para evitar consultas repetidas."""
+        self.__dict__['sri_doc_prefetch'] = doc
+        return self
+
+    def buscar_sri_documento(self):
+        """Consulta en BD el documento SRI más reciente de esta factura."""
         try:
             from sri.models import SriDocumento
             return SriDocumento.objects.filter(
                 factura_origen_id=self.pk,
-                factura_origen_modelo='Factura'
-            ).first()
+                factura_origen_modelo__in=MODELOS_SRI_FACTURA,
+            ).order_by('-created_at').first()
         except Exception:
             return None
+
+    @property
+    def sri_estado_codigo(self):
+        """Código del estado SRI ('AUTORIZADO', 'ERROR'…). Vacío si no se envió."""
+        doc = self.sri_documento
+        return doc.estado if doc else ''
 
     @property
     def sri_estado(self):
@@ -356,19 +382,63 @@ class Factura(models.Model):
         return doc.get_estado_display()
 
     @property
-    def sri_color_clase(self):
-        """Retorna la clase CSS para el badge SRI."""
+    def sri_autorizado(self):
+        """True si el SRI autorizó la factura."""
+        return self.sri_estado_codigo == 'AUTORIZADO'
+
+    @property
+    def sri_numero_autorizacion(self):
+        """N° de autorización del SRI (o la clave de acceso si aún no hay)."""
         doc = self.sri_documento
         if not doc:
             return ''
+        return doc.numero_autorizacion or doc.clave_acceso or ''
+
+    @property
+    def sri_fecha_autorizacion(self):
+        """Fecha/hora en que el SRI autorizó la factura, si existe."""
+        doc = self.sri_documento
+        if not doc:
+            return None
+        return doc.fecha_autorizacion
+
+    @property
+    def sri_clave_acceso(self):
+        doc = self.sri_documento
+        return doc.clave_acceso if doc else ''
+
+    @property
+    def sri_numero_documento(self):
+        doc = self.sri_documento
+        return doc.numero_documento if doc else ''
+
+    @property
+    def sri_mensajes(self):
+        """Mensajes devueltos por el SRI para esta factura."""
+        doc = self.sri_documento
+        return list(doc.mensajes or []) if doc else []
+
+    @property
+    def sri_mensaje_error(self):
+        """Texto del primer mensaje de error del SRI ('' si no hay)."""
+        for msg in self.sri_mensajes:
+            if (msg.get('tipo') or '').upper() in ('ERROR', 'ADVERTENCIA'):
+                texto = msg.get('mensaje') or ''
+                extra = msg.get('informacionAdicional') or ''
+                return f'{texto} — {extra}' if extra else texto
+        return ''
+
+    @property
+    def sri_color_clase(self):
+        """Retorna la clase CSS para el badge SRI."""
         m = {
             'AUTORIZADO': 'success',
             'ENVIADO': 'warning',
             'PENDIENTE': 'secondary',
             'ERROR': 'danger',
-            'RECHAZADO': 'danger',
+            'NO_AUTORIZADO': 'danger',
         }
-        return m.get(doc.estado, 'secondary')
+        return m.get(self.sri_estado_codigo, 'secondary')
 
     def _recalcular_totales(self):
         """Recalcula subtotal, descuento, impuesto y total desde los items."""

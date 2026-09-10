@@ -8,7 +8,9 @@ from django.contrib import messages
 from django.db.models import Q
 from django.core.paginator import Paginator
 
-from .models import Proforma, Factura, Servicio, generar_numero
+from .models import (
+    MODELOS_SRI_FACTURA, Proforma, Factura, Servicio, generar_numero,
+)
 from .forms import ProformaForm, FacturaForm, ServicioForm
 from pacientes.models import Paciente
 from medicos.models import Medico
@@ -293,10 +295,13 @@ def imprimir_proforma(request, proforma_id):
 @login_required
 @permiso_requerido('ver_facturas')
 def lista_facturas(request):
-    """Lista todas las facturas de la empresa."""
+    """Lista todas las facturas de la empresa, incluyendo la respuesta del SRI."""
+    from sri.models import SriDocumento
+
     empresa = _get_empresa(request)
     q = request.GET.get('q', '').strip()
     estado = request.GET.get('estado', '')
+    sri = request.GET.get('sri', '').strip()
 
     facturas = Factura.objects.filter(empresa=empresa).select_related('paciente', 'medico')
 
@@ -309,11 +314,52 @@ def lista_facturas(request):
     if estado:
         facturas = facturas.filter(estado=estado)
 
+    # --- Filtro por estado del SRI ---
+    docs = SriDocumento.objects.filter(
+        factura_origen_modelo__in=MODELOS_SRI_FACTURA
+    )
+    if sri:
+        con_doc = docs.values_list('factura_origen_id', flat=True)
+        if sri == 'AUTORIZADO':
+            facturas = facturas.filter(
+                id__in=docs.filter(estado='AUTORIZADO')
+                .values_list('factura_origen_id', flat=True)
+            )
+        elif sri == 'PROCESO':
+            facturas = facturas.filter(
+                id__in=docs.filter(estado__in=['PENDIENTE', 'ENVIADO'])
+                .values_list('factura_origen_id', flat=True)
+            )
+        elif sri == 'RECHAZADO':
+            facturas = facturas.filter(
+                id__in=docs.filter(estado__in=['NO_AUTORIZADO', 'ERROR'])
+                .values_list('factura_origen_id', flat=True)
+            )
+        elif sri == 'SIN_ENVIAR':
+            facturas = facturas.exclude(id__in=con_doc)
+
+    # --- Documento SRI más reciente por factura (1 sola consulta) ---
+    facturas = list(facturas)
+    documentos = (
+        SriDocumento.objects
+        .filter(
+            factura_origen_modelo__in=MODELOS_SRI_FACTURA,
+            factura_origen_id__in=[f.id for f in facturas],
+        )
+        .order_by('created_at', 'id')
+    )
+    ultimo_doc = {}
+    for doc in documentos:
+        ultimo_doc[doc.factura_origen_id] = doc
+    for factura in facturas:
+        factura.set_sri_documento(ultimo_doc.get(factura.id))
+
     context = {
         'title': 'Facturas',
         'facturas': facturas,
         'query': q,
         'estado_activo': estado,
+        'sri_activo': sri,
         'active': 'facturas',
         'sri_info': _get_sri_info(empresa),
     }
@@ -381,13 +427,13 @@ def detalle_factura(request, factura_id):
     # Buscar el documento más reciente para mostrar info
     sri_doc = SriDocumento.objects.filter(
         factura_origen_id=factura.id,
-        factura_origen_modelo='facturacion.factura'
+        factura_origen_modelo__in=MODELOS_SRI_FACTURA,
     ).order_by('-created_at').first()
     
     # Buscar documento en ERROR (o ENVIADO con mensajes de error) para reintento
     sri_doc_error = SriDocumento.objects.filter(
         factura_origen_id=factura.id,
-        factura_origen_modelo='facturacion.factura',
+        factura_origen_modelo__in=MODELOS_SRI_FACTURA,
         estado__in=['ERROR', 'ENVIADO'],
     ).order_by('-created_at').first()
     # Si el más reciente es ENVIADO pero no tiene errores, ignorarlo
