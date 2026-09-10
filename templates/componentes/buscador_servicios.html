@@ -1,0 +1,322 @@
+{% comment %}
+Buscador de servicios del catálogo con autocompletado.
+
+Uso:
+    {% include 'componentes/buscador_servicios.html' with catalogo_servicios=catalogo_servicios %}
+
+La página debe definir window.alAgregarServicio(servicio) para recibir el elegido.
+{% endcomment %}
+<div id="buscadorServicios" class="relative w-full sm:w-80">
+    <div class="relative">
+        <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+            <i class="fas fa-search"></i>
+        </span>
+        <input type="text" id="buscadorServicioInput" autocomplete="off"
+               role="combobox" aria-expanded="false" aria-controls="buscadorServicioLista"
+               aria-autocomplete="list" aria-label="Buscar servicio del catálogo"
+               placeholder="Buscar servicio del catálogo..."
+               class="block w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-9 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
+        <button type="button" id="buscadorServicioLimpiar"
+                class="absolute inset-y-0 right-0 hidden items-center pr-3 text-slate-400 transition hover:text-slate-600"
+                aria-label="Limpiar búsqueda">
+            <i class="fas fa-times-circle"></i>
+        </button>
+    </div>
+
+    <div id="buscadorServicioLista" role="listbox" aria-label="Resultados del catálogo"
+         class="absolute z-40 mt-1 hidden max-h-72 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white py-1 text-left shadow-xl"></div>
+
+    <p id="buscadorServicioAyuda" class="mt-1.5 text-xs text-slate-400"></p>
+
+    <div id="buscadorServicioToast"
+         class="fixed bottom-6 right-6 z-[9998] hidden items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-2xl"></div>
+</div>
+
+{{ catalogo_servicios|json_script:"catalogoServiciosData" }}
+
+<style>
+    @keyframes itemNuevoFila {
+        from { background-color: #d1fae5; }
+        to { background-color: transparent; }
+    }
+    .item-nuevo-fila { animation: itemNuevoFila 1.4s ease-out; }
+</style>
+
+<script>
+(function() {
+    "use strict";
+
+    var caja = document.getElementById('buscadorServicios');
+    var input = document.getElementById('buscadorServicioInput');
+    var lista = document.getElementById('buscadorServicioLista');
+    var ayuda = document.getElementById('buscadorServicioAyuda');
+    var limpiar = document.getElementById('buscadorServicioLimpiar');
+    var toast = document.getElementById('buscadorServicioToast');
+    var datos = document.getElementById('catalogoServiciosData');
+    if (!caja || !input || !lista || !datos) return;
+
+    var MAX_RESULTADOS = 8;
+    var catalogo = [];
+    try {
+        catalogo = JSON.parse(datos.textContent || '[]');
+    } catch (e) {
+        catalogo = [];
+    }
+    if (!Array.isArray(catalogo)) catalogo = [];
+
+    // Clave de búsqueda sin acentos ni mayúsculas (se calcula una sola vez)
+    function normalizar(texto) {
+        return String(texto || '')
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+    }
+    for (var c = 0; c < catalogo.length; c++) {
+        catalogo[c].clave = normalizar(catalogo[c].nombre + ' ' + (catalogo[c].descripcion || ''));
+    }
+
+    ayuda.textContent = catalogo.length
+        ? catalogo.length + ' servicio' + (catalogo.length === 1 ? '' : 's') + ' en el catálogo · escribe para buscar'
+        : 'El catálogo está vacío. Usa "Agregar Item" o créalos en Servicios.';
+
+    var visibles = [];
+    var activo = -1;
+
+    function coincide(servicio, terminos) {
+        for (var t = 0; t < terminos.length; t++) {
+            if (servicio.clave.indexOf(terminos[t]) === -1) return false;
+        }
+        return true;
+    }
+
+    function filtrar(consulta) {
+        // Coincidencias por prefijo primero, luego el resto
+        var terminos = normalizar(consulta).split(/\s+/).filter(function(t) { return t.length; });
+        if (!terminos.length) return catalogo.slice(0, MAX_RESULTADOS);
+        var prefijo = [];
+        var resto = [];
+        for (var i = 0; i < catalogo.length; i++) {
+            if (!coincide(catalogo[i], terminos)) continue;
+            if (normalizar(catalogo[i].nombre).indexOf(terminos[0]) === 0) prefijo.push(catalogo[i]);
+            else resto.push(catalogo[i]);
+            if (prefijo.length >= MAX_RESULTADOS) break;
+        }
+        return prefijo.concat(resto).slice(0, MAX_RESULTADOS);
+    }
+
+    function escapar(texto) {
+        var div = document.createElement('div');
+        div.textContent = texto == null ? '' : String(texto);
+        return div.innerHTML;
+    }
+
+    /** Resalta el texto que coincide con la consulta */
+    function resaltar(texto, consulta) {
+        var terminos = normalizar(consulta).split(/\s+/).filter(function(t) { return t.length; });
+        if (!terminos.length) return escapar(texto);
+        var plano = normalizar(texto);
+        var marca = new Array(texto.length);
+        for (var t = 0; t < terminos.length; t++) {
+            var desde = 0;
+            while (true) {
+                var pos = plano.indexOf(terminos[t], desde);
+                if (pos === -1) break;
+                for (var k = pos; k < pos + terminos[t].length && k < marca.length; k++) marca[k] = true;
+                desde = pos + terminos[t].length;
+            }
+        }
+        var html = '';
+        var abierto = false;
+        for (var i = 0; i < texto.length; i++) {
+            if (marca[i] && !abierto) { html += '<mark class="bg-amber-100 text-slate-900">'; abierto = true; }
+            if (!marca[i] && abierto) { html += '</mark>'; abierto = false; }
+            html += escapar(texto[i]);
+        }
+        if (abierto) html += '</mark>';
+        return html;
+    }
+
+    function filaOpcion(servicio, indice) {
+        var extra = [];
+        if (servicio.duracion) extra.push(servicio.duracion + ' min');
+        if (servicio.descripcion) extra.push(servicio.descripcion);
+        return '<div role="option" id="buscadorServicioOpcion' + indice + '" data-indice="' + indice + '"'
+            + ' aria-selected="' + (indice === activo) + '"'
+            + ' class="cursor-pointer px-3 py-2 transition '
+            + (indice === activo ? 'bg-sky-50' : 'hover:bg-slate-50') + '">'
+            + '<div class="flex items-baseline justify-between gap-3">'
+            + '<span class="truncate text-sm font-medium text-slate-800">' + resaltar(servicio.nombre, consultaActual()) + '</span>'
+            + '<span class="shrink-0 text-sm font-bold text-sky-700">$' + (parseFloat(servicio.precio) || 0).toFixed(2) + '</span>'
+            + '</div>'
+            + (extra.length ? '<div class="truncate text-xs text-slate-400">' + escapar(extra.join(' · ')) + '</div>' : '')
+            + '</div>';
+    }
+
+    function consultaActual() {
+        return input.value.trim();
+    }
+
+    function pintar() {
+        visibles = filtrar(consultaActual());
+        var consulta = consultaActual();
+        var html = '';
+
+        if (visibles.length) {
+            for (var i = 0; i < visibles.length; i++) html += filaOpcion(visibles[i], i);
+            var total = filtrarSinLimite(consulta);
+            if (total > visibles.length) {
+                html += '<div class="border-t border-slate-100 px-3 py-1.5 text-[0.7rem] text-slate-400">'
+                    + 'Mostrando ' + visibles.length + ' de ' + total + ' · sigue escribiendo para afinar</div>';
+            }
+        } else {
+            html += '<div class="px-3 py-2 text-xs text-slate-500">Sin coincidencias en el catálogo.</div>';
+        }
+
+        if (consulta) {
+            html += '<div data-manual="1" class="flex cursor-pointer items-center gap-2 border-t border-slate-100 px-3 py-2 text-xs font-semibold text-sky-700 transition hover:bg-sky-50' + (activo === visibles.length ? ' bg-sky-50' : '') + '"'
+                + ' role="option" id="buscadorServicioOpcionManual" aria-selected="' + (activo === visibles.length) + '">'
+                + '<i class="fas fa-plus-circle"></i> Añadir "' + escapar(consulta) + '" como ítem manual</div>';
+        }
+
+        lista.innerHTML = html;
+        lista.classList.remove('hidden');
+        input.setAttribute('aria-expanded', 'true');
+        if (consulta) {
+            limpiar.classList.remove('hidden');
+            limpiar.classList.add('flex');
+        } else {
+            limpiar.classList.add('hidden');
+            limpiar.classList.remove('flex');
+        }
+    }
+
+    function filtrarSinLimite(consulta) {
+        var terminos = normalizar(consulta).split(/\s+/).filter(function(t) { return t.length; });
+        if (!terminos.length) return catalogo.length;
+        var total = 0;
+        for (var i = 0; i < catalogo.length; i++) {
+            if (coincide(catalogo[i], terminos)) total++;
+        }
+        return total;
+    }
+
+    function cerrar() {
+        lista.classList.add('hidden');
+        input.setAttribute('aria-expanded', 'false');
+        activo = -1;
+    }
+
+    function seleccionar(indice) {
+        activo = indice;
+        var opciones = lista.querySelectorAll('[data-indice]');
+        for (var i = 0; i < opciones.length; i++) {
+            var activa = i === indice;
+            opciones[i].setAttribute('aria-selected', activa);
+            opciones[i].classList.toggle('bg-sky-50', activa);
+        }
+        var manual = lista.querySelector('[data-manual]');
+        if (manual) {
+            manual.setAttribute('aria-selected', indice === visibles.length);
+            manual.classList.toggle('bg-sky-50', indice === visibles.length);
+        }
+    }
+
+    function mover(paso) {
+        var total = visibles.length + (consultaActual() ? 1 : 0);
+        if (!total) return;
+        var nuevo = activo + paso;
+        if (nuevo < 0) nuevo = total - 1;
+        if (nuevo >= total) nuevo = 0;
+        seleccionar(nuevo);
+        var nodo = nuevo === visibles.length
+            ? lista.querySelector('[data-manual]')
+            : lista.querySelector('[data-indice="' + nuevo + '"]');
+        if (nodo && nodo.scrollIntoView) nodo.scrollIntoView({ block: 'nearest' });
+    }
+
+    function avisar(texto) {
+        if (!toast) return;
+        toast.innerHTML = '<i class="fas fa-check-circle"></i> ' + escapar(texto);
+        toast.classList.remove('hidden');
+        toast.classList.add('flex');
+        clearTimeout(avisar.timeout);
+        avisar.timeout = setTimeout(function() {
+            toast.classList.add('hidden');
+            toast.classList.remove('flex');
+        }, 2200);
+    }
+    function agregar(servicio) {
+        if (typeof window.alAgregarServicio !== 'function') {
+            console.warn('Define window.alAgregarServicio() para recibir el servicio elegido.');
+            return;
+        }
+        window.alAgregarServicio(servicio);
+        input.value = '';
+        activo = -1;
+        avisar('Añadido: ' + servicio.nombre);
+        pintar();
+        input.focus();
+    }
+
+    function elegir(indice) {
+        if (indice === visibles.length) {
+            agregar({nombre: consultaActual(), precio: 0, manual: true});
+            return;
+        }
+        var servicio = visibles[indice];
+        if (!servicio) return;
+        agregar({
+            id: servicio.id,
+            nombre: servicio.nombre,
+            precio: parseFloat(servicio.precio) || 0,
+            duracion: servicio.duracion,
+            manual: false
+        });
+    }
+
+    input.addEventListener('input', function() {
+        activo = -1;
+        pintar();
+    });
+
+    input.addEventListener('focus', function() {
+        pintar();
+    });
+
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowDown') { e.preventDefault(); mover(1); return; }
+        if (e.key === 'ArrowUp') { e.preventDefault(); mover(-1); return; }
+        if (e.key === 'Enter') {
+            // Evita enviar el formulario al buscar
+            e.preventDefault();
+            if (lista.classList.contains('hidden')) { pintar(); return; }
+            if (!visibles.length && !consultaActual()) return;
+            elegir(activo >= 0 ? activo : 0);
+            return;
+        }
+        if (e.key === 'Escape') { e.preventDefault(); input.value = ''; cerrar(); return; }
+        if (e.key === 'Tab') { cerrar(); }
+    });
+
+    // El mousedown no debe quitar el foco del input
+    lista.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        var opcion = e.target.closest('[data-indice], [data-manual]');
+        if (!opcion) return;
+        if (opcion.hasAttribute('data-manual')) elegir(visibles.length);
+        else elegir(parseInt(opcion.getAttribute('data-indice'), 10));
+    });
+
+    limpiar.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        input.value = '';
+        activo = -1;
+        pintar();
+        input.focus();
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!caja.contains(e.target)) cerrar();
+    });
+})();
+</script>

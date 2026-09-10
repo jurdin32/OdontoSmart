@@ -24,6 +24,23 @@ def _get_empresa(request):
     return get_empresa(request)
 
 
+def _catalogo_servicios(empresa):
+    """Catálogo de servicios activos serializable para el buscador del formulario."""
+    if not empresa:
+        return []
+    servicios = Servicio.objects.filter(empresa=empresa, activo=True)
+    return [
+        {
+            'id': s.id,
+            'nombre': s.nombre,
+            'precio': float(s.precio or 0),
+            'duracion': s.duracion_minutos,
+            'descripcion': s.descripcion or '',
+        }
+        for s in servicios
+    ]
+
+
 def _get_sri_info(empresa):
     """Obtiene información SRI (ambiente y días restantes del certificado) para mostrar en vistas."""
     from sri.models import SriEmpresaConfig
@@ -154,6 +171,7 @@ def crear_proforma(request):
         'active': 'proformas',
         'items_json': items_json,
         'servicios': Servicio.objects.filter(empresa=empresa, activo=True) if empresa else Servicio.objects.none(),
+        'catalogo_servicios': _catalogo_servicios(empresa),
     }
     return render(request, 'facturacion/proforma_form.html', context)
 
@@ -216,6 +234,7 @@ def editar_proforma(request, proforma_id):
         'active': 'proformas',
         'items_json': items_json,
         'servicios': Servicio.objects.filter(empresa=empresa, activo=True) if empresa else Servicio.objects.none(),
+        'catalogo_servicios': _catalogo_servicios(empresa),
     }
     return render(request, 'facturacion/proforma_form.html', context)
 
@@ -413,6 +432,7 @@ def crear_factura(request):
         'active': 'facturas',
         'items_json': items_json,
         'servicios': Servicio.objects.filter(empresa=empresa, activo=True) if empresa else Servicio.objects.none(),
+        'catalogo_servicios': _catalogo_servicios(empresa),
     }
     return render(request, 'facturacion/factura_form.html', context)
 
@@ -527,6 +547,7 @@ def editar_factura(request, factura_id):
         'active': 'facturas',
         'items_json': items_json,
         'servicios': Servicio.objects.filter(empresa=empresa, activo=True) if empresa else Servicio.objects.none(),
+        'catalogo_servicios': _catalogo_servicios(empresa),
     }
     return render(request, 'facturacion/factura_form.html', context)
 
