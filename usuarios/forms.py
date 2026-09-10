@@ -105,14 +105,14 @@ class CustomLoginForm(AuthenticationForm):
     username = forms.CharField(
         label='Usuario',
         widget=forms.TextInput(attrs={
-            'class': 'mt-1 block w-full rounded-xl border-0 bg-white py-3 pl-11 pr-4 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100 lg:border lg:border-slate-300',
+            'class': 'mt-1 block w-full rounded-xl border-0 bg-white py-3 pl-11 pr-4 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100',
             'placeholder': 'Nombre de usuario'
         })
     )
     password = forms.CharField(
         label='Contraseña',
         widget=forms.PasswordInput(attrs={
-            'class': 'mt-1 block w-full rounded-xl border-0 bg-white py-3 pl-11 pr-12 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100 lg:border lg:border-slate-300',
+            'class': 'mt-1 block w-full rounded-xl border-0 bg-white py-3 pl-11 pr-12 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100',
             'placeholder': '••••••••'
         })
     )
