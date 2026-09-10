@@ -28,6 +28,7 @@
     </div>
 
     <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+        <!-- Panel Principal -->
         <a href="{% url 'dashboard' %}"
            class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
                   {% if active == 'dashboard' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
@@ -35,42 +36,49 @@
             <span>Panel Principal</span>
         </a>
 
-        {% if puede_ver_citas %}
-        <a href="{% url 'lista_citas' %}"
-           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
-                  {% if active == 'citas' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
-            <i class="fas fa-calendar-check w-5 text-center text-[15px]"></i>
-            <span>Citas</span>
-        </a>
+        <!-- Clínica -->
+        {% if puede_ver_citas or puede_ver_pacientes or puede_ver_historia or puede_ver_medicos %}
+        <div class="sidebar-group">
+            <button type="button"
+                    class="sidebar-toggle flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-white/5 hover:text-white">
+                <i class="fas fa-stethoscope w-5 text-center text-[15px]"></i>
+                <span class="flex-1 text-left">Clínica</span>
+                <i class="sidebar-chevron fas fa-chevron-down text-[10px] text-slate-500 transition-transform duration-200"></i>
+            </button>
+            <div class="sidebar-submenu mt-1 hidden space-y-1 border-l border-white/10 pl-3 ml-5">
+                {% if puede_ver_citas %}
+                <a href="{% url 'lista_citas' %}" data-active="{% if active == 'citas' %}1{% endif %}"
+                   class="sidebar-link flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition
+                          {% if active == 'citas' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+                    <i class="fas fa-calendar-check w-4 text-center text-[13px]"></i><span>Citas</span>
+                </a>
+                {% endif %}
+                {% if puede_ver_pacientes %}
+                <a href="{% url 'lista_pacientes' %}" data-active="{% if active == 'pacientes' %}1{% endif %}"
+                   class="sidebar-link flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition
+                          {% if active == 'pacientes' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+                    <i class="fas fa-users w-4 text-center text-[13px]"></i><span>Pacientes</span>
+                </a>
+                {% endif %}
+                {% if puede_ver_historia %}
+                <a href="{% url 'lista_pacientes' %}" data-active="{% if active == 'pacientes' %}1{% endif %}"
+                   class="sidebar-link flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition
+                          {% if active == 'pacientes' %}text-white{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+                    <i class="fas fa-notes-medical w-4 text-center text-[13px]"></i><span>Historial Clínico</span>
+                </a>
+                {% endif %}
+                {% if puede_ver_medicos %}
+                <a href="{% url 'lista_medicos' %}" data-active="{% if active == 'medicos' %}1{% endif %}"
+                   class="sidebar-link flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition
+                          {% if active == 'medicos' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+                    <i class="fas fa-user-md w-4 text-center text-[13px]"></i><span>Médicos</span>
+                </a>
+                {% endif %}
+            </div>
+        </div>
         {% endif %}
 
-        {% if puede_ver_pacientes %}
-        <a href="{% url 'lista_pacientes' %}"
-           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
-                  {% if active == 'pacientes' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
-            <i class="fas fa-users w-5 text-center text-[15px]"></i>
-            <span>Pacientes</span>
-        </a>
-        {% endif %}
-
-        {% if puede_ver_historia %}
-        <a href="{% url 'lista_pacientes' %}"
-           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
-                  {% if active == 'pacientes' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
-            <i class="fas fa-notes-medical w-5 text-center text-[15px]"></i>
-            <span>Historial Clínico</span>
-        </a>
-        {% endif %}
-
-        {% if puede_ver_medicos %}
-        <a href="{% url 'lista_medicos' %}"
-           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
-                  {% if active == 'medicos' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
-            <i class="fas fa-user-md w-5 text-center text-[15px]"></i>
-            <span>Médicos</span>
-        </a>
-        {% endif %}
-
+        <!-- Reportes -->
         {% if puede_ver_reportes %}
         <a href="{% url 'reportes' %}"
            class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
@@ -80,98 +88,117 @@
         </a>
         {% endif %}
 
-        {% if puede_ver_proformas %}
-        <a href="{% url 'lista_proformas' %}"
-           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
-                  {% if active == 'proformas' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
-            <i class="fas fa-file-invoice w-5 text-center text-[15px]"></i>
-            <span>Proformas</span>
-        </a>
-        {% endif %}
-
-        {% if puede_ver_facturas %}
-        <a href="{% url 'lista_facturas' %}"
-           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
-                  {% if active == 'facturas' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
-            <i class="fas fa-file-invoice-dollar w-5 text-center text-[15px]"></i>
-            <span>Facturas</span>
-        </a>
-        {% endif %}
-
-        {% if puede_ver_servicios %}
-        <a href="{% url 'lista_servicios' %}"
-           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
-                  {% if active == 'servicios' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
-            <i class="fas fa-tooth w-5 text-center text-[15px]"></i>
-            <span>Servicios</span>
-        </a>
-        {% endif %}
-
-        {% if puede_ver_usuarios %}
-        <a href="{% url 'lista_usuarios' %}"
-           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
-                  {% if active == 'usuarios' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
-            <i class="fas fa-user-shield w-5 text-center text-[15px]"></i>
-            <span>Usuarios</span>
-        </a>
-        <a href="{% url 'lista_roles' %}"
-           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
-                  {% if active == 'roles' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
-            <i class="fas fa-tags w-5 text-center text-[15px]"></i>
-            <span>Roles</span>
-        </a>
-        <a href="{% url 'lista_permisos' %}"
-           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
-                  {% if active == 'permisos' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
-            <i class="fas fa-key w-5 text-center text-[15px]"></i>
-            <span>Permisos</span>
-        </a>
-        {% endif %}
-
-        {% if es_admin_user %}
-        <a href="{% url 'tareas_list' %}"
-           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
-                  {% if active == 'tareas' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
-            <i class="fas fa-tasks w-5 text-center text-[15px]"></i>
-            <span>Tareas Programadas</span>
-        </a>
-        {% endif %}
-
-        {% if puede_sri_config or puede_sri_consultar %}
-        <div class="mb-1 mt-3 flex items-center gap-2 px-3 text-[0.65rem] font-bold uppercase tracking-widest text-slate-500">
-            <i class="fas fa-file-contract"></i> SRI
+        <!-- Facturación -->
+        {% if puede_ver_proformas or puede_ver_facturas or puede_ver_servicios %}
+        <div class="sidebar-group">
+            <button type="button"
+                    class="sidebar-toggle flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-white/5 hover:text-white">
+                <i class="fas fa-file-invoice-dollar w-5 text-center text-[15px]"></i>
+                <span class="flex-1 text-left">Facturación</span>
+                <i class="sidebar-chevron fas fa-chevron-down text-[10px] text-slate-500 transition-transform duration-200"></i>
+            </button>
+            <div class="sidebar-submenu mt-1 hidden space-y-1 border-l border-white/10 pl-3 ml-5">
+                {% if puede_ver_proformas %}
+                <a href="{% url 'lista_proformas' %}" data-active="{% if active == 'proformas' %}1{% endif %}"
+                   class="sidebar-link flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition
+                          {% if active == 'proformas' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+                    <i class="fas fa-file-invoice w-4 text-center text-[13px]"></i><span>Proformas</span>
+                </a>
+                {% endif %}
+                {% if puede_ver_facturas %}
+                <a href="{% url 'lista_facturas' %}" data-active="{% if active == 'facturas' %}1{% endif %}"
+                   class="sidebar-link flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition
+                          {% if active == 'facturas' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+                    <i class="fas fa-file-invoice-dollar w-4 text-center text-[13px]"></i><span>Facturas</span>
+                </a>
+                {% endif %}
+                {% if puede_ver_servicios %}
+                <a href="{% url 'lista_servicios' %}" data-active="{% if active == 'servicios' %}1{% endif %}"
+                   class="sidebar-link flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition
+                          {% if active == 'servicios' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+                    <i class="fas fa-tooth w-4 text-center text-[13px]"></i><span>Servicios</span>
+                </a>
+                {% endif %}
+            </div>
         </div>
-        {% if puede_sri_config %}
-        <a href="{% url 'sri_configuracion' %}"
-           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
-                  {% if active == 'sri_config' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
-            <i class="fas fa-cog w-5 text-center text-[15px]"></i>
-            <span>Config. SRI</span>
-        </a>
-        {% endif %}
-        {% if puede_sri_consultar %}
-        <a href="{% url 'sri_documentos' %}"
-           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
-                  {% if active == 'sri_docs' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
-            <i class="fas fa-file-invoice w-5 text-center text-[15px]"></i>
-            <span>Docs. Electrónicos</span>
-        </a>
-        <a href="{% url 'sri_log' %}"
-           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
-                  {% if active == 'sri_log' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
-            <i class="fas fa-history w-5 text-center text-[15px]"></i>
-            <span>Log SRI</span>
-        </a>
-        {% endif %}
         {% endif %}
 
-        {% if puede_ver_configuracion %}
-        <a href="{% url 'configuracion_empresa' %}"
-           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
-                  {% if active == 'configuracion' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
-            <i class="fas fa-cog w-5 text-center text-[15px]"></i>
-            <span>Configuración</span>
-        </a>
+        <!-- Administración -->
+        {% if puede_ver_usuarios or es_admin_user or puede_ver_configuracion %}
+        <div class="sidebar-group">
+            <button type="button"
+                    class="sidebar-toggle flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-white/5 hover:text-white">
+                <i class="fas fa-sliders-h w-5 text-center text-[15px]"></i>
+                <span class="flex-1 text-left">Administración</span>
+                <i class="sidebar-chevron fas fa-chevron-down text-[10px] text-slate-500 transition-transform duration-200"></i>
+            </button>
+            <div class="sidebar-submenu mt-1 hidden space-y-1 border-l border-white/10 pl-3 ml-5">
+                {% if puede_ver_usuarios %}
+                <a href="{% url 'lista_usuarios' %}" data-active="{% if active == 'usuarios' %}1{% endif %}"
+                   class="sidebar-link flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition
+                          {% if active == 'usuarios' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+                    <i class="fas fa-user-shield w-4 text-center text-[13px]"></i><span>Usuarios</span>
+                </a>
+                <a href="{% url 'lista_roles' %}" data-active="{% if active == 'roles' %}1{% endif %}"
+                   class="sidebar-link flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition
+                          {% if active == 'roles' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+                    <i class="fas fa-tags w-4 text-center text-[13px]"></i><span>Roles</span>
+                </a>
+                <a href="{% url 'lista_permisos' %}" data-active="{% if active == 'permisos' %}1{% endif %}"
+                   class="sidebar-link flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition
+                          {% if active == 'permisos' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+                    <i class="fas fa-key w-4 text-center text-[13px]"></i><span>Permisos</span>
+                </a>
+                {% endif %}
+                {% if es_admin_user %}
+                <a href="{% url 'tareas_list' %}" data-active="{% if active == 'tareas' %}1{% endif %}"
+                   class="sidebar-link flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition
+                          {% if active == 'tareas' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+                    <i class="fas fa-tasks w-4 text-center text-[13px]"></i><span>Tareas Programadas</span>
+                </a>
+                {% endif %}
+                {% if puede_ver_configuracion %}
+                <a href="{% url 'configuracion_empresa' %}" data-active="{% if active == 'configuracion' %}1{% endif %}"
+                   class="sidebar-link flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition
+                          {% if active == 'configuracion' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+                    <i class="fas fa-cog w-4 text-center text-[13px]"></i><span>Configuración</span>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- SRI -->
+        {% if puede_sri_config or puede_sri_consultar %}
+        <div class="sidebar-group">
+            <button type="button"
+                    class="sidebar-toggle flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-white/5 hover:text-white">
+                <i class="fas fa-file-contract w-5 text-center text-[15px]"></i>
+                <span class="flex-1 text-left">SRI</span>
+                <i class="sidebar-chevron fas fa-chevron-down text-[10px] text-slate-500 transition-transform duration-200"></i>
+            </button>
+            <div class="sidebar-submenu mt-1 hidden space-y-1 border-l border-white/10 pl-3 ml-5">
+                {% if puede_sri_config %}
+                <a href="{% url 'sri_configuracion' %}" data-active="{% if active == 'sri_config' %}1{% endif %}"
+                   class="sidebar-link flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition
+                          {% if active == 'sri_config' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+                    <i class="fas fa-cog w-4 text-center text-[13px]"></i><span>Config. SRI</span>
+                </a>
+                {% endif %}
+                {% if puede_sri_consultar %}
+                <a href="{% url 'sri_documentos' %}" data-active="{% if active == 'sri_docs' %}1{% endif %}"
+                   class="sidebar-link flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition
+                          {% if active == 'sri_docs' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+                    <i class="fas fa-file-invoice w-4 text-center text-[13px]"></i><span>Docs. Electrónicos</span>
+                </a>
+                <a href="{% url 'sri_log' %}" data-active="{% if active == 'sri_log' %}1{% endif %}"
+                   class="sidebar-link flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition
+                          {% if active == 'sri_log' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+                    <i class="fas fa-history w-4 text-center text-[13px]"></i><span>Log SRI</span>
+                </a>
+                {% endif %}
+            </div>
+        </div>
         {% endif %}
     </nav>
 
@@ -183,3 +210,32 @@
         </a>
     </div>
 </aside>
+
+<script>
+(function () {
+    // Desplegar / contraer grupos del menú lateral
+    document.querySelectorAll('.sidebar-toggle').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var grupo = btn.closest('.sidebar-group');
+            if (!grupo) return;
+            var sub = grupo.querySelector('.sidebar-submenu');
+            var chev = grupo.querySelector('.sidebar-chevron');
+            if (sub) sub.classList.toggle('hidden');
+            if (chev) chev.classList.toggle('rotate-180');
+        });
+    });
+
+    // Abrir automáticamente el grupo que contiene la página actual
+    document.querySelectorAll('.sidebar-link[data-active="1"]').forEach(function (link) {
+        var sub = link.closest('.sidebar-submenu');
+        if (!sub) return;
+        sub.classList.remove('hidden');
+        var grupo = sub.closest('.sidebar-group');
+        if (!grupo) return;
+        var chev = grupo.querySelector('.sidebar-chevron');
+        if (chev) chev.classList.add('rotate-180');
+        var btn = grupo.querySelector('.sidebar-toggle');
+        if (btn) btn.classList.add('text-white');
+    });
+})();
+</script>
