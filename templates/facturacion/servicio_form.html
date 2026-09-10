@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='servicios' %}
+
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+
+        <div class="dashboard-content p-6 lg:p-8">
+            <!-- Encabezado -->
+            <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">
+                        {% if servicio %}Editar Servicio{% else %}Nuevo Servicio{% endif %}
+                    </h1>
+                    <p class="mt-1 text-sm text-slate-500">
+                        {% if servicio %}Actualiza los datos del servicio{% else %}Agrega un tratamiento al catálogo de la clínica{% endif %}
+                    </p>
+                </div>
+                <a href="{% url 'lista_servicios' %}"
+                   class="inline-flex items-center justify-center gap-2 self-start rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 sm:self-auto">
+                    <i class="fas fa-arrow-left"></i> Volver a Servicios
+                </a>
+            </div>
+
+            <!-- Tarjeta del formulario -->
+            <div class="max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
+                <div class="mb-6 flex items-center gap-3 border-b border-slate-100 pb-4">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-100 text-sky-600">
+                        <i class="fas fa-tooth"></i>
+                    </span>
+                    <h2 class="text-lg font-bold text-slate-800">Datos del Servicio</h2>
+                </div>
+
+                <form method="POST" novalidate>
+                    {% csrf_token %}
+
+                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                        <div class="sm:col-span-2">
+                            <label for="{{ form.nombre.id_for_label }}" class="mb-1.5 block text-sm font-semibold text-slate-700">{{ form.nombre.label }}</label>
+                            {{ form.nombre }}
+                            {% if form.nombre.errors %}<div class="mt-1.5 space-y-0.5">{% for e in form.nombre.errors %}<p class="text-xs font-medium text-red-600">{{ e }}</p>{% endfor %}</div>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.precio.id_for_label }}" class="mb-1.5 block text-sm font-semibold text-slate-700">{{ form.precio.label }}</label>
+                            <div class="relative">
+                                <span class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-400">$</span>
+                                {{ form.precio }}
+                            </div>
+                            {% if form.precio.errors %}<div class="mt-1.5 space-y-0.5">{% for e in form.precio.errors %}<p class="text-xs font-medium text-red-600">{{ e }}</p>{% endfor %}</div>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.duracion_minutos.id_for_label }}" class="mb-1.5 block text-sm font-semibold text-slate-700">{{ form.duracion_minutos.label }}</label>
+                            {{ form.duracion_minutos }}
+                            {% if form.duracion_minutos.errors %}<div class="mt-1.5 space-y-0.5">{% for e in form.duracion_minutos.errors %}<p class="text-xs font-medium text-red-600">{{ e }}</p>{% endfor %}</div>{% endif %}
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label for="{{ form.descripcion.id_for_label }}" class="mb-1.5 block text-sm font-semibold text-slate-700">{{ form.descripcion.label }}</label>
+                            {{ form.descripcion }}
+                            {% if form.descripcion.errors %}<div class="mt-1.5 space-y-0.5">{% for e in form.descripcion.errors %}<p class="text-xs font-medium text-red-600">{{ e }}</p>{% endfor %}</div>{% endif %}
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 transition hover:border-sky-300 hover:bg-sky-50">
+                                {{ form.activo }}
+                                <span class="text-sm font-semibold text-slate-700">{{ form.activo.label }}</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    {% if form.non_field_errors %}
+                    <div class="mt-5 space-y-1 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+                        {% for e in form.non_field_errors %}<p class="text-sm font-medium text-red-700">{{ e }}</p>{% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="mt-8 flex flex-col-reverse items-stretch gap-3 border-t border-slate-100 pt-6 sm:flex-row sm:items-center sm:justify-end">
+                        <a href="{% url 'lista_servicios' %}"
+                           class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-50">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                        <button type="submit"
+                                class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-sky-600/20 transition hover:from-sky-700 hover:to-cyan-600">
+                            <i class="fas fa-save"></i>
+                            {% if servicio %}Actualizar Servicio{% else %}Guardar Servicio{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

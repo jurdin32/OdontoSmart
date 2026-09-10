@@ -102,6 +102,7 @@ class Permiso(models.Model):
         ('TAREAS', 'Tareas Programadas'),
         ('FACTURACION', 'Facturación'),
         ('SRI', 'SRI'),
+        ('SERVICIOS', 'Servicios'),
     ]
 
     nombre = models.CharField(max_length=100, verbose_name='Nombre del permiso')

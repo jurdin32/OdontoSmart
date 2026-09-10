@@ -1,5 +1,5 @@
 from django import forms
-from .models import Proforma, Factura
+from .models import Proforma, Factura, Servicio
 from pacientes.models import Paciente
 from medicos.models import Medico
 from datetime import date, timedelta
@@ -10,6 +10,41 @@ INPUT_CLASSES = (
     'text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 '
     'focus:border-sky-500 focus:ring-2 focus:ring-sky-100'
 )
+
+
+class ServicioForm(forms.ModelForm):
+    """Formulario para crear/editar servicios del catálogo."""
+
+    class Meta:
+        model = Servicio
+        fields = ['nombre', 'descripcion', 'precio', 'duracion_minutos', 'activo']
+        widgets = {
+            'nombre': forms.TextInput(attrs={
+                'class': INPUT_CLASSES, 'placeholder': 'Ej: Limpieza dental'
+            }),
+            'descripcion': forms.Textarea(attrs={
+                'class': INPUT_CLASSES,
+                'placeholder': 'Descripción del servicio (opcional)',
+                'rows': 3
+            }),
+            'precio': forms.NumberInput(attrs={
+                'class': INPUT_CLASSES, 'step': '0.01', 'min': '0',
+                'placeholder': '0.00'
+            }),
+            'duracion_minutos': forms.NumberInput(attrs={
+                'class': INPUT_CLASSES, 'min': '1', 'placeholder': '30'
+            }),
+            'activo': forms.CheckboxInput(attrs={
+                'class': 'h-4 w-4 rounded border-slate-300 accent-sky-600'
+            }),
+        }
+        labels = {
+            'nombre': 'Nombre del servicio',
+            'descripcion': 'Descripción',
+            'precio': 'Precio',
+            'duracion_minutos': 'Duración (minutos)',
+            'activo': 'Servicio activo',
+        }
 
 
 class ProformaForm(forms.ModelForm):

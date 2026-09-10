@@ -6,9 +6,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
+from django.core.paginator import Paginator
 
-from .models import Proforma, Factura, generar_numero
-from .forms import ProformaForm, FacturaForm
+from .models import Proforma, Factura, Servicio, generar_numero
+from .forms import ProformaForm, FacturaForm, ServicioForm
 from pacientes.models import Paciente
 from medicos.models import Medico
 from usuarios.models import ActivityLog
@@ -532,3 +533,137 @@ def imprimir_factura(request, factura_id):
         'factura': factura,
     }
     return render(request, 'facturacion/factura_print.html', context)
+
+
+# ===========================================================================
+#  SERVICIOS (Catálogo de tratamientos)
+# ===========================================================================
+
+@login_required
+@permiso_requerido('ver_servicios')
+def lista_servicios(request):
+    """Lista los servicios del catálogo de la empresa actual."""
+    q = request.GET.get('q', '').strip()
+    empresa = _get_empresa(request)
+    if not empresa:
+        messages.error(request, 'No se encontró la empresa.')
+        return redirect('dashboard')
+
+    servicios = Servicio.objects.filter(empresa=empresa)
+    if q:
+        servicios = servicios.filter(
+            Q(nombre__icontains=q) | Q(descripcion__icontains=q)
+        )
+    servicios = servicios.order_by('-activo', 'nombre')
+
+    paginator = Paginator(servicios, 12)
+    page = request.GET.get('page', 1)
+    servicios_page = paginator.get_page(page)
+
+    context = {
+        'title': 'Servicios',
+        'servicios': servicios_page,
+        'query': q,
+        'total': Servicio.objects.filter(empresa=empresa).count(),
+        'total_activos': Servicio.objects.filter(empresa=empresa, activo=True).count(),
+        'active': 'servicios',
+    }
+    return render(request, 'facturacion/servicios_lista.html', context)
+
+
+@login_required
+@permiso_requerido('crear_servicios')
+def crear_servicio(request):
+    """Crea un nuevo servicio en el catálogo de la empresa."""
+    empresa = _get_empresa(request)
+    if not empresa:
+        messages.error(request, 'No se encontró la empresa.')
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        form = ServicioForm(request.POST)
+        if form.is_valid():
+            servicio = form.save(commit=False)
+            servicio.empresa = empresa
+            servicio.save()
+            ActivityLog.objects.create(
+                empresa=empresa, usuario=request.user, accion='CREAR',
+                modelo='Servicio', objeto_id=servicio.id,
+                descripcion=f'Servicio creado: {servicio.nombre}'
+            )
+            messages.success(request, f'Servicio "{servicio.nombre}" creado exitosamente.')
+            return redirect('lista_servicios')
+        messages.error(request, 'Corrige los errores del formulario.')
+    else:
+        form = ServicioForm()
+
+    return render(request, 'facturacion/servicio_form.html', {
+        'title': 'Nuevo Servicio',
+        'form': form,
+        'active': 'servicios',
+    })
+
+
+@login_required
+@permiso_requerido('editar_servicios')
+def editar_servicio(request, servicio_id):
+    """Edita un servicio existente del catálogo."""
+    empresa = _get_empresa(request)
+    if not empresa:
+        messages.error(request, 'No se encontró la empresa.')
+        return redirect('dashboard')
+    servicio = get_object_or_404(Servicio, id=servicio_id, empresa=empresa)
+
+    if request.method == 'POST':
+        form = ServicioForm(request.POST, instance=servicio)
+        if form.is_valid():
+            servicio = form.save()
+            ActivityLog.objects.create(
+                empresa=empresa, usuario=request.user, accion='EDITAR',
+                modelo='Servicio', objeto_id=servicio.id,
+                descripcion=f'Servicio editado: {servicio.nombre}'
+            )
+            messages.success(request, f'Servicio "{servicio.nombre}" actualizado.')
+            return redirect('lista_servicios')
+        messages.error(request, 'Corrige los errores del formulario.')
+    else:
+        form = ServicioForm(instance=servicio)
+
+    return render(request, 'facturacion/servicio_form.html', {
+        'title': f'Editar {servicio.nombre}',
+        'form': form,
+        'servicio': servicio,
+        'active': 'servicios',
+    })
+
+
+@login_required
+@permiso_requerido('editar_servicios')
+def toggle_servicio(request, servicio_id):
+    """Activa o desactiva un servicio (POST)."""
+    empresa = _get_empresa(request)
+    servicio = get_object_or_404(Servicio, id=servicio_id, empresa=empresa)
+    if request.method == 'POST':
+        servicio.activo = not servicio.activo
+        servicio.save()
+        estado = 'activado' if servicio.activo else 'desactivado'
+        messages.success(request, f'Servicio "{servicio.nombre}" {estado}.')
+    return redirect('lista_servicios')
+
+
+@login_required
+@permiso_requerido('eliminar_servicios')
+def eliminar_servicio(request, servicio_id):
+    """Elimina un servicio del catálogo (POST)."""
+    empresa = _get_empresa(request)
+    servicio = get_object_or_404(Servicio, id=servicio_id, empresa=empresa)
+    if request.method == 'POST':
+        nombre = servicio.nombre
+        servicio.delete()
+        ActivityLog.objects.create(
+            empresa=empresa, usuario=request.user, accion='ELIMINAR',
+            modelo='Servicio',
+            descripcion=f'Servicio eliminado: {nombre}'
+        )
+        messages.success(request, f'Servicio "{nombre}" eliminado.')
+    return redirect('lista_servicios')

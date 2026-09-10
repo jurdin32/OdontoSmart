@@ -28,6 +28,44 @@ def generar_numero(tipo, empresa_id):
 
 
 # ===========================================================================
+#  SERVICIO (Catálogo de tratamientos / procedimientos)
+# ===========================================================================
+
+class Servicio(models.Model):
+    """Servicio o tratamiento odontológico ofertado por la empresa."""
+
+    class Meta:
+        verbose_name = 'Servicio'
+        verbose_name_plural = 'Servicios'
+        ordering = ['nombre']
+        unique_together = ('empresa', 'nombre')
+
+    empresa = models.ForeignKey(
+        'core.Empresa', on_delete=models.CASCADE,
+        related_name='servicios', verbose_name='Empresa'
+    )
+    nombre = models.CharField(max_length=150, verbose_name='Nombre del servicio')
+    descripcion = models.TextField(blank=True, verbose_name='Descripción')
+    precio = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0,
+        validators=[MinValueValidator(0)], verbose_name='Precio'
+    )
+    duracion_minutos = models.PositiveIntegerField(
+        default=30, verbose_name='Duración (minutos)'
+    )
+    activo = models.BooleanField(default=True, verbose_name='Activo')
+    fecha_creacion = models.DateTimeField(
+        auto_now_add=True, verbose_name='Fecha de creación'
+    )
+    fecha_actualizacion = models.DateTimeField(
+        auto_now=True, verbose_name='Última actualización'
+    )
+
+    def __str__(self):
+        return self.nombre
+
+
+# ===========================================================================
 #  PROFORMA (Cotización / Presupuesto)
 # ===========================================================================
 

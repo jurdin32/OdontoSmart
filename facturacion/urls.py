@@ -19,4 +19,10 @@ urlpatterns = [
     # Print
     path('proformas/<int:proforma_id>/imprimir/', views.imprimir_proforma, name='imprimir_proforma'),
     path('facturas/<int:factura_id>/imprimir/', views.imprimir_factura, name='imprimir_factura'),
+    # Servicios (catálogo)
+    path('servicios/', views.lista_servicios, name='lista_servicios'),
+    path('servicios/registrar/', views.crear_servicio, name='crear_servicio'),
+    path('servicios/<int:servicio_id>/editar/', views.editar_servicio, name='editar_servicio'),
+    path('servicios/<int:servicio_id>/toggle/', views.toggle_servicio, name='toggle_servicio'),
+    path('servicios/<int:servicio_id>/eliminar/', views.eliminar_servicio, name='eliminar_servicio'),
 ]

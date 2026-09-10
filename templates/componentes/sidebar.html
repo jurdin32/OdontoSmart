@@ -11,6 +11,7 @@
 {% tiene_permiso 'ver_configuracion' as puede_ver_configuracion %}
 {% tiene_permiso 'sri_config' as puede_sri_config %}
 {% tiene_permiso 'sri_consultar' as puede_sri_consultar %}
+{% tiene_permiso 'ver_servicios' as puede_ver_servicios %}
 {% es_admin as es_admin_user %}
 <aside class="sidebar">
     <div class="flex flex-col items-center gap-2 border-b border-white/10 px-5 py-5">
@@ -94,6 +95,15 @@
                   {% if active == 'facturas' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
             <i class="fas fa-file-invoice-dollar w-5 text-center text-[15px]"></i>
             <span>Facturas</span>
+        </a>
+        {% endif %}
+
+        {% if puede_ver_servicios %}
+        <a href="{% url 'lista_servicios' %}"
+           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
+                  {% if active == 'servicios' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+            <i class="fas fa-tooth w-5 text-center text-[15px]"></i>
+            <span>Servicios</span>
         </a>
         {% endif %}
 

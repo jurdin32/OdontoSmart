@@ -80,6 +80,12 @@ PERMISOS = [
     ('Configuración SRI', 'sri_config', 'SRI'),
     ('Emitir comprobantes electrónicos', 'sri_emitir', 'SRI'),
     ('Consultar autorizaciones SRI', 'sri_consultar', 'SRI'),
+
+    # ====== SERVICIOS ======
+    ('Ver servicios', 'ver_servicios', 'SERVICIOS'),
+    ('Crear servicios', 'crear_servicios', 'SERVICIOS'),
+    ('Editar servicios', 'editar_servicios', 'SERVICIOS'),
+    ('Eliminar servicios', 'eliminar_servicios', 'SERVICIOS'),
 ]
 
 
