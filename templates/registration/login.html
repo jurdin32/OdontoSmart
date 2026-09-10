@@ -9,8 +9,8 @@
         <div class="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-white/10 blur-3xl"></div>
         <div class="pointer-events-none absolute -bottom-40 -left-20 h-96 w-96 rounded-full bg-cyan-300/20 blur-3xl"></div>
 
-        <div class="relative z-10 flex items-center justify-between">
-            <img src="{% static 'images/odontoSmart.png' %}" alt="OdontSmart" class="h-16 w-auto drop-shadow-md">
+        <div class="relative z-10 flex flex-col items-center gap-4 text-center">
+            <img src="{% static 'images/odontoSmart.png' %}" alt="OdontSmart" class="h-24 w-auto drop-shadow-lg">
             {% if config_empresa and config_empresa.logo %}
             <img src="{{ config_empresa.logo.url }}" alt="{{ empresa.nombre }}" class="max-h-12 w-auto rounded-xl bg-white/90 p-1">
             {% endif %}
