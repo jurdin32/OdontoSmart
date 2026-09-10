@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+    {% include 'componentes/sidebar.html' with active='reportes' %}
+
+    <main class="main-content">
+        {% include 'componentes/topbar.html' %}
+
+        <div class="dashboard-content p-6 lg:p-8">
+            <!-- Encabezado -->
+            <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">Reporte de Servicios</h1>
+                    <p class="mt-1 text-sm text-slate-500">Uso del catálogo: citas, evoluciones e ingresos estimados</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <a href="{% url 'lista_servicios' %}"
+                       class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-50">
+                        <i class="fas fa-tooth"></i> Catálogo
+                    </a>
+                    <a href="{% url 'reportes' %}"
+                       class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-50">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </a>
+                </div>
+            </div>
+
+            {% if sin_empresa %}
+            <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                <i class="fas fa-exclamation-triangle mr-2"></i> No se pudo identificar la empresa para generar el reporte.
+            </div>
+            {% else %}
+
+            <!-- KPIs -->
+            <div class="mb-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+                <div class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-cyan-100 text-lg text-cyan-600"><i class="fas fa-tooth"></i></div>
+                    <div>
+                        <div class="text-2xl font-extrabold leading-none text-slate-900">{{ total_servicios }}</div>
+                        <div class="mt-1 text-sm text-slate-500">Servicios ({{ activos }} activos)</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-lg text-emerald-600"><i class="fas fa-calendar-check"></i></div>
+                    <div>
+                        <div class="text-2xl font-extrabold leading-none text-slate-900">{{ total_citas }}</div>
+                        <div class="mt-1 text-sm text-slate-500">Citas con servicio</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-lg text-violet-600"><i class="fas fa-notes-medical"></i></div>
+                    <div>
+                        <div class="text-2xl font-extrabold leading-none text-slate-900">{{ total_evoluciones }}</div>
+                        <div class="mt-1 text-sm text-slate-500">Evoluciones con servicio</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-teal-100 text-lg text-teal-600"><i class="fas fa-dollar-sign"></i></div>
+                    <div>
+                        <div class="text-2xl font-extrabold leading-none text-slate-900">$ {{ ingresos_estimados|floatformat:2 }}</div>
+                        <div class="mt-1 text-sm text-slate-500">Ingresos estimados</div>
+                    </div>
+                </div>
+            </div>
+
+            {% if servicios %}
+            <!-- Tabla -->
+            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Servicio</th>
+                                <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Precio</th>
+                                <th class="px-6 py-3 text-center text-xs font-bold uppercase tracking-wider text-slate-500">Citas</th>
+                                <th class="px-6 py-3 text-center text-xs font-bold uppercase tracking-wider text-slate-500">Evoluciones</th>
+                                <th class="px-6 py-3 text-center text-xs font-bold uppercase tracking-wider text-slate-500">Uso total</th>
+                                <th class="px-6 py-3 text-right text-xs font-bold uppercase tracking-wider text-slate-500">Ingresos est.</th>
+                                <th class="px-6 py-3 text-center text-xs font-bold uppercase tracking-wider text-slate-500">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 bg-white">
+                            {% for s in servicios %}
+                            <tr class="transition hover:bg-slate-50">
+                                <td class="whitespace-nowrap px-6 py-4 font-semibold text-slate-800">
+                                    <i class="fas fa-tooth mr-2 text-cyan-400"></i>{{ s.nombre }}
+                                </td>
+                                <td class="whitespace-nowrap px-6 py-4 text-slate-600">$ {{ s.precio|floatformat:2 }}</td>
+                                <td class="whitespace-nowrap px-6 py-4 text-center font-semibold text-slate-700">{{ s.total_citas }}</td>
+                                <td class="whitespace-nowrap px-6 py-4 text-center font-semibold text-slate-700">{{ s.total_evoluciones }}</td>
+                                <td class="whitespace-nowrap px-6 py-4 text-center">
+                                    <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">{{ s.uso_total }}</span>
+                                </td>
+                                <td class="whitespace-nowrap px-6 py-4 text-right font-bold text-slate-800">
+                                    $ {{ s.ingresos|floatformat:2 }}
+                                </td>
+                                <td class="whitespace-nowrap px-6 py-4 text-center">
+                                    {% if s.activo %}
+                                    <span class="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">Activo</span>
+                                    {% else %}
+                                    <span class="inline-flex items-center rounded-full bg-slate-200 px-3 py-1 text-xs font-bold text-slate-600">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <p class="mt-4 text-xs text-slate-400">
+                <i class="fas fa-info-circle mr-1"></i>
+                Los ingresos son <strong>estimados</strong>: se calculan como (citas + evoluciones asociadas) × precio del servicio.
+            </p>
+            {% else %}
+            <div class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white py-16 text-center">
+                <i class="fas fa-tooth mb-4 text-5xl text-slate-300"></i>
+                <h3 class="text-lg font-bold text-slate-700">No hay servicios en el catálogo</h3>
+                <p class="mt-1 text-sm text-slate-500">Crea servicios para ver su uso en el reporte</p>
+                <a href="{% url 'crear_servicio' %}"
+                   class="mt-5 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-sky-600/20 transition hover:from-sky-700 hover:to-cyan-600">
+                    <i class="fas fa-plus"></i> Nuevo Servicio
+                </a>
+            </div>
+            {% endif %}
+
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% endblock %}

@@ -26,6 +26,52 @@ def reportes_dashboard(request):
 
 
 @login_required
+@permiso_requerido('ver_reportes')
+def reporte_servicios(request):
+    """Reporte de uso de servicios (citas y evoluciones por servicio)."""
+    from core.tenant import get_empresa
+    from facturacion.models import Servicio
+
+    empresa = get_empresa(request)
+    if not empresa:
+        return render(request, 'reportes/servicios.html', {
+            'title': 'Reporte de Servicios',
+            'servicios': [],
+            'sin_empresa': True,
+        })
+
+    servicios = (
+        Servicio.objects.filter(empresa=empresa)
+        .annotate(
+            total_citas=Count('citas', filter=Q(citas__empresa=empresa), distinct=True),
+            total_evoluciones=Count('evoluciones', filter=Q(evoluciones__empresa=empresa), distinct=True),
+        )
+        .order_by('-total_citas', '-total_evoluciones', 'nombre')
+    )
+
+    servicios = list(servicios)
+    for s in servicios:
+        s.uso_total = s.total_citas + s.total_evoluciones
+        s.ingresos = s.uso_total * float(s.precio or 0)
+
+    total_servicios = len(servicios)
+    activos = sum(1 for s in servicios if s.activo)
+    total_citas = sum(s.total_citas for s in servicios)
+    total_evoluciones = sum(s.total_evoluciones for s in servicios)
+    ingresos_estimados = sum(s.ingresos for s in servicios)
+
+    return render(request, 'reportes/servicios.html', {
+        'title': 'Reporte de Servicios',
+        'servicios': servicios,
+        'total_servicios': total_servicios,
+        'activos': activos,
+        'total_citas': total_citas,
+        'total_evoluciones': total_evoluciones,
+        'ingresos_estimados': ingresos_estimados,
+    })
+
+
+@login_required
 @permiso_requerido('ver_reporte_pacientes')
 def reporte_pacientes(request):
     desde = request.GET.get('desde', '')
