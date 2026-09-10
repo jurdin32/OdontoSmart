@@ -46,12 +46,28 @@
 
                 <!-- Items -->
                 <div class="mt-8">
-                    <div class="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="mb-3 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
                         <label class="block text-base font-bold text-slate-800">Servicios / Productos</label>
-                        <button type="button" onclick="agregarItem()"
-                                class="inline-flex items-center justify-center gap-2 self-start rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-sky-600/20 transition hover:from-sky-700 hover:to-cyan-600 sm:self-auto">
-                            <i class="fas fa-plus"></i> Agregar Item
-                        </button>
+                        <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+                            <div class="flex items-center gap-2">
+                                <select id="servicioSelect"
+                                        class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-800 shadow-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100 sm:w-72">
+                                    <option value="">— Elegir del catálogo —</option>
+                                    {% for s in servicios %}
+                                    <option value="{{ s.id }}" data-nombre="{{ s.nombre }}" data-precio="{{ s.precio }}">{{ s.nombre }} · ${{ s.precio|floatformat:2 }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="button" onclick="agregarDesdeCatalogo()"
+                                        class="inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-xl border border-sky-300 bg-sky-50 px-4 py-2.5 text-sm font-semibold text-sky-700 transition hover:bg-sky-100">
+                                    <i class="fas fa-cart-plus"></i> Añadir
+                                </button>
+                            </div>
+                            <a href="{% url 'lista_servicios' %}" class="text-xs font-semibold text-slate-400 underline-offset-2 hover:text-sky-600 hover:underline sm:ml-2">Gestionar catálogo</a>
+                            <button type="button" onclick="agregarItem()"
+                                    class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-sky-600/20 transition hover:from-sky-700 hover:to-cyan-600">
+                                <i class="fas fa-plus"></i> Agregar Item
+                            </button>
+                        </div>
                     </div>
 
                     <div class="overflow-hidden rounded-2xl border border-slate-200">
@@ -186,6 +202,21 @@
     window.agregarItem = function() {
         items.push({descripcion: '', cantidad: 1, precio_unitario: 0});
         render();
+    };
+
+    // Agrega un item desde el catálogo de servicios (nombre + precio)
+    window.agregarDesdeCatalogo = function() {
+        var sel = document.getElementById('servicioSelect');
+        if (!sel) return;
+        var opt = sel.options[sel.selectedIndex];
+        if (!opt || !opt.value) return;
+        items.push({
+            descripcion: opt.getAttribute('data-nombre') || opt.text,
+            cantidad: 1,
+            precio_unitario: parseFloat(opt.getAttribute('data-precio')) || 0
+        });
+        render();
+        sel.value = '';
     };
 
     window.eliminarItem = function(i) {

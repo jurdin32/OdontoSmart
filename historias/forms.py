@@ -1,6 +1,7 @@
 from django import forms
 from .models import HistoriaClinica, Evolucion
 from medicos.models import Medico
+from facturacion.models import Servicio
 
 INPUT_CLASSES = ('mt-1 block w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100')
 
@@ -95,10 +96,12 @@ class EvolucionForm(forms.ModelForm):
     class Meta:
         model = Evolucion
         fields = ['medico', 'fecha', 'motivo', 'diagnostico', 'tratamiento', 'observaciones',
+                  'servicio',
                   'consentimiento_acepta', 'consentimiento_fecha', 'consentimiento_medico',
                   'costo', 'proxima_consulta', 'proxima_consulta_nota']
         widgets = {
             'medico': forms.Select(attrs={'class': INPUT_CLASSES}),
+            'servicio': forms.Select(attrs={'class': INPUT_CLASSES}),
             'fecha': forms.DateInput(
                 format='%Y-%m-%d',
                 attrs={'class': INPUT_CLASSES, 'type': 'date'}
@@ -141,9 +144,17 @@ class EvolucionForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        self.empresa = kwargs.pop('empresa', None)
         super().__init__(*args, **kwargs)
         self.fields['medico'].queryset = Medico.objects.filter(activo=True)
         self.fields['medico'].empty_label = 'Seleccione un médico'
+
+        qs_servicio = Servicio.objects.filter(activo=True)
+        if self.empresa:
+            qs_servicio = qs_servicio.filter(empresa=self.empresa)
+        self.fields['servicio'].queryset = qs_servicio
+        self.fields['servicio'].empty_label = 'Sin servicio (opcional)'
+        self.fields['servicio'].required = False
         # Consentimiento_medico es CharField, se llena automáticamente vía JS
         if 'consentimiento_medico' in self.fields:
             self.fields['consentimiento_medico'].widget.attrs['readonly'] = 'readonly'

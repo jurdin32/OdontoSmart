@@ -75,6 +75,11 @@
                             <label class="mb-1.5 block text-sm font-semibold text-slate-700">{{ form.estado.label }}</label>
                             {{ form.estado }}
                         </div>
+                        <div class="sm:col-span-2">
+                            <label class="mb-1.5 block text-sm font-semibold text-slate-700">{{ form.servicio.label }}</label>
+                            {{ form.servicio }}
+                            {% if form.servicio.errors %}<div class="mt-1.5 space-y-0.5">{% for e in form.servicio.errors %}<p class="text-xs font-medium text-red-600">{{ e }}</p>{% endfor %}</div>{% endif %}
+                        </div>
                     </div>
 
                     <div class="mt-5">

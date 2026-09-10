@@ -33,6 +33,11 @@ class Cita(models.Model):
         Medico, on_delete=models.SET_NULL, null=True, blank=True,
         related_name='citas', verbose_name='Doctor'
     )
+    servicio = models.ForeignKey(
+        'facturacion.Servicio', on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='citas', verbose_name='Servicio'
+    )
     fecha = models.DateField(verbose_name='Fecha de la cita')
     hora = models.TimeField(verbose_name='Hora de la cita')
     motivo = models.TextField(verbose_name='Motivo de consulta')

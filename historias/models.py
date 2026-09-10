@@ -231,6 +231,11 @@ class Evolucion(VersionModelMixin):
         Medico, on_delete=models.SET_NULL, null=True,
         verbose_name='Médico'
     )
+    servicio = models.ForeignKey(
+        'facturacion.Servicio', on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='evoluciones', verbose_name='Servicio'
+    )
     fecha = models.DateField(verbose_name='Fecha de consulta')
     motivo = models.TextField(verbose_name='Motivo de consulta')
     diagnostico = models.TextField(blank=True, verbose_name='Diagnóstico')

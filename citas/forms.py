@@ -2,6 +2,7 @@ from django import forms
 from .models import Cita
 from pacientes.models import Paciente
 from medicos.models import Medico
+from facturacion.models import Servicio
 from datetime import date, time
 
 # Clases compartidas para los campos (Tailwind CSS)
@@ -17,10 +18,11 @@ class CitaForm(forms.ModelForm):
 
     class Meta:
         model = Cita
-        fields = ['paciente', 'doctor', 'fecha', 'hora', 'motivo', 'estado', 'notas']
+        fields = ['paciente', 'doctor', 'fecha', 'hora', 'motivo', 'estado', 'servicio', 'notas']
         widgets = {
             'paciente': forms.Select(attrs={'class': INPUT_CLASSES}),
             'doctor': forms.Select(attrs={'class': INPUT_CLASSES}),
+            'servicio': forms.Select(attrs={'class': INPUT_CLASSES}),
             'fecha': forms.DateInput(
                 format='%Y-%m-%d',
                 attrs={'class': INPUT_CLASSES, 'type': 'date'}
@@ -60,6 +62,13 @@ class CitaForm(forms.ModelForm):
                 )
         self.fields['paciente'].queryset = qs_paciente
         self.fields['doctor'].queryset = qs_medico
+
+        qs_servicio = Servicio.objects.filter(activo=True)
+        if empresa:
+            qs_servicio = qs_servicio.filter(empresa=empresa)
+        self.fields['servicio'].queryset = qs_servicio
+        self.fields['servicio'].empty_label = 'Sin servicio (opcional)'
+        self.fields['servicio'].required = False
         self.fields['paciente'].empty_label = 'Seleccione un paciente'
         self.fields['doctor'].empty_label = 'Seleccione un doctor'
         self.fields['estado'].initial = 'PENDIENTE'

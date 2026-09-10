@@ -83,7 +83,7 @@ def nueva_evolucion(request, paciente_id):
     )
 
     if request.method == 'POST':
-        form = EvolucionForm(request.POST)
+        form = EvolucionForm(request.POST, empresa=paciente.empresa)
         if form.is_valid():
             evol = form.save(commit=False)
             evol.historia = historia
@@ -112,7 +112,7 @@ def nueva_evolucion(request, paciente_id):
             messages.success(request, 'Evolución registrada.')
             return redirect('historia', paciente_id=paciente.id)
     else:
-        form = EvolucionForm(initial={'fecha': timezone.localdate()})
+        form = EvolucionForm(initial={'fecha': timezone.localdate()}, empresa=paciente.empresa)
 
     return render(request, 'historias/evolucion_form.html', {
         'form': form, 'paciente': paciente, 'title': 'Nueva Evolución'
@@ -138,7 +138,7 @@ def editar_evolucion(request, evolucion_id):
         if version_form:
             evol.version = int(version_form)
 
-        form = EvolucionForm(request.POST, instance=evol)
+        form = EvolucionForm(request.POST, instance=evol, empresa=evol.historia.paciente.empresa)
         if form.is_valid():
             try:
                 evol = form.save()
@@ -146,7 +146,7 @@ def editar_evolucion(request, evolucion_id):
             except ConcurrentUpdateError as e:
                 messages.error(request, str(e))
                 evol.refresh_from_db()
-                form = EvolucionForm(instance=evol)
+                form = EvolucionForm(instance=evol, empresa=evol.historia.paciente.empresa)
                 return render(request, 'historias/evolucion_form.html', {
                     'form': form, 'paciente': evol.historia.paciente,
                     'evolucion': evol, 'object_version': evol.version,
@@ -171,7 +171,7 @@ def editar_evolucion(request, evolucion_id):
             messages.success(request, 'Evolución actualizada.')
             return redirect('historia', paciente_id=evol.historia.paciente.id)
     else:
-        form = EvolucionForm(instance=evol)
+        form = EvolucionForm(instance=evol, empresa=evol.historia.paciente.empresa)
     return render(request, 'historias/evolucion_form.html', {
         'form': form, 'paciente': evol.historia.paciente, 'evolucion': evol,
         'object_version': evol.version,

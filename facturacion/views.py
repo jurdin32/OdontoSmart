@@ -151,6 +151,7 @@ def crear_proforma(request):
         'form': form,
         'active': 'proformas',
         'items_json': items_json,
+        'servicios': Servicio.objects.filter(empresa=empresa, activo=True) if empresa else Servicio.objects.none(),
     }
     return render(request, 'facturacion/proforma_form.html', context)
 
@@ -212,6 +213,7 @@ def editar_proforma(request, proforma_id):
         'proforma': proforma,
         'active': 'proformas',
         'items_json': items_json,
+        'servicios': Servicio.objects.filter(empresa=empresa, activo=True) if empresa else Servicio.objects.none(),
     }
     return render(request, 'facturacion/proforma_form.html', context)
 
@@ -360,6 +362,7 @@ def crear_factura(request):
         'form': form,
         'active': 'facturas',
         'items_json': items_json,
+        'servicios': Servicio.objects.filter(empresa=empresa, activo=True) if empresa else Servicio.objects.none(),
     }
     return render(request, 'facturacion/factura_form.html', context)
 
@@ -480,6 +483,7 @@ def editar_factura(request, factura_id):
         'factura': factura,
         'active': 'facturas',
         'items_json': items_json,
+        'servicios': Servicio.objects.filter(empresa=empresa, activo=True) if empresa else Servicio.objects.none(),
     }
     return render(request, 'facturacion/factura_form.html', context)
 
