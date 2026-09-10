@@ -6,109 +6,120 @@
     {% include 'componentes/sidebar.html' with active='reportes' %}
     <main class="main-content">
         {% include 'componentes/topbar.html' %}
-        <div class="dashboard-content">
-            <div class="page-header page-header--between">
+        <div class="dashboard-content p-6 lg:p-8">
+            <!-- Encabezado -->
+            <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 class="page-title">Reporte de Valores</h1>
-                    <p class="page-subtitle">Ingresos por tratamientos odontológicos</p>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">Reporte de Valores</h1>
+                    <p class="mt-1 text-sm text-slate-500">Ingresos por tratamientos odontológicos</p>
                 </div>
-                <div class="header-actions">
-                    <a href="{% url 'reportes' %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver</a>
-                </div>
+                <a href="{% url 'reportes' %}"
+                   class="inline-flex items-center justify-center gap-2 self-start rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 sm:self-auto">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
             </div>
 
             <!-- Filtros -->
-            <form method="GET" class="report-filters">
-                <div class="filter-group">
-                    <label class="filter-label">Período</label>
-                    <select name="periodo" class="form-input filter-input">
-                        <option value="dia" {% if periodo == 'dia' %}selected{% endif %}>Por día</option>
-                        <option value="semana" {% if periodo == 'semana' %}selected{% endif %}>Por semana</option>
-                        <option value="mes" {% if periodo == 'mes' %}selected{% endif %}>Por mes</option>
-                        <option value="ano" {% if periodo == 'ano' %}selected{% endif %}>Por año</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label class="filter-label">Desde</label>
-                    <input type="date" name="desde" value="{{ desde }}" class="form-input filter-input">
-                </div>
-                <div class="filter-group">
-                    <label class="filter-label">Hasta</label>
-                    <input type="date" name="hasta" value="{{ hasta }}" class="form-input filter-input">
-                </div>
-                <div class="filter-group">
-                    <label class="filter-label">&nbsp;</label>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Filtrar</button>
+            <form method="GET" class="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div class="flex flex-wrap items-end gap-4">
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">Período</label>
+                        <select name="periodo"
+                                class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
+                            <option value="dia" {% if periodo == 'dia' %}selected{% endif %}>Por día</option>
+                            <option value="semana" {% if periodo == 'semana' %}selected{% endif %}>Por semana</option>
+                            <option value="mes" {% if periodo == 'mes' %}selected{% endif %}>Por mes</option>
+                            <option value="ano" {% if periodo == 'ano' %}selected{% endif %}>Por año</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">Desde</label>
+                        <input type="date" name="desde" value="{{ desde }}"
+                               class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-700 shadow-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">Hasta</label>
+                        <input type="date" name="hasta" value="{{ hasta }}"
+                               class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-700 shadow-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
+                    </div>
+                    <button type="submit"
+                            class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-sky-600/20 transition hover:from-sky-700 hover:to-cyan-600">
+                        <i class="fas fa-filter"></i> Filtrar
+                    </button>
                 </div>
             </form>
 
-            <!-- KPI Cards -->
-            <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);">
-                <div class="stat-card stat-card--blue">
-                    <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
-                    <div class="stat-info">
-                        <span class="stat-number">$ {{ total_ingresos|floatformat:2 }}</span>
-                        <span class="stat-label">Total ingresos</span>
+            <!-- KPIs -->
+            <div class="mb-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+                <div class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-sky-600"><i class="fas fa-dollar-sign"></i></div>
+                    <div class="min-w-0">
+                        <div class="text-2xl font-extrabold leading-none text-slate-900">$ {{ total_ingresos|floatformat:2 }}</div>
+                        <div class="mt-1 truncate text-sm text-slate-500">Total ingresos</div>
                     </div>
                 </div>
-                <div class="stat-card stat-card--green">
-                    <div class="stat-icon"><i class="fas fa-notes-medical"></i></div>
-                    <div class="stat-info">
-                        <span class="stat-number">{{ total_consultas }}</span>
-                        <span class="stat-label">Consultas con costo</span>
+                <div class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600"><i class="fas fa-notes-medical"></i></div>
+                    <div class="min-w-0">
+                        <div class="text-2xl font-extrabold leading-none text-slate-900">{{ total_consultas }}</div>
+                        <div class="mt-1 truncate text-sm text-slate-500">Consultas con costo</div>
                     </div>
                 </div>
-                <div class="stat-card stat-card--orange">
-                    <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
-                    <div class="stat-info">
-                        <span class="stat-number">$ {{ promedio|floatformat:2 }}</span>
-                        <span class="stat-label">Promedio por consulta</span>
+                <div class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600"><i class="fas fa-chart-line"></i></div>
+                    <div class="min-w-0">
+                        <div class="text-2xl font-extrabold leading-none text-slate-900">$ {{ promedio|floatformat:2 }}</div>
+                        <div class="mt-1 truncate text-sm text-slate-500">Promedio por consulta</div>
                     </div>
                 </div>
-                <div class="stat-card stat-card--purple">
-                    <div class="stat-icon"><i class="fas fa-arrow-up"></i></div>
-                    <div class="stat-info">
-                        <span class="stat-number">$ {{ max_costo|floatformat:2 }}</span>
-                        <span class="stat-label">Costo máximo</span>
+                <div class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-600"><i class="fas fa-arrow-up"></i></div>
+                    <div class="min-w-0">
+                        <div class="text-2xl font-extrabold leading-none text-slate-900">$ {{ max_costo|floatformat:2 }}</div>
+                        <div class="mt-1 truncate text-sm text-slate-500">Costo máximo</div>
                     </div>
                 </div>
             </div>
 
             <!-- Gráfico -->
-            <div class="report-section">
-                <div class="detail-card">
-                    <h3><i class="fas fa-chart-bar"></i> Ingresos por {{ periodo|default:'mes' }}</h3>
+            <section class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <h2 class="mb-4 text-lg font-bold text-slate-800">
+                    <i class="fas fa-chart-bar mr-1 text-sky-500"></i> Ingresos por {{ periodo|default:'mes' }}
+                </h2>
+                <div class="relative h-72 w-full">
                     <canvas id="valoresChart" height="100"></canvas>
                 </div>
-            </div>
+            </section>
 
-            <!-- Tabla de datos -->
-            <div class="report-section">
-                <div class="detail-card">
-                    <h3><i class="fas fa-table"></i> Detalle por período</h3>
-                    <div class="table-container" style="margin-top:12px;">
-                        <table class="table">
-                            <thead>
+            <!-- Detalle por período -->
+            <section class="mb-6">
+                <h2 class="mb-3 text-lg font-bold text-slate-800">
+                    <i class="fas fa-table mr-1 text-slate-400"></i> Detalle por período
+                </h2>
+                <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                            <thead class="bg-slate-50">
                                 <tr>
-                                    <th>Período</th>
-                                    <th>Consultas</th>
-                                    <th>Total</th>
-                                    <th>Promedio</th>
+                                    <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Período</th>
+                                    <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Consultas</th>
+                                    <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Total</th>
+                                    <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Promedio</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="divide-y divide-slate-100 bg-white">
                                 {% for d in datos_periodo %}
-                                <tr>
-                                    <td><strong>{{ d.periodo|date }}</strong></td>
-                                    <td>{{ d.cantidad }}</td>
-                                    <td><strong>$ {{ d.total|floatformat:2 }}</strong></td>
-                                    <td>$ {{ d.promedio|floatformat:2 }}</td>
+                                <tr class="transition hover:bg-slate-50">
+                                    <td class="whitespace-nowrap px-6 py-4 font-semibold text-slate-800">{{ d.periodo|date }}</td>
+                                    <td class="px-6 py-4 text-slate-600">{{ d.cantidad }}</td>
+                                    <td class="whitespace-nowrap px-6 py-4 font-semibold text-slate-800">$ {{ d.total|floatformat:2 }}</td>
+                                    <td class="whitespace-nowrap px-6 py-4 text-slate-600">$ {{ d.promedio|floatformat:2 }}</td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="4" style="text-align:center;padding:30px;color:var(--gray-400);">
-                                        <i class="fas fa-inbox" style="font-size:1.5rem;display:block;margin-bottom:8px;"></i>
-                                        No hay datos para el período seleccionado
+                                    <td colspan="4" class="px-6 py-16 text-center">
+                                        <i class="fas fa-inbox mb-3 block text-3xl text-slate-300"></i>
+                                        <span class="text-sm font-semibold text-slate-500">No hay datos para el período seleccionado</span>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -116,42 +127,42 @@
                         </table>
                     </div>
                 </div>
-            </div>
+            </section>
 
             <!-- Por médico -->
-            <div class="report-section">
-                <div class="detail-card">
-                    <h3><i class="fas fa-user-md"></i> Ingresos por médico</h3>
-                    <div class="table-container" style="margin-top:12px;">
-                        <table class="table">
-                            <thead>
+            <section>
+                <h2 class="mb-3 text-lg font-bold text-slate-800">
+                    <i class="fas fa-user-md mr-1 text-slate-400"></i> Ingresos por médico
+                </h2>
+                <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                            <thead class="bg-slate-50">
                                 <tr>
-                                    <th>Médico</th>
-                                    <th>Consultas</th>
-                                    <th>Total</th>
-                                    <th>Promedio</th>
+                                    <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Médico</th>
+                                    <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Consultas</th>
+                                    <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Total</th>
+                                    <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Promedio</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="divide-y divide-slate-100 bg-white">
                                 {% for m in por_medico %}
-                                <tr>
-                                    <td><strong>Dr. {{ m.medico__nombres }} {{ m.medico__apellidos }}</strong></td>
-                                    <td>{{ m.cantidad }}</td>
-                                    <td><strong>$ {{ m.total|floatformat:2 }}</strong></td>
-                                    <td>$ {{ m.total|floatformat:2|default:'0.00' }}</td>
+                                <tr class="transition hover:bg-slate-50">
+                                    <td class="px-6 py-4 font-semibold text-slate-800">Dr. {{ m.medico__nombres }} {{ m.medico__apellidos }}</td>
+                                    <td class="px-6 py-4 text-slate-600">{{ m.cantidad }}</td>
+                                    <td class="whitespace-nowrap px-6 py-4 font-semibold text-slate-800">$ {{ m.total|floatformat:2 }}</td>
+                                    <td class="whitespace-nowrap px-6 py-4 text-slate-600">$ {{ m.total|floatformat:2|default:'0.00' }}</td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="4" style="text-align:center;padding:30px;color:var(--gray-400);">
-                                        No hay datos
-                                    </td>
+                                    <td colspan="4" class="px-6 py-10 text-center text-sm text-slate-400">No hay datos</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
                 </div>
-            </div>
+            </section>
         </div>
     </main>
 </div>

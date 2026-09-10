@@ -6,122 +6,162 @@
 {% block content %}
 <div class="dashboard">
     {% include 'componentes/sidebar.html' with active='proformas' %}
+
     <main class="main-content">
         {% include 'componentes/topbar.html' %}
-        <div class="dashboard-content">
-            <div class="page-header page-header--between">
+
+        <div class="dashboard-content p-6 lg:p-8">
+            <!-- Encabezado -->
+            <div class="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                    <h1 class="page-title">{{ proforma.numero }}</h1>
-                    <p class="page-subtitle">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">{{ proforma.numero }}</h1>
+                        {% if proforma.estado == 'PENDIENTE' %}
+                        <span class="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">Pendiente</span>
+                        {% elif proforma.estado == 'APROBADA' %}
+                        <span class="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">Aprobada</span>
+                        {% elif proforma.estado == 'RECHAZADA' %}
+                        <span class="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-700">Rechazada</span>
+                        {% elif proforma.estado == 'VENCIDA' %}
+                        <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">Vencida</span>
+                        {% elif proforma.estado == 'FACTURADA' %}
+                        <span class="inline-flex items-center rounded-full bg-sky-100 px-3 py-1 text-xs font-bold text-sky-700">Facturada</span>
+                        {% endif %}
+                    </div>
+                    <p class="mt-1 text-sm text-slate-500">
                         {{ proforma.paciente }} — {{ proforma.fecha_emision|date:"d/m/Y" }}
                     </p>
                 </div>
-                <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                    <a href="{% url 'imprimir_proforma' proforma.id %}" class="btn btn-secondary" target="_blank">
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <a href="{% url 'imprimir_proforma' proforma.id %}" target="_blank"
+                       class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-50">
                         <i class="fas fa-print"></i> Imprimir
                     </a>
                     {% tiene_permiso 'editar_proformas' as puede_editar %}
                     {% if puede_editar and proforma.estado != 'FACTURADA' %}
-                    <a href="{% url 'editar_proforma' proforma.id %}" class="btn btn-secondary">
+                    <a href="{% url 'editar_proforma' proforma.id %}"
+                       class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-50">
                         <i class="fas fa-edit"></i> Editar
                     </a>
                     {% endif %}
                     {% tiene_permiso 'crear_facturas' as puede_facturar %}
                     {% if puede_facturar and proforma.estado == 'APROBADA' or puede_facturar and proforma.estado == 'PENDIENTE' %}
-                    <form method="POST" action="{% url 'proforma_a_factura' proforma.id %}" style="display:inline;">
+                    <form method="POST" action="{% url 'proforma_a_factura' proforma.id %}">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-success">
+                        <button type="submit"
+                                class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-600/20 transition hover:bg-emerald-700">
                             <i class="fas fa-file-invoice"></i> Generar Factura
                         </button>
                     </form>
                     {% endif %}
                     {% tiene_permiso 'eliminar_proformas' as puede_eliminar %}
                     {% if puede_eliminar and proforma.estado != 'FACTURADA' %}
-                    <form method="POST" action="{% url 'eliminar_proforma' proforma.id %}" style="display:inline;">
+                    <form method="POST" action="{% url 'eliminar_proforma' proforma.id %}">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-danger" onclick="return confirm('¿Eliminar esta proforma?')">
-                            <i class="fas fa-trash"></i>
+                        <button type="submit" title="Eliminar" onclick="return confirm('¿Eliminar esta proforma?')"
+                                class="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-red-600/20 transition hover:bg-red-700">
+                            <i class="fas fa-trash"></i> Eliminar
                         </button>
                     </form>
                     {% endif %}
                 </div>
             </div>
 
-            <div class="detail-grid-2col">
-                <!-- Detalle -->
-                <div class="form-card">
-                    <h3 style="margin-bottom:16px;">Servicios</h3>
-                    <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Descripción</th>
-                                <th>Cant.</th>
-                                <th>P. Unit.</th>
-                                <th>Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for item in proforma.items %}
-                            <tr>
-                                <td data-label="Descripción">{{ item.descripcion }}</td>
-                                <td data-label="Cant.">{{ item.cantidad }}</td>
-                                <td data-label="P. Unit.">${{ item.precio_unitario|floatformat:2 }}</td>
-                                <td data-label="Total">${{ item.cantidad|multiply:item.precio_unitario|floatformat:2 }}</td>
-                            </tr>
-                            {% empty %}
-                            <tr><td colspan="4" style="text-align:center;">Sin items</td></tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                <!-- Detalle: Servicios -->
+                <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm lg:col-span-2">
+                    <div class="flex items-center gap-3 border-b border-slate-100 px-5 py-4">
+                        <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-100 text-sky-600"><i class="fas fa-list"></i></span>
+                        <h3 class="text-sm font-bold text-slate-800">Servicios</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                            <thead class="bg-slate-50">
+                                <tr>
+                                    <th class="px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Descripción</th>
+                                    <th class="px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Cant.</th>
+                                    <th class="px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">P. Unit.</th>
+                                    <th class="px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 bg-white">
+                                {% for item in proforma.items %}
+                                <tr class="transition hover:bg-slate-50">
+                                    <td class="px-5 py-3.5 font-medium text-slate-700">{{ item.descripcion }}</td>
+                                    <td class="px-5 py-3.5 text-slate-600">{{ item.cantidad }}</td>
+                                    <td class="px-5 py-3.5 text-slate-600">${{ item.precio_unitario|floatformat:2 }}</td>
+                                    <td class="px-5 py-3.5 font-bold text-slate-800">${{ item.cantidad|multiply:item.precio_unitario|floatformat:2 }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="px-5 py-10 text-center text-sm text-slate-400">Sin items</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
-                <!-- Totales -->
-                <div class="detail-sidebar">
+                <!-- Totales y metadatos -->
+                <div class="space-y-6">
                     <!-- Resumen -->
-                    <div class="detail-card">
-                        <div class="detail-card-header">
-                            <div class="detail-card-icon" style="background:#ecfdf5;color:var(--success);"><i class="fas fa-calculator"></i></div>
-                            <span class="detail-card-title">Resumen</span>
+                    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+                        <div class="flex items-center gap-3 border-b border-slate-100 px-5 py-4">
+                            <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600"><i class="fas fa-calculator"></i></span>
+                            <h3 class="text-sm font-bold text-slate-800">Resumen</h3>
                         </div>
-                        <div class="detail-card-body">
-                            <div class="detail-row"><span>Subtotal</span><strong>${{ proforma.subtotal|floatformat:2 }}</strong></div>
+                        <dl class="px-5 py-4 text-sm">
+                            <div class="flex items-center justify-between gap-4 py-2">
+                                <dt class="text-slate-500">Subtotal</dt>
+                                <dd class="font-semibold text-slate-800">${{ proforma.subtotal|floatformat:2 }}</dd>
+                            </div>
                             {% if proforma.descuento_porcentaje > 0 %}
-                            <div class="detail-row detail-row-red"><span>Descuento ({{ proforma.descuento_porcentaje }}%)</span><strong>-${{ proforma.descuento_monto|floatformat:2 }}</strong></div>
+                            <div class="flex items-center justify-between gap-4 py-2">
+                                <dt class="text-red-600">Descuento ({{ proforma.descuento_porcentaje }}%)</dt>
+                                <dd class="font-semibold text-red-600">-${{ proforma.descuento_monto|floatformat:2 }}</dd>
+                            </div>
                             {% endif %}
                             {% if proforma.impuesto_porcentaje > 0 %}
-                            <div class="detail-row"><span>Impuesto ({{ proforma.impuesto_porcentaje }}%)</span><strong>${{ proforma.impuesto_monto|floatformat:2 }}</strong></div>
+                            <div class="flex items-center justify-between gap-4 py-2">
+                                <dt class="text-slate-500">Impuesto ({{ proforma.impuesto_porcentaje }}%)</dt>
+                                <dd class="font-semibold text-slate-800">${{ proforma.impuesto_monto|floatformat:2 }}</dd>
+                            </div>
                             {% endif %}
-                            <div class="detail-row detail-row-total"><span>TOTAL</span><strong>${{ proforma.total|floatformat:2 }}</strong></div>
-                        </div>
+                            <div class="mt-2 flex items-center justify-between gap-4 border-t border-slate-200 pt-4">
+                                <dt class="text-sm font-black uppercase tracking-wide text-slate-800">Total</dt>
+                                <dd class="text-2xl font-black text-sky-700">${{ proforma.total|floatformat:2 }}</dd>
+                            </div>
+                        </dl>
                     </div>
 
                     <!-- Información -->
-                    <div class="detail-card">
-                        <div class="detail-card-header">
-                            <div class="detail-card-icon" style="background:#eff6ff;color:var(--primary);"><i class="fas fa-info-circle"></i></div>
-                            <span class="detail-card-title">Información</span>
+                    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+                        <div class="flex items-center gap-3 border-b border-slate-100 px-5 py-4">
+                            <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-100 text-sky-600"><i class="fas fa-info-circle"></i></span>
+                            <h3 class="text-sm font-bold text-slate-800">Información</h3>
                         </div>
-                        <div class="detail-card-body">
-                            <div class="detail-row"><span>Paciente</span><span>{{ proforma.paciente }}</span></div>
-                            <div class="detail-row"><span>Médico</span><span>{{ proforma.medico|default:"-" }}</span></div>
-                            <div class="detail-row"><span>Emisión</span><span>{{ proforma.fecha_emision|date:"d/m/Y" }}</span></div>
-                            <div class="detail-row"><span>Validez</span><span>{{ proforma.fecha_validez|date:"d/m/Y" }}</span></div>
-                            <div class="detail-row"><span>Estado</span><span>{{ proforma.get_estado_display }}</span></div>
-                            <div class="detail-row"><span>Creado por</span><span>{{ proforma.registrado_por.get_full_name|default:proforma.registrado_por.username }}</span></div>
-                        </div>
+                        <dl class="divide-y divide-slate-50 px-5 py-2 text-sm">
+                            <div class="flex justify-between gap-4 py-2.5"><dt class="text-slate-500">Paciente</dt><dd class="text-right font-medium text-slate-800">{{ proforma.paciente }}</dd></div>
+                            <div class="flex justify-between gap-4 py-2.5"><dt class="text-slate-500">Médico</dt><dd class="text-right font-medium text-slate-800">{{ proforma.medico|default:"—" }}</dd></div>
+                            <div class="flex justify-between gap-4 py-2.5"><dt class="text-slate-500">Emisión</dt><dd class="font-medium text-slate-800">{{ proforma.fecha_emision|date:"d/m/Y" }}</dd></div>
+                            <div class="flex justify-between gap-4 py-2.5"><dt class="text-slate-500">Validez</dt><dd class="font-medium text-slate-800">{{ proforma.fecha_validez|date:"d/m/Y" }}</dd></div>
+                            <div class="flex justify-between gap-4 py-2.5"><dt class="text-slate-500">Estado</dt><dd class="font-medium text-slate-800">{{ proforma.get_estado_display }}</dd></div>
+                            <div class="flex justify-between gap-4 py-2.5">
+                                <dt class="text-slate-500">Creado por</dt>
+                                <dd class="text-right font-medium text-slate-800">{{ proforma.registrado_por.get_full_name|default:proforma.registrado_por.username|default:"—" }}</dd>
+                            </div>
+                        </dl>
                     </div>
 
+                    <!-- Notas -->
                     {% if proforma.notas %}
-                    <div class="detail-card">
-                        <div class="detail-card-header">
-                            <div class="detail-card-icon" style="background:#fef3c7;color:#d97706;"><i class="fas fa-sticky-note"></i></div>
-                            <span class="detail-card-title">Notas</span>
+                    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+                        <div class="flex items-center gap-3 border-b border-slate-100 px-5 py-4">
+                            <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-100 text-amber-600"><i class="fas fa-sticky-note"></i></span>
+                            <h3 class="text-sm font-bold text-slate-800">Notas</h3>
                         </div>
-                        <div class="detail-card-body">
-                            <p style="font-size:.85rem;color:var(--gray-600);padding:4px 0;">{{ proforma.notas|linebreaks }}</p>
-                        </div>
+                        <div class="px-5 py-4 text-sm leading-relaxed text-slate-600">{{ proforma.notas|linebreaks }}</div>
                     </div>
                     {% endif %}
                 </div>

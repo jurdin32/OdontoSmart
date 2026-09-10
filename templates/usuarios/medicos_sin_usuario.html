@@ -6,52 +6,73 @@
     {% include 'componentes/sidebar.html' with active='usuarios' %}
     <main class="main-content">
         {% include 'componentes/topbar.html' %}
-        <div class="dashboard-content">
-            <div class="page-header page-header--between">
+        <div class="dashboard-content p-6 lg:p-8">
+            <!-- Encabezado -->
+            <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 class="page-title">🩺 Vincular Médicos</h1>
-                    <p class="page-subtitle">Médicos sin usuario asignado — crea su acceso al sistema</p>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">Vincular Médicos</h1>
+                    <p class="mt-1 text-sm text-slate-500">Médicos sin usuario asignado — crea su acceso al sistema</p>
                 </div>
-                <a href="{% url 'lista_usuarios' %}" class="btn btn-secondary">
+                <a href="{% url 'lista_usuarios' %}"
+                   class="inline-flex items-center justify-center gap-2 self-start rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 sm:self-auto">
                     <i class="fas fa-arrow-left"></i> Volver
                 </a>
             </div>
+
             {% if medicos %}
-            <div class="table-responsive">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Médico</th>
-                            <th>Cédula</th>
-                            <th>Especialidad</th>
-                            <th>Registro Prof.</th>
-                            <th>Teléfono</th>
-                            <th>Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for m in medicos %}
-                        <tr>
-                            <td><strong>Dr. {{ m.nombre_completo }}</strong></td>
-                            <td>{{ m.cedula }}</td>
-                            <td>{{ m.get_especialidad_display }}</td>
-                            <td>{{ m.registro_profesional }}</td>
-                            <td>{{ m.telefono }}</td>
-                            <td>
-                                <a href="{% url 'crear_usuario_desde_medico' m.id %}" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-user-plus"></i> Crear Usuario
-                                </a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Médico</th>
+                                <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Cédula</th>
+                                <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Especialidad</th>
+                                <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Registro Prof.</th>
+                                <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Teléfono</th>
+                                <th class="px-6 py-3 text-right text-xs font-bold uppercase tracking-wider text-slate-500">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 bg-white">
+                            {% for m in medicos %}
+                            <tr class="transition hover:bg-slate-50">
+                                <td class="whitespace-nowrap px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-emerald-400 text-white">
+                                            <i class="fas fa-user-md"></i>
+                                        </span>
+                                        <span class="font-semibold text-slate-800">Dr. {{ m.nombre_completo }}</span>
+                                    </div>
+                                </td>
+                                <td class="whitespace-nowrap px-6 py-4 text-slate-600">{{ m.cedula }}</td>
+                                <td class="whitespace-nowrap px-6 py-4">
+                                    <span class="inline-flex items-center rounded-full bg-indigo-100 px-3 py-1 text-xs font-bold text-indigo-700">{{ m.get_especialidad_display }}</span>
+                                </td>
+                                <td class="whitespace-nowrap px-6 py-4 text-slate-600">{{ m.registro_profesional }}</td>
+                                <td class="whitespace-nowrap px-6 py-4 text-slate-600">{{ m.telefono|default:'—' }}</td>
+                                <td class="whitespace-nowrap px-6 py-4">
+                                    <div class="flex items-center justify-end">
+                                        <a href="{% url 'crear_usuario_desde_medico' m.id %}"
+                                           class="inline-flex items-center gap-2 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-bold text-sky-700 transition hover:border-sky-300 hover:bg-sky-100">
+                                            <i class="fas fa-user-plus"></i> Crear Usuario
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
             {% else %}
-            <div class="empty-state">
-                <i class="fas fa-check-circle" style="font-size:3rem;color:var(--success);margin-bottom:16px;"></i>
-                <h3>Todos los médicos tienen usuario</h3>
-                <p>No hay médicos pendientes de vinculación.</p>
+            <div class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white py-16 text-center">
+                <i class="fas fa-check-circle mb-4 text-5xl text-emerald-400"></i>
+                <h3 class="text-lg font-bold text-slate-700">Todos los médicos tienen usuario</h3>
+                <p class="mt-1 text-sm text-slate-500">No hay médicos pendientes de vinculación.</p>
+                <a href="{% url 'lista_usuarios' %}"
+                   class="mt-5 inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-50">
+                    <i class="fas fa-arrow-left"></i> Volver a Usuarios
+                </a>
             </div>
             {% endif %}
         </div>

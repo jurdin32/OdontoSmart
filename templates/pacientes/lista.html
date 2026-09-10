@@ -8,69 +8,87 @@
     <main class="main-content">
         {% include 'componentes/topbar.html' %}
 
-        <div class="dashboard-content">
-            <div class="page-header page-header--between">
+        <div class="dashboard-content p-6 lg:p-8">
+            <!-- Encabezado -->
+            <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 class="page-title">Pacientes</h1>
-                    <p class="page-subtitle">Lista de pacientes registrados en el sistema</p>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">Pacientes</h1>
+                    <p class="mt-1 text-sm text-slate-500">Lista de pacientes registrados en el sistema</p>
                 </div>
-                <a href="{% url 'registrar_paciente' %}" class="btn btn-primary">
+                <a href="{% url 'registrar_paciente' %}"
+                   class="inline-flex items-center justify-center gap-2 self-start rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-sky-600/20 transition hover:from-sky-700 hover:to-cyan-600 sm:self-auto">
                     <i class="fas fa-plus"></i> Nuevo Paciente
                 </a>
             </div>
 
             {% if query %}
-            <div class="search-info">
-                <i class="fas fa-search"></i> Resultados para "<strong>{{ query }}</strong>" — 
-                <span>{{ pacientes|length }} paciente{{ pacientes|length|pluralize:'s' }}</span>
-                <a href="{% url 'lista_pacientes' %}" class="search-clear"><i class="fas fa-times"></i> Limpiar</a>
+            <div class="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800">
+                <i class="fas fa-search"></i>
+                <span>Resultados para "<strong>{{ query }}</strong>" — <span class="font-semibold">{{ pacientes|length }} paciente{{ pacientes|length|pluralize:'s' }}</span></span>
+                <a href="{% url 'lista_pacientes' %}" class="ml-auto font-semibold text-sky-700 transition hover:text-sky-900">
+                    <i class="fas fa-times"></i> Limpiar
+                </a>
             </div>
             {% endif %}
 
             {% if pacientes %}
-            <!-- Vista tabla (escritorio) -->
-            <div class="table-container">
-                <table class="table">
-                    <thead>
+            <!-- Tabla escritorio -->
+            <div class="hidden overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm md:block">
+                <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                    <thead class="bg-slate-50">
                         <tr>
-                            <th>#</th>
-                            <th>Nombres</th>
-                            <th>Apellidos</th>
-                            <th>Cédula</th>
-                            <th>Edad</th>
-                            <th>Teléfono</th>
-                            <th>Género</th>
-                            <th>Acciones</th>
+                            <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">#</th>
+                            <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Nombres</th>
+                            <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Apellidos</th>
+                            <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Cédula</th>
+                            <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Edad</th>
+                            <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Teléfono</th>
+                            <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Género</th>
+                            <th class="px-6 py-3 text-right text-xs font-bold uppercase tracking-wider text-slate-500">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="divide-y divide-slate-100 bg-white">
                         {% for p in pacientes %}
-                        <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ p.nombres }}</td>
-                            <td>{{ p.apellidos }}</td>
-                            <td>{{ p.cedula }}</td>
-                            <td>{{ p.edad }} años</td>
-                            <td>{{ p.telefono }}</td>
-                            <td>{{ p.get_genero_display }}</td>
-                            <td class="actions-cell">
-                                <a href="{% url 'detalle_paciente' p.id %}" class="btn-action btn-view" title="Ver">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <a href="{% url 'editar_paciente' p.id %}" class="btn-action btn-edit" title="Editar">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a href="{% url 'historia' p.id %}" class="btn-action btn-history" title="Historia Clínica">
-                                    <i class="fas fa-notes-medical"></i>
-                                </a>
-                                <button type="button" class="btn-action btn-delete" title="Eliminar"
-                                    data-id="{{ p.id }}"
-                                    data-nombre="{{ p.nombres }} {{ p.apellidos }}"
-                                    data-cedula="{{ p.cedula }}"
-                                    data-edad="{{ p.edad }}"
-                                    data-telefono="{{ p.telefono }}">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+                        <tr class="paciente-fila transition hover:bg-slate-50">
+                            <td class="whitespace-nowrap px-6 py-4 text-slate-400">{{ forloop.counter }}</td>
+                            <td class="whitespace-nowrap px-6 py-4 font-semibold text-slate-800">{{ p.nombres }}</td>
+                            <td class="whitespace-nowrap px-6 py-4 text-slate-600">{{ p.apellidos }}</td>
+                            <td class="whitespace-nowrap px-6 py-4 text-slate-600">{{ p.cedula }}</td>
+                            <td class="whitespace-nowrap px-6 py-4 text-slate-600">{{ p.edad }} años</td>
+                            <td class="whitespace-nowrap px-6 py-4 text-slate-600">{{ p.telefono|default:"—" }}</td>
+                            <td class="whitespace-nowrap px-6 py-4">
+                                {% if p.genero == 'M' %}
+                                <span class="inline-flex items-center gap-1 rounded-full bg-sky-100 px-3 py-1 text-xs font-bold text-sky-700"><i class="fas fa-mars"></i> Masculino</span>
+                                {% elif p.genero == 'F' %}
+                                <span class="inline-flex items-center gap-1 rounded-full bg-pink-100 px-3 py-1 text-xs font-bold text-pink-700"><i class="fas fa-venus"></i> Femenino</span>
+                                {% else %}
+                                <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">{{ p.get_genero_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="whitespace-nowrap px-6 py-4">
+                                <div class="flex items-center justify-end gap-2">
+                                    <a href="{% url 'detalle_paciente' p.id %}" title="Ver"
+                                       class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-600">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'editar_paciente' p.id %}" title="Editar"
+                                       class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-slate-400 hover:bg-slate-100 hover:text-slate-700">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'historia' p.id %}" title="Historia Clínica"
+                                       class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-teal-300 hover:bg-teal-50 hover:text-teal-600">
+                                        <i class="fas fa-notes-medical"></i>
+                                    </a>
+                                    <button type="button" class="btn-delete inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-red-300 hover:bg-red-50 hover:text-red-600"
+                                            title="Eliminar"
+                                            data-id="{{ p.id }}"
+                                            data-nombre="{{ p.nombres }} {{ p.apellidos }}"
+                                            data-cedula="{{ p.cedula }}"
+                                            data-edad="{{ p.edad }}"
+                                            data-telefono="{{ p.telefono }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
@@ -78,66 +96,59 @@
                 </table>
             </div>
 
-            <!-- Vista tarjetas (móvil) - estilo médicos -->
-            <div class="data-cards">
+            <!-- Tarjetas móvil -->
+            <div class="grid gap-4 md:hidden">
                 {% for p in pacientes %}
-                <div class="data-card">
-                    <div class="data-card-header">
-                        <div class="data-card-icon">
+                <div class="paciente-card rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+                     data-search="{{ p.nombres|lower }} {{ p.apellidos|lower }} {{ p.cedula }}">
+                    <div class="flex items-center gap-3">
+                        <div class="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-sky-500 to-cyan-400 text-lg font-bold text-white">
                             {% if p.foto %}
-                            <img src="{{ p.foto.url }}" alt="{{ p.nombres }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+                            <img src="{{ p.foto.url }}" alt="{{ p.nombres }}" class="h-full w-full object-cover">
                             {% else %}
                             {{ p.nombres|first|upper }}
                             {% endif %}
                         </div>
-                        <div class="data-card-info">
-                            <h3 class="data-card-title">{{ p.nombres }} {{ p.apellidos }}</h3>
-                            <span class="data-card-sub">
-                                <span class="badge {% if p.genero == 'M' %}badge-primary{% else %}badge-danger{% endif %}">
-                                    {% if p.genero == 'M' %}<i class="fas fa-mars"></i>{% elif p.genero == 'F' %}<i class="fas fa-venus"></i>{% endif %}
-                                    {{ p.get_genero_display }}
-                                </span>
-                            </span>
+                        <div class="min-w-0 flex-1">
+                            <h3 class="truncate font-bold text-slate-800">{{ p.nombres }} {{ p.apellidos }}</h3>
+                            <div class="mt-1">
+                                {% if p.genero == 'M' %}
+                                <span class="inline-flex items-center gap-1 rounded-full bg-sky-100 px-2 py-0.5 text-[0.65rem] font-bold text-sky-700"><i class="fas fa-mars"></i> Masculino</span>
+                                {% elif p.genero == 'F' %}
+                                <span class="inline-flex items-center gap-1 rounded-full bg-pink-100 px-2 py-0.5 text-[0.65rem] font-bold text-pink-700"><i class="fas fa-venus"></i> Femenino</span>
+                                {% else %}
+                                <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[0.65rem] font-bold text-slate-600">{{ p.get_genero_display }}</span>
+                                {% endif %}
+                            </div>
                         </div>
-                        <div class="data-card-actions">
-                            <a href="{% url 'detalle_paciente' p.id %}" class="data-card-btn data-card-btn-primary" title="Ver">
+                        <div class="flex shrink-0 gap-1.5">
+                            <a href="{% url 'detalle_paciente' p.id %}" title="Ver"
+                               class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-600">
                                 <i class="fas fa-eye"></i>
                             </a>
-                            <a href="{% url 'editar_paciente' p.id %}" class="data-card-btn data-card-btn-warning" title="Editar">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <a href="{% url 'historia' p.id %}" class="data-card-btn data-card-btn-primary" title="Historia Clínica">
-                                <i class="fas fa-notes-medical"></i>
-                            </a>
-                            <button type="button" class="data-card-btn data-card-btn-danger" title="Eliminar"
-                                data-id="{{ p.id }}"
-                                data-nombre="{{ p.nombres }} {{ p.apellidos }}">
+                            <button type="button" class="btn-delete inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-red-300 hover:bg-red-50 hover:text-red-600"
+                                    title="Eliminar"
+                                    data-id="{{ p.id }}"
+                                    data-nombre="{{ p.nombres }} {{ p.apellidos }}"
+                                    data-cedula="{{ p.cedula }}"
+                                    data-edad="{{ p.edad }}"
+                                    data-telefono="{{ p.telefono }}">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
                     </div>
-                    <div class="data-card-body">
-                        <div class="data-card-row">
-                            <i class="fas fa-id-card"></i>
-                            <span class="data-card-row-label">Cédula</span>
-                            <span class="data-card-row-value">{{ p.cedula }}</span>
-                        </div>
-                        <div class="data-card-row">
-                            <i class="fas fa-calendar-alt"></i>
-                            <span class="data-card-row-label">Edad</span>
-                            <span class="data-card-row-value">{{ p.edad }} años</span>
-                        </div>
-                        <div class="data-card-row">
-                            <i class="fas fa-phone"></i>
-                            <span class="data-card-row-label">Teléfono</span>
-                            <span class="data-card-row-value">{{ p.telefono }}</span>
-                        </div>
+                    <div class="mt-3 space-y-1.5 border-t border-slate-100 pt-3 text-sm text-slate-600">
+                        <div class="flex items-center gap-2"><i class="fas fa-id-card w-4 text-center text-slate-400"></i><span>Cédula:</span><span class="ml-auto font-medium text-slate-700">{{ p.cedula }}</span></div>
+                        <div class="flex items-center gap-2"><i class="fas fa-calendar-alt w-4 text-center text-slate-400"></i><span>Edad:</span><span class="ml-auto font-medium text-slate-700">{{ p.edad }} años</span></div>
+                        <div class="flex items-center gap-2"><i class="fas fa-phone w-4 text-center text-slate-400"></i><span>Teléfono:</span><span class="ml-auto font-medium text-slate-700">{{ p.telefono|default:"—" }}</span></div>
                     </div>
-                    <div class="data-card-footer">
-                        <a href="{% url 'detalle_paciente' p.id %}" class="btn btn-sm btn-primary">
+                    <div class="mt-4 flex gap-2">
+                        <a href="{% url 'detalle_paciente' p.id %}"
+                           class="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-sky-400 hover:bg-sky-50 hover:text-sky-700">
                             <i class="fas fa-eye"></i> Ver ficha
                         </a>
-                        <a href="{% url 'historia' p.id %}" class="btn btn-sm btn-secondary">
+                        <a href="{% url 'historia' p.id %}"
+                           class="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-teal-400 hover:bg-teal-50 hover:text-teal-700">
                             <i class="fas fa-notes-medical"></i> Historia
                         </a>
                     </div>
@@ -147,11 +158,12 @@
 
             {% include 'componentes/pagination.html' with page_obj=pacientes %}
             {% else %}
-            <div class="empty-state">
-                <i class="fas fa-users fa-4x"></i>
-                <h3>No hay pacientes registrados</h3>
-                <p>Comienza registrando el primer paciente</p>
-                <a href="{% url 'registrar_paciente' %}" class="btn btn-primary">
+            <div class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white py-16 text-center">
+                <i class="fas fa-users mb-4 text-5xl text-slate-300"></i>
+                <h3 class="text-lg font-bold text-slate-700">No hay pacientes registrados</h3>
+                <p class="mt-1 text-sm text-slate-500">Comienza registrando el primer paciente</p>
+                <a href="{% url 'registrar_paciente' %}"
+                   class="mt-5 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-sky-600/20 transition hover:from-sky-700 hover:to-cyan-600">
                     <i class="fas fa-plus"></i> Registrar Paciente
                 </a>
             </div>
@@ -159,36 +171,29 @@
         </div>
 
         <!-- Modal Eliminar Paciente -->
-        <div class="modal-overlay" id="deleteModal">
-            <div class="modal-container">
-                <div class="modal-icon">
+        <div id="deleteModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
+            <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+                <div class="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-2xl text-red-600">
                     <i class="fas fa-exclamation-triangle"></i>
                 </div>
-                <h2 class="modal-title">¿Eliminar paciente?</h2>
-                <p class="modal-text">
-                    Estás a punto de eliminar a <strong id="modalPatientName"></strong>.
-                    <br>Esta acción no se puede deshacer.
+                <h2 class="text-xl font-extrabold text-slate-900">¿Eliminar paciente?</h2>
+                <p class="mt-2 text-sm text-slate-500">
+                    Estás a punto de eliminar a <strong id="modalPatientName" class="text-slate-800"></strong>.
+                    Esta acción no se puede deshacer.
                 </p>
-                <div class="modal-info" id="modalInfo">
-                    <div class="modal-info-row">
-                        <span class="modal-info-label">Cédula</span>
-                        <span id="modalCedula"></span>
-                    </div>
-                    <div class="modal-info-row">
-                        <span class="modal-info-label">Edad</span>
-                        <span id="modalEdad"></span>
-                    </div>
-                    <div class="modal-info-row">
-                        <span class="modal-info-label">Teléfono</span>
-                        <span id="modalTelefono"></span>
-                    </div>
+                <div class="mt-4 space-y-2 rounded-xl bg-slate-50 p-4 text-sm">
+                    <div class="flex justify-between"><span class="text-slate-500">Cédula</span><span id="modalCedula" class="font-semibold text-slate-800"></span></div>
+                    <div class="flex justify-between"><span class="text-slate-500">Edad</span><span id="modalEdad" class="font-semibold text-slate-800"></span></div>
+                    <div class="flex justify-between"><span class="text-slate-500">Teléfono</span><span id="modalTelefono" class="font-semibold text-slate-800"></span></div>
                 </div>
-                <form method="POST" id="deleteForm" class="modal-actions">
+                <form method="POST" id="deleteForm" class="mt-6 flex justify-end gap-3">
                     {% csrf_token %}
-                    <button type="button" class="btn btn-secondary" id="cancelDelete">
+                    <button type="button" id="cancelDelete"
+                            class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-50">
                         <i class="fas fa-times"></i> Cancelar
                     </button>
-                    <button type="submit" class="btn btn-danger">
+                    <button type="submit"
+                            class="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-bold text-white shadow-md shadow-red-600/20 transition hover:bg-red-700">
                         <i class="fas fa-trash"></i> Sí, Eliminar
                     </button>
                 </form>
@@ -198,18 +203,20 @@
 </div>
 
 <script>
-    // Buscador
-    document.getElementById('globalSearch')?.addEventListener('input', function() {
-        const q = this.value.toLowerCase();
-        document.querySelectorAll('.table tbody tr').forEach(row => {
-            const text = row.textContent.toLowerCase();
-            row.style.display = text.includes(q) ? '' : 'none';
+    // Buscador en la página (filtro rápido sobre filas/tarjetas)
+    const buscadorPacientes = document.getElementById('globalSearch');
+    if (buscadorPacientes) {
+        buscadorPacientes.addEventListener('input', function() {
+            const q = this.value.toLowerCase();
+            document.querySelectorAll('.paciente-fila').forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+            });
+            document.querySelectorAll('.paciente-card').forEach(card => {
+                const txt = card.dataset.search || card.textContent.toLowerCase();
+                card.style.display = txt.includes(q) ? '' : 'none';
+            });
         });
-        document.querySelectorAll('.patient-card').forEach(card => {
-            const text = card.dataset.search || card.textContent.toLowerCase();
-            card.style.display = text.includes(q) ? '' : 'none';
-        });
-    });
+    }
 
     // Modal Eliminar
     const deleteModal = document.getElementById('deleteModal');
@@ -224,19 +231,18 @@
         deleteForm.action = '/pacientes/' + id + '/eliminar/';
         modalPatientName.textContent = nombre;
         modalCedula.textContent = cedula;
-        modalEdad.textContent = edad + ' años';
+        modalEdad.textContent = (edad ? edad + ' años' : '');
         modalTelefono.textContent = telefono;
-        deleteModal.classList.add('active');
+        deleteModal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
     }
 
     function closeDeleteModal() {
-        deleteModal.classList.remove('active');
+        deleteModal.classList.add('hidden');
         document.body.style.overflow = '';
     }
 
-    // Abrir modal desde botones de eliminar
-    document.querySelectorAll('.btn-delete, .card-btn-delete').forEach(btn => {
+    document.querySelectorAll('.btn-delete').forEach(btn => {
         btn.addEventListener('click', function() {
             openDeleteModal(
                 this.dataset.id,
@@ -248,7 +254,6 @@
         });
     });
 
-    // Cerrar modal
     cancelDelete?.addEventListener('click', closeDeleteModal);
     deleteModal?.addEventListener('click', function(e) {
         if (e.target === this) closeDeleteModal();

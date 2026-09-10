@@ -3,93 +3,127 @@
 {% load empresa_tags %}
 
 {% block content %}
-<div class="auth-container">
-    <div class="auth-left">
-        <div class="auth-brand">
-            <img src="{% static 'img/odontsmart-logo.svg' %}" alt="OdontSmart" class="auth-logo-generic">
-            <div class="auth-brand-text">
-                <span class="auth-brand-title">OdontSmart</span>
-                <span class="auth-brand-tagline">GESTIÓN ODONTOLÓGICA</span>
-            </div>
-            <div class="auth-empresa-info">
-                {% if config_empresa and config_empresa.logo %}
-                <img src="{{ config_empresa.logo.url }}" alt="{{ empresa.nombre }}" class="auth-logo-empresa">
-                {% endif %}
-                <p class="auth-empresa-name">{{ empresa.nombre|default:'' }}</p>
-            </div>
+<div class="flex min-h-screen w-full">
+    <!-- Panel izquierdo: marca -->
+    <div class="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-gradient-to-br from-slate-900 via-sky-900 to-sky-600 p-12 lg:flex">
+        <div class="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-white/10 blur-3xl"></div>
+        <div class="pointer-events-none absolute -bottom-40 -left-20 h-96 w-96 rounded-full bg-cyan-300/20 blur-3xl"></div>
+
+        <div class="relative z-10 flex items-center justify-between">
+            <img src="{% static 'images/odontoSmart.png' %}" alt="OdontSmart" class="h-16 w-auto drop-shadow-md">
+            {% if config_empresa and config_empresa.logo %}
+            <img src="{{ config_empresa.logo.url }}" alt="{{ empresa.nombre }}" class="max-h-12 w-auto rounded-xl bg-white/90 p-1">
+            {% endif %}
         </div>
-        
-        <div class="auth-illustration">
-            <div class="floating-shape shape-1"></div>
-            <div class="floating-shape shape-2"></div>
-            <div class="floating-shape shape-3"></div>
-            <div class="illustration-content">
-                <p class="illustration-text">{{ config_empresa.frase_pie|default:'Tu sonrisa, nuestra prioridad' }}</p>
-            </div>
+
+        <div class="relative z-10">
+            <img src="{% static 'images/odontoSmart_2.png' %}" alt="" class="mb-8 h-28 w-auto drop-shadow-xl">
+            <p class="max-w-md text-3xl font-light leading-snug text-white">
+                {{ config_empresa.frase_pie|default:'Tu sonrisa, nuestra prioridad' }}
+            </p>
+            <ul class="mt-8 space-y-3 text-sm text-white/80">
+                <li class="flex items-center gap-3">
+                    <span class="flex h-7 w-7 items-center justify-center rounded-full bg-white/15"><i class="fas fa-check text-xs"></i></span>
+                    Agenda y gestión de citas
+                </li>
+                <li class="flex items-center gap-3">
+                    <span class="flex h-7 w-7 items-center justify-center rounded-full bg-white/15"><i class="fas fa-check text-xs"></i></span>
+                    Historias clínicas y odontograma
+                </li>
+                <li class="flex items-center gap-3">
+                    <span class="flex h-7 w-7 items-center justify-center rounded-full bg-white/15"><i class="fas fa-check text-xs"></i></span>
+                    Facturación electrónica SRI
+                </li>
+            </ul>
         </div>
+
+        <p class="relative z-10 text-sm text-white/40">© {% now 'Y' %} OdontSmart · Gestión dental integral</p>
     </div>
 
-    <div class="auth-right">
-        <div class="auth-form-wrapper">
-            <div class="auth-header">
-                <h2 class="auth-title">Iniciar Sesión</h2>
-                <p class="auth-description">Ingresa tus credenciales para acceder al sistema</p>
+    <!-- Panel derecho: formulario -->
+    <div class="flex w-full flex-col items-center justify-center bg-slate-100 px-6 py-10 lg:w-1/2">
+        <div class="w-full max-w-md">
+            <div class="mb-8 text-center lg:hidden">
+                <img src="{% static 'images/odontoSmart.png' %}" alt="OdontSmart" class="mx-auto h-20 w-auto">
             </div>
 
-            <form method="POST" class="auth-form" novalidate>
-                {% csrf_token %}
-                
-                <div class="form-group">
-                    <label for="{{ form.username.id_for_label }}" class="form-label">
-                        <i class="fas fa-user"></i>
-                        {{ form.username.label }}
-                    </label>
-                    {{ form.username }}
-                    {% if form.username.errors %}
-                    <div class="form-error">
-                        {% for error in form.username.errors %}
-                        <span>{{ error }}</span>
-                        {% endfor %}
-                    </div>
+            <div class="rounded-3xl border border-slate-200 bg-white p-8 shadow-xl shadow-slate-900/5">
+                {% if empresa %}
+                <div class="mb-6 flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
+                    {% if config_empresa and config_empresa.logo %}
+                    <img src="{{ config_empresa.logo.url }}" alt="{{ empresa.nombre }}" class="h-9 w-auto rounded-lg">
+                    {% else %}
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-100 text-sky-600"><i class="fas fa-tooth"></i></span>
                     {% endif %}
-                </div>
-
-                <div class="form-group">
-                    <label for="{{ form.password.id_for_label }}" class="form-label">
-                        <i class="fas fa-lock"></i>
-                        {{ form.password.label }}
-                    </label>
-                    <div class="password-wrapper">
-                        {{ form.password }}
-                        <button type="button" class="password-toggle" onclick="togglePassword()">
-                            <i class="fas fa-eye" id="toggleIcon"></i>
-                        </button>
+                    <div class="min-w-0">
+                        <div class="truncate text-sm font-bold text-slate-800">{{ empresa.nombre }}</div>
+                        <div class="text-xs text-slate-500">Portal de acceso</div>
                     </div>
-                    {% if form.password.errors %}
-                    <div class="form-error">
-                        {% for error in form.password.errors %}
-                        <span>{{ error }}</span>
-                        {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="mb-6">
+                    <h2 class="text-2xl font-extrabold tracking-tight text-slate-900">Iniciar Sesión</h2>
+                    <p class="mt-1.5 text-sm text-slate-500">Ingresa tus credenciales para acceder al sistema</p>
+                </div>
+
+                <form method="POST" class="space-y-5" novalidate>
+                    {% csrf_token %}
+
+                    <div>
+                        <label for="{{ form.username.id_for_label }}" class="mb-1.5 block text-sm font-semibold text-slate-700">{{ form.username.label }}</label>
+                        <div class="relative">
+                            <i class="fas fa-user pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-slate-400"></i>
+                            {{ form.username }}
+                        </div>
+                        {% if form.username.errors %}
+                        <div class="mt-1.5 space-y-0.5">
+                            {% for error in form.username.errors %}
+                            <p class="text-xs font-medium text-red-600">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                     </div>
-                    {% endif %}
-                </div>
 
-                <div class="form-options">
-                    <label class="checkbox-label">
-                        <input type="checkbox" name="remember" class="checkbox-input">
-                        <span class="checkbox-custom"></span>
-                        Recordarme
-                    </label>
-                    <a href="{% url 'reset_password' %}" class="forgot-link">¿Olvidaste tu contraseña?</a>
-                </div>
+                    <div>
+                        <label for="{{ form.password.id_for_label }}" class="mb-1.5 block text-sm font-semibold text-slate-700">{{ form.password.label }}</label>
+                        <div class="relative">
+                            <i class="fas fa-lock pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-slate-400"></i>
+                            {{ form.password }}
+                            <button type="button" onclick="togglePassword()"
+                                    class="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 transition hover:text-slate-600">
+                                <i class="fas fa-eye" id="toggleIcon"></i>
+                            </button>
+                        </div>
+                        {% if form.password.errors %}
+                        <div class="mt-1.5 space-y-0.5">
+                            {% for error in form.password.errors %}
+                            <p class="text-xs font-medium text-red-600">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
 
-                <button type="submit" class="btn btn-primary btn-full">
-                    <span>Ingresar</span>
-                    <i class="fas fa-arrow-right"></i>
-                </button>
-            </form>
+                    <div class="flex items-center justify-between text-sm">
+                        <label class="flex cursor-pointer items-center gap-2 text-slate-600">
+                            <input type="checkbox" name="remember"
+                                   class="h-4 w-4 rounded border-slate-300 accent-sky-600">
+                            Recordarme
+                        </label>
+                        <a href="{% url 'reset_password' %}" class="font-semibold text-sky-600 transition hover:text-sky-700">
+                            ¿Olvidaste tu contraseña?
+                        </a>
+                    </div>
 
+                    <button type="submit"
+                            class="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-sky-600/25 transition hover:from-sky-700 hover:to-cyan-600 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2">
+                        <span>Ingresar</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </form>
+            </div>
 
+            <p class="mt-6 text-center text-xs text-slate-400 lg:hidden">© {% now 'Y' %} OdontSmart</p>
         </div>
     </div>
 </div>

@@ -10,123 +10,155 @@
         {% include 'componentes/topbar.html' %}
 
         <!-- Dashboard Content -->
-        <div class="dashboard-content">
-            <div class="page-header">
-                <h1 class="page-title">Panel Principal</h1>
-                <p class="page-subtitle">Bienvenido de nuevo, {{ user.first_name|default:user.username }}</p>
+        <div class="dashboard-content p-6 lg:p-8">
+            <!-- Encabezado -->
+            <div class="mb-8 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">Panel Principal</h1>
+                    <p class="mt-1 text-sm text-slate-500">Bienvenido de nuevo, <span class="font-semibold text-slate-700">{{ user.first_name|default:user.username }}</span></p>
+                </div>
+                <a href="{% url 'registrar_cita' %}"
+                   class="inline-flex items-center gap-2 self-start rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-sky-600/20 transition hover:from-sky-700 hover:to-cyan-600 sm:self-auto">
+                    <i class="fas fa-plus"></i> Nueva Cita
+                </a>
             </div>
 
-            <!-- Stats Cards -->
-            <div class="stats-grid">
-                <div class="stat-card stat-card--blue">
-                    <div class="stat-icon">
+            <!-- Tarjetas de estadísticas -->
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+                <div class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-lg text-sky-600">
                         <i class="fas fa-calendar-check"></i>
                     </div>
-                    <div class="stat-info">
-                        <span class="stat-number">{{ citas_hoy }}</span>
-                        <span class="stat-label">Citas Hoy</span>
+                    <div class="min-w-0">
+                        <div class="text-2xl font-extrabold leading-none text-slate-900">{{ citas_hoy }}</div>
+                        <div class="mt-1 truncate text-sm text-slate-500">Citas Hoy</div>
                     </div>
                 </div>
-                <div class="stat-card stat-card--green">
-                    <div class="stat-icon">
+                <div class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-lg text-emerald-600">
                         <i class="fas fa-users"></i>
                     </div>
-                    <div class="stat-info">
-                        <span class="stat-number">{{ total_pacientes }}</span>
-                        <span class="stat-label">Pacientes</span>
+                    <div class="min-w-0">
+                        <div class="text-2xl font-extrabold leading-none text-slate-900">{{ total_pacientes }}</div>
+                        <div class="mt-1 truncate text-sm text-slate-500">Pacientes</div>
                     </div>
                 </div>
-                <div class="stat-card stat-card--purple">
-                    <div class="stat-icon">
+                <div class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-lg text-violet-600">
                         <i class="fas fa-user-md"></i>
                     </div>
-                    <div class="stat-info">
-                        <span class="stat-number">{{ total_medicos }}</span>
-                        <span class="stat-label">Médicos</span>
+                    <div class="min-w-0">
+                        <div class="text-2xl font-extrabold leading-none text-slate-900">{{ total_medicos }}</div>
+                        <div class="mt-1 truncate text-sm text-slate-500">Médicos</div>
                     </div>
                 </div>
-                <div class="stat-card stat-card--orange">
-                    <div class="stat-icon">
+                <div class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-lg text-amber-600">
                         <i class="fas fa-clock"></i>
                     </div>
-                    <div class="stat-info">
-                        <span class="stat-number">{{ citas_pendientes }}</span>
-                        <span class="stat-label">Citas Pendientes</span>
+                    <div class="min-w-0">
+                        <div class="text-2xl font-extrabold leading-none text-slate-900">{{ citas_pendientes }}</div>
+                        <div class="mt-1 truncate text-sm text-slate-500">Citas Pendientes</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Quick Actions -->
-            <div class="quick-actions">
-                <h2>Acciones Rápidas</h2>
-                <div class="actions-grid">
-                    <a href="{% url 'registrar_cita' %}" class="action-card">
-                        <i class="fas fa-plus-circle"></i>
-                        <span>Nueva Cita</span>
+            <!-- Acciones rápidas -->
+            <div class="mt-10">
+                <h2 class="mb-4 text-lg font-bold text-slate-800">Acciones Rápidas</h2>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <a href="{% url 'registrar_cita' %}"
+                       class="group flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-sky-300 hover:shadow-md">
+                        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-cyan-400 text-lg text-white shadow-sm transition group-hover:scale-105">
+                            <i class="fas fa-plus-circle"></i>
+                        </div>
+                        <div>
+                            <div class="font-semibold text-slate-800">Nueva Cita</div>
+                            <div class="text-xs text-slate-500">Agenda una atención</div>
+                        </div>
                     </a>
-                   
-                    <a href="{% url 'lista_pacientes' %}" class="action-card">
-                        <i class="fas fa-file-medical"></i>
-                        <span>Nuevo Historial</span>
+                    <a href="{% url 'lista_pacientes' %}"
+                       class="group flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-md">
+                        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-400 text-lg text-white shadow-sm transition group-hover:scale-105">
+                            <i class="fas fa-file-medical"></i>
+                        </div>
+                        <div>
+                            <div class="font-semibold text-slate-800">Historial Clínico</div>
+                            <div class="text-xs text-slate-500">Consulta expedientes</div>
+                        </div>
                     </a>
-                    <a href="{% url 'registrar_paciente' %}" class="action-card">
-                        <i class="fas fa-user-plus"></i>
-                        <span>Nuevo Paciente</span>
+                    <a href="{% url 'registrar_paciente' %}"
+                       class="group flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-md">
+                        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-400 text-lg text-white shadow-sm transition group-hover:scale-105">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div>
+                            <div class="font-semibold text-slate-800">Nuevo Paciente</div>
+                            <div class="text-xs text-slate-500">Registra un paciente</div>
+                        </div>
                     </a>
                 </div>
             </div>
 
-            <!-- Recent Activity -->
-            <div class="recent-activity">
-                <h2>
-                    Actividad Reciente
-                    <span class="activity-count">{{ grupos_actividad|length }} categorías</span>
-                </h2>
-                <div class="activity-list">
-                    {% if grupos_actividad %}
-                    <div class="activity-feed">
-                        {% for grupo in grupos_actividad %}
-                        <div class="activity-group">
-                            <div class="activity-group-header">
-                                <div class="activity-group-icon activity-{{ grupo.accion|lower }}">
-                                    {% if grupo.accion == 'CREAR' %}
-                                    <i class="fas fa-plus-circle"></i>
-                                    {% elif grupo.accion == 'EDITAR' %}
-                                    <i class="fas fa-edit"></i>
-                                    {% elif grupo.accion == 'ELIMINAR' %}
-                                    <i class="fas fa-trash-alt"></i>
-                                    {% elif grupo.accion == 'LOGIN' %}
-                                    <i class="fas fa-sign-in-alt"></i>
-                                    {% endif %}
+            <!-- Actividad reciente -->
+            <div class="mt-10">
+                <div class="mb-4 flex items-center justify-between">
+                    <h2 class="text-lg font-bold text-slate-800">Actividad Reciente</h2>
+                    <span class="rounded-full bg-slate-200 px-3 py-1 text-xs font-semibold text-slate-600">
+                        {{ grupos_actividad|length }} categoría{{ grupos_actividad|length|pluralize }}
+                    </span>
+                </div>
+
+                {% if grupos_actividad %}
+                <div class="space-y-5">
+                    {% for grupo in grupos_actividad %}
+                    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                        <div class="flex items-center gap-3 border-b border-slate-100 px-5 py-4">
+                            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl
+                                {% if grupo.accion == 'CREAR' %}bg-emerald-100 text-emerald-600
+                                {% elif grupo.accion == 'EDITAR' %}bg-sky-100 text-sky-600
+                                {% elif grupo.accion == 'ELIMINAR' %}bg-red-100 text-red-600
+                                {% elif grupo.accion == 'LOGIN' %}bg-violet-100 text-violet-600
+                                {% else %}bg-slate-100 text-slate-600{% endif %}">
+                                {% if grupo.accion == 'CREAR' %}<i class="fas fa-plus-circle"></i>
+                                {% elif grupo.accion == 'EDITAR' %}<i class="fas fa-edit"></i>
+                                {% elif grupo.accion == 'ELIMINAR' %}<i class="fas fa-trash-alt"></i>
+                                {% elif grupo.accion == 'LOGIN' %}<i class="fas fa-sign-in-alt"></i>
+                                {% else %}<i class="fas fa-bolt"></i>{% endif %}
+                            </span>
+                            <div class="min-w-0 flex-1">
+                                <div class="truncate text-sm font-bold text-slate-800">
+                                    {% if grupo.accion == 'CREAR' %}Creación{% elif grupo.accion == 'EDITAR' %}Edición{% elif grupo.accion == 'ELIMINAR' %}Eliminación{% elif grupo.accion == 'LOGIN' %}Inicio de sesión{% else %}{{ grupo.accion }}{% endif %} en {{ grupo.modelo }}
                                 </div>
-                                <div class="activity-group-info">
-                                    <span class="activity-group-title">
-                                        {% if grupo.accion == 'CREAR' %}Creación{% elif grupo.accion == 'EDITAR' %}Edición{% elif grupo.accion == 'ELIMINAR' %}Eliminación{% elif grupo.accion == 'LOGIN' %}Inicio de sesión{% else %}{{ grupo.accion }}{% endif %} en {{ grupo.modelo }}
-                                    </span>
-                                    <span class="activity-group-count">{{ grupo.total }} registro{{ grupo.total|pluralize }}</span>
-                                </div>
-                            </div>
-                            <div class="activity-group-items">
-                                {% for act in grupo.items %}
-                                <div class="activity-item">
-                                    <div class="activity-item-content">
-                                        <span class="activity-item-text">{{ act.descripcion }}</span>
-                                        <span class="activity-item-time">{{ act.fecha|date:"d/m/Y H:i" }}</span>
-                                    </div>
-                                    <span class="activity-item-user">{{ act.usuario.get_full_name|default:act.usuario.username }}</span>
-                                </div>
-                                {% endfor %}
+                                <div class="text-xs text-slate-400">{{ grupo.total }} registro{{ grupo.total|pluralize }}</div>
                             </div>
                         </div>
-                        {% endfor %}
+                        <ul class="divide-y divide-slate-100">
+                            {% for act in grupo.items %}
+                            <li class="flex items-center justify-between gap-4 px-5 py-3">
+                                <div class="min-w-0">
+                                    <p class="truncate text-sm text-slate-700">{{ act.descripcion }}</p>
+                                    <p class="text-xs text-slate-400">{{ act.fecha|date:"d/m/Y H:i" }}</p>
+                                </div>
+                                <span class="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+                                    {% if act.usuario %}
+                                        {{ act.usuario.get_full_name|default:act.usuario.username }}
+                                    {% else %}
+                                        Sistema
+                                    {% endif %}
+                                </span>
+                            </li>
+                            {% endfor %}
+                        </ul>
                     </div>
-                    {% else %}
-                    <div class="activity-empty">
-                        <i class="fas fa-inbox fa-3x"></i>
-                        <p>No hay actividad reciente</p>
-                    </div>
-                    {% endif %}
+                    {% endfor %}
                 </div>
+                {% else %}
+                <div class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white py-16 text-center">
+                    <i class="fas fa-inbox mb-3 text-4xl text-slate-300"></i>
+                    <p class="text-sm font-medium text-slate-500">No hay actividad reciente</p>
+                </div>
+                {% endif %}
             </div>
         </div>
     </main>

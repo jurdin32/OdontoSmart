@@ -4,102 +4,131 @@
 {% block content %}
 <div class="dashboard">
     {% include 'componentes/sidebar.html' with active='proformas' %}
+
     <main class="main-content">
         {% include 'componentes/topbar.html' %}
-        <div class="dashboard-content">
-            <div class="page-header">
-                <h1 class="page-title">{{ title }}</h1>
+
+        <div class="dashboard-content p-6 lg:p-8">
+            <!-- Encabezado -->
+            <div class="mb-6">
+                <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">{{ title }}</h1>
+                <p class="mt-1 text-sm text-slate-500">Completa los datos del presupuesto y sus servicios</p>
             </div>
 
-            <form method="POST" id="proformaForm" class="form-card">
+            <form method="POST" id="proformaForm" class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
                 {% csrf_token %}
                 <input type="hidden" name="items" id="id_items" value="{{ items_json|default:'[]' }}">
 
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+                {% if form.non_field_errors %}
+                <div class="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Datos generales -->
+                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
                     <div>
-                        <label class="form-label">Paciente</label>
+                        <label class="mb-1.5 block text-sm font-semibold text-slate-700" for="{{ form.paciente.id_for_label }}">Paciente</label>
                         {{ form.paciente }}
+                        {% for error in form.paciente.errors %}<p class="mt-1 text-xs font-semibold text-red-600">{{ error }}</p>{% endfor %}
                     </div>
                     <div>
-                        <label class="form-label">Médico</label>
+                        <label class="mb-1.5 block text-sm font-semibold text-slate-700" for="{{ form.medico.id_for_label }}">Médico</label>
                         {{ form.medico }}
+                        {% for error in form.medico.errors %}<p class="mt-1 text-xs font-semibold text-red-600">{{ error }}</p>{% endfor %}
                     </div>
                     <div>
-                        <label class="form-label">Válido hasta</label>
+                        <label class="mb-1.5 block text-sm font-semibold text-slate-700" for="{{ form.fecha_validez.id_for_label }}">Válido hasta</label>
                         {{ form.fecha_validez }}
+                        {% for error in form.fecha_validez.errors %}<p class="mt-1 text-xs font-semibold text-red-600">{{ error }}</p>{% endfor %}
                     </div>
-                    <div></div>
                 </div>
 
                 <!-- Items -->
-                <div style="margin-bottom:24px;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-                        <label class="form-label" style="margin:0;font-size:1rem;">Servicios / Productos</label>
-                        <button type="button" class="btn btn-primary btn-sm" onclick="agregarItem()">
+                <div class="mt-8">
+                    <div class="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <label class="block text-base font-bold text-slate-800">Servicios / Productos</label>
+                        <button type="button" onclick="agregarItem()"
+                                class="inline-flex items-center justify-center gap-2 self-start rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-sky-600/20 transition hover:from-sky-700 hover:to-cyan-600 sm:self-auto">
                             <i class="fas fa-plus"></i> Agregar Item
                         </button>
                     </div>
-                    <div style="overflow-x:auto;">
-                        <table class="table" id="itemsTable">
-                            <thead>
-                                <tr>
-                                    <th style="width:50%;">Descripción</th>
-                                    <th style="width:15%;">Cantidad</th>
-                                    <th style="width:20%;">Precio Unit.</th>
-                                    <th style="width:15%;">Total</th>
-                                    <th style="width:40px;"></th>
-                                </tr>
-                            </thead>
-                            <tbody id="itemsBody">
-                            </tbody>
-                            <tfoot>
-                                <tr>
-                                    <td colspan="3" style="text-align:right;font-weight:600;">Subtotal</td>
-                                    <td id="subtotalDisplay">$0.00</td>
-                                    <td></td>
-                                </tr>
-                                <tr>
-                                    <td colspan="3" style="text-align:right;">
-                                        Descuento (%): {{ form.descuento_porcentaje }}
-                                    </td>
-                                    <td id="descuentoDisplay">$0.00</td>
-                                    <td></td>
-                                </tr>
-                                <tr>
-                                    <td colspan="3" style="text-align:right;">
-                                        Impuesto (%): {{ form.impuesto_porcentaje }}
-                                    </td>
-                                    <td id="impuestoDisplay">$0.00</td>
-                                    <td></td>
-                                </tr>
-                                <tr style="font-size:1.1rem;">
-                                    <td colspan="3" style="text-align:right;font-weight:700;">TOTAL</td>
-                                    <td id="totalDisplay" style="font-weight:700;">$0.00</td>
-                                    <td></td>
-                                </tr>
-                            </tfoot>
-                        </table>
+
+                    <div class="overflow-hidden rounded-2xl border border-slate-200">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-slate-200 text-left text-sm" id="itemsTable">
+                                <thead class="bg-slate-50">
+                                    <tr>
+                                        <th class="w-1/2 px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Descripción</th>
+                                        <th class="w-[15%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Cantidad</th>
+                                        <th class="w-[20%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Precio Unit.</th>
+                                        <th class="w-[15%] px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Total</th>
+                                        <th class="w-10 px-4 py-3"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="itemsBody" class="divide-y divide-slate-100 bg-white">
+                                </tbody>
+                                <tfoot class="divide-y divide-slate-100 border-t border-slate-200 bg-slate-50/60">
+                                    <tr>
+                                        <td colspan="3" class="px-4 py-3 text-right text-sm font-semibold text-slate-600">Subtotal</td>
+                                        <td id="subtotalDisplay" class="px-4 py-3 font-semibold text-slate-700">$0.00</td>
+                                        <td class="px-4 py-3"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" class="px-4 py-3">
+                                            <div class="flex items-center justify-end gap-2">
+                                                <label class="text-sm text-slate-600" for="{{ form.descuento_porcentaje.id_for_label }}">Descuento (%):</label>
+                                                {{ form.descuento_porcentaje }}
+                                            </div>
+                                        </td>
+                                        <td id="descuentoDisplay" class="px-4 py-3 font-semibold text-red-600">$0.00</td>
+                                        <td class="px-4 py-3"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" class="px-4 py-3">
+                                            <div class="flex items-center justify-end gap-2">
+                                                <label class="text-sm text-slate-600" for="{{ form.impuesto_porcentaje.id_for_label }}">Impuesto (%):</label>
+                                                {{ form.impuesto_porcentaje }}
+                                            </div>
+                                        </td>
+                                        <td id="impuestoDisplay" class="px-4 py-3 font-semibold text-slate-700">$0.00</td>
+                                        <td class="px-4 py-3"></td>
+                                    </tr>
+                                    <tr class="border-t border-slate-200">
+                                        <td colspan="3" class="px-4 py-4 text-right text-base font-black uppercase tracking-wide text-slate-800">Total</td>
+                                        <td id="totalDisplay" class="px-4 py-4 text-lg font-black text-sky-700">$0.00</td>
+                                        <td class="px-4 py-4"></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Notas -->
-                <div style="margin-bottom:24px;">
-                    <label class="form-label">Notas / Condiciones</label>
+                <div class="mt-8">
+                    <label class="mb-1.5 block text-sm font-semibold text-slate-700" for="{{ form.notas.id_for_label }}">Notas / Condiciones</label>
                     {{ form.notas }}
+                    {% for error in form.notas.errors %}<p class="mt-1 text-xs font-semibold text-red-600">{{ error }}</p>{% endfor %}
                 </div>
 
                 {% if proforma %}
-                <div style="margin-bottom:24px;">
-                    <label class="form-label">Estado</label>
+                <div class="mt-6 max-w-xs">
+                    <label class="mb-1.5 block text-sm font-semibold text-slate-700" for="{{ form.estado.id_for_label }}">Estado</label>
                     {{ form.estado }}
+                    {% for error in form.estado.errors %}<p class="mt-1 text-xs font-semibold text-red-600">{{ error }}</p>{% endfor %}
                 </div>
                 {% endif %}
 
-                <div style="display:flex;gap:12px;">
-                    <button type="submit" class="btn btn-primary">
+                <div class="mt-8 flex flex-col gap-3 border-t border-slate-100 pt-6 sm:flex-row">
+                    <button type="submit"
+                            class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-sky-600/20 transition hover:from-sky-700 hover:to-cyan-600">
                         <i class="fas fa-save"></i> {% if proforma %}Actualizar{% else %}Guardar{% endif %}
                     </button>
-                    <a href="{% url 'lista_proformas' %}" class="btn btn-secondary">Cancelar</a>
+                    <a href="{% url 'lista_proformas' %}"
+                       class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-50">
+                        Cancelar
+                    </a>
                 </div>
             </form>
         </div>
@@ -111,6 +140,9 @@
 <script>
 (function() {
     "use strict";
+
+    var ITEM_INPUT_CLASS = 'mt-1 block w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100';
+    var ITEM_NUMBER_CLASS = ITEM_INPUT_CLASS + ' min-w-[5.5rem]';
 
     // 1. Cargar items desde el hidden input (Django preserva el valor POST)
     var items = [];
@@ -134,12 +166,13 @@
             var item = items[i];
             var total = (parseFloat(item.cantidad)||0) * (parseFloat(item.precio_unitario)||0);
             var row = document.createElement('tr');
+            row.className = 'transition hover:bg-slate-50';
             row.innerHTML =
-                '<td><input type="text" class="form-input" value="' + h(item.descripcion||'') + '" placeholder="Describa el servicio"></td>' +
-                '<td><input type="number" class="form-input" value="' + (item.cantidad||1) + '" min="1" step="1"></td>' +
-                '<td><input type="number" class="form-input" value="' + (item.precio_unitario||0) + '" min="0" step="0.01"></td>' +
-                '<td style="font-weight:600;">' + fmt(total) + '</td>' +
-                '<td><button type="button" class="btn btn-sm btn-secondary" onclick="window.eliminarItem(' + i + ')"><i class="fas fa-times"></i></button></td>';
+                '<td class="px-4 py-3"><input type="text" class="' + ITEM_INPUT_CLASS + '" value="' + h(item.descripcion||'') + '" placeholder="Describa el servicio"></td>' +
+                '<td class="px-4 py-3"><input type="number" class="' + ITEM_NUMBER_CLASS + '" value="' + (item.cantidad||1) + '" min="1" step="1"></td>' +
+                '<td class="px-4 py-3"><input type="number" class="' + ITEM_NUMBER_CLASS + '" value="' + (item.precio_unitario||0) + '" min="0" step="0.01"></td>' +
+                '<td class="px-4 py-3 font-semibold text-slate-700">' + fmt(total) + '</td>' +
+                '<td class="px-4 py-3"><button type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-red-300 hover:bg-red-50 hover:text-red-600" onclick="window.eliminarItem(' + i + ')" title="Quitar"><i class="fas fa-times"></i></button></td>';
             tbody.appendChild(row);
         }
         // Vincular eventos oninput a los campos de cantidad y precio

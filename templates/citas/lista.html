@@ -8,80 +8,114 @@
     <main class="main-content">
         {% include 'componentes/topbar.html' %}
 
-        <div class="dashboard-content">
-            <div class="page-header page-header--between">
+        <div class="dashboard-content p-6 lg:p-8">
+            <!-- Encabezado -->
+            <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 class="page-title">Citas</h1>
-                    <p class="page-subtitle">Gestión de citas odontológicas</p>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">Citas</h1>
+                    <p class="mt-1 text-sm text-slate-500">Gestión de citas odontológicas</p>
                 </div>
-                <a href="{% url 'registrar_cita' %}" class="btn btn-primary">
+                <a href="{% url 'registrar_cita' %}"
+                   class="inline-flex items-center justify-center gap-2 self-start rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-sky-600/20 transition hover:from-sky-700 hover:to-cyan-600 sm:self-auto">
                     <i class="fas fa-plus"></i> Nueva Cita
                 </a>
             </div>
 
             {% if query %}
-            <div class="search-info">
-                <i class="fas fa-search"></i> Resultados para "<strong>{{ query }}</strong>" — 
-                <span>{{ citas|length }} cita{{ citas|length|pluralize:'s' }}</span>
-                <a href="{% url 'lista_citas' %}" class="search-clear"><i class="fas fa-times"></i> Limpiar</a>
+            <div class="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800">
+                <i class="fas fa-search"></i>
+                <span>Resultados para "<strong>{{ query }}</strong>" — <span class="font-semibold">{{ citas|length }} cita{{ citas|length|pluralize:'s' }}</span></span>
+                <a href="{% url 'lista_citas' %}" class="ml-auto font-semibold text-sky-700 transition hover:text-sky-900">
+                    <i class="fas fa-times"></i> Limpiar
+                </a>
             </div>
             {% endif %}
 
-            <div class="filter-tabs">
-                <a href="{% url 'lista_citas' %}{% if query %}?q={{ query }}{% endif %}" class="filter-tab {% if not estado_activo %}active{% endif %}">
-                    Todas <span class="filter-count">{{ conteos.TODAS }}</span>
+            <!-- Filtros por estado -->
+            <div class="mb-6 flex flex-wrap gap-2">
+                <a href="{% url 'lista_citas' %}{% if query %}?q={{ query }}{% endif %}"
+                   class="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition
+                   {% if not estado_activo %}border-slate-900 bg-slate-900 text-white{% else %}border-slate-300 bg-white text-slate-600 hover:border-slate-400{% endif %}">
+                    <span class="h-2 w-2 rounded-full bg-slate-400"></span> Todas
+                    <span class="rounded-full px-2 py-0.5 text-xs {% if not estado_activo %}bg-white/20{% else %}bg-slate-100 text-slate-500{% endif %}">{{ conteos.TODAS }}</span>
                 </a>
-                <a href="{% url 'lista_citas' %}?estado=PENDIENTE{% if query %}&q={{ query }}{% endif %}" class="filter-tab filter-tab-pendiente {% if estado_activo == 'PENDIENTE' %}active{% endif %}">
-                    Pendientes <span class="filter-count">{{ conteos.PENDIENTE }}</span>
+                <a href="{% url 'lista_citas' %}?estado=PENDIENTE{% if query %}&q={{ query }}{% endif %}"
+                   class="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition
+                   {% if estado_activo == 'PENDIENTE' %}border-slate-900 bg-slate-900 text-white{% else %}border-slate-300 bg-white text-slate-600 hover:border-slate-400{% endif %}">
+                    <span class="h-2 w-2 rounded-full bg-amber-400"></span> Pendientes
+                    <span class="rounded-full px-2 py-0.5 text-xs {% if estado_activo == 'PENDIENTE' %}bg-white/20{% else %}bg-slate-100 text-slate-500{% endif %}">{{ conteos.PENDIENTE }}</span>
                 </a>
-                <a href="{% url 'lista_citas' %}?estado=CONFIRMADA{% if query %}&q={{ query }}{% endif %}" class="filter-tab filter-tab-confirmada {% if estado_activo == 'CONFIRMADA' %}active{% endif %}">
-                    Confirmadas <span class="filter-count">{{ conteos.CONFIRMADA }}</span>
+                <a href="{% url 'lista_citas' %}?estado=CONFIRMADA{% if query %}&q={{ query }}{% endif %}"
+                   class="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition
+                   {% if estado_activo == 'CONFIRMADA' %}border-slate-900 bg-slate-900 text-white{% else %}border-slate-300 bg-white text-slate-600 hover:border-slate-400{% endif %}">
+                    <span class="h-2 w-2 rounded-full bg-sky-400"></span> Confirmadas
+                    <span class="rounded-full px-2 py-0.5 text-xs {% if estado_activo == 'CONFIRMADA' %}bg-white/20{% else %}bg-slate-100 text-slate-500{% endif %}">{{ conteos.CONFIRMADA }}</span>
                 </a>
-                <a href="{% url 'lista_citas' %}?estado=COMPLETADA{% if query %}&q={{ query }}{% endif %}" class="filter-tab filter-tab-completada {% if estado_activo == 'COMPLETADA' %}active{% endif %}">
-                    Completadas <span class="filter-count">{{ conteos.COMPLETADA }}</span>
+                <a href="{% url 'lista_citas' %}?estado=COMPLETADA{% if query %}&q={{ query }}{% endif %}"
+                   class="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition
+                   {% if estado_activo == 'COMPLETADA' %}border-slate-900 bg-slate-900 text-white{% else %}border-slate-300 bg-white text-slate-600 hover:border-slate-400{% endif %}">
+                    <span class="h-2 w-2 rounded-full bg-emerald-400"></span> Completadas
+                    <span class="rounded-full px-2 py-0.5 text-xs {% if estado_activo == 'COMPLETADA' %}bg-white/20{% else %}bg-slate-100 text-slate-500{% endif %}">{{ conteos.COMPLETADA }}</span>
                 </a>
-                <a href="{% url 'lista_citas' %}?estado=CANCELADA{% if query %}&q={{ query }}{% endif %}" class="filter-tab filter-tab-cancelada {% if estado_activo == 'CANCELADA' %}active{% endif %}">
-                    Canceladas <span class="filter-count">{{ conteos.CANCELADA }}</span>
+                <a href="{% url 'lista_citas' %}?estado=CANCELADA{% if query %}&q={{ query }}{% endif %}"
+                   class="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition
+                   {% if estado_activo == 'CANCELADA' %}border-slate-900 bg-slate-900 text-white{% else %}border-slate-300 bg-white text-slate-600 hover:border-slate-400{% endif %}">
+                    <span class="h-2 w-2 rounded-full bg-red-400"></span> Canceladas
+                    <span class="rounded-full px-2 py-0.5 text-xs {% if estado_activo == 'CANCELADA' %}bg-white/20{% else %}bg-slate-100 text-slate-500{% endif %}">{{ conteos.CANCELADA }}</span>
                 </a>
             </div>
 
             {% if citas %}
             <!-- Tabla escritorio -->
-            <div class="table-container">
-                <table class="table">
-                    <thead>
+            <div class="hidden overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm md:block">
+                <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                    <thead class="bg-slate-50">
                         <tr>
-                            <th>#</th>
-                            <th>Paciente</th>
-                            <th>Doctor</th>
-                            <th>Fecha</th>
-                            <th>Hora</th>
-                            <th>Motivo</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
+                            <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">#</th>
+                            <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Paciente</th>
+                            <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Doctor</th>
+                            <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Fecha</th>
+                            <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Hora</th>
+                            <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Motivo</th>
+                            <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Estado</th>
+                            <th class="px-6 py-3 text-right text-xs font-bold uppercase tracking-wider text-slate-500">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="divide-y divide-slate-100 bg-white">
                         {% for c in citas %}
-                        <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ c.paciente.nombres }} {{ c.paciente.apellidos }}</td>
-                            <td>{{ c.doctor.nombre_completo|default:"-" }}</td>
-                            <td>{{ c.fecha|date:"d/m/Y" }}</td>
-                            <td>{{ c.hora|time:"H:i" }}</td>
-                            <td class="motivo-cell">{{ c.motivo|truncatechars:40 }}</td>
-                            <td>
-                                <span class="estado-badge estado-{{ c.estado|lower }}">
-                                    {{ c.get_estado_display }}
-                                </span>
+                        <tr class="cita-fila transition hover:bg-slate-50">
+                            <td class="whitespace-nowrap px-6 py-4 text-slate-400">{{ forloop.counter }}</td>
+                            <td class="whitespace-nowrap px-6 py-4 font-semibold text-slate-800">
+                                {{ c.paciente.nombres }} {{ c.paciente.apellidos }}
                             </td>
-                            <td class="actions-cell">
-                                <a href="{% url 'detalle_cita' c.id %}" class="btn-action btn-view" title="Ver">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <a href="{% url 'editar_cita' c.id %}" class="btn-action btn-edit" title="Editar">
-                                    <i class="fas fa-edit"></i>
-                                </a>
+                            <td class="whitespace-nowrap px-6 py-4 text-slate-600">{{ c.doctor.nombre_completo|default:"—" }}</td>
+                            <td class="whitespace-nowrap px-6 py-4 text-slate-600">{{ c.fecha|date:"d/m/Y" }}</td>
+                            <td class="whitespace-nowrap px-6 py-4 text-slate-600">{{ c.hora|time:"H:i" }}</td>
+                            <td class="max-w-[220px] truncate px-6 py-4 text-slate-600" title="{{ c.motivo }}">{{ c.motivo|truncatechars:40 }}</td>
+                            <td class="whitespace-nowrap px-6 py-4">
+                                {% if c.estado == 'PENDIENTE' %}
+                                <span class="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">{{ c.get_estado_display }}</span>
+                                {% elif c.estado == 'CONFIRMADA' %}
+                                <span class="inline-flex items-center rounded-full bg-sky-100 px-3 py-1 text-xs font-bold text-sky-700">{{ c.get_estado_display }}</span>
+                                {% elif c.estado == 'COMPLETADA' %}
+                                <span class="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">{{ c.get_estado_display }}</span>
+                                {% elif c.estado == 'CANCELADA' %}
+                                <span class="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-700">{{ c.get_estado_display }}</span>
+                                {% else %}
+                                <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">{{ c.get_estado_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="whitespace-nowrap px-6 py-4">
+                                <div class="flex items-center justify-end gap-2">
+                                    <a href="{% url 'detalle_cita' c.id %}" title="Ver"
+                                       class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-600">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'editar_cita' c.id %}" title="Editar"
+                                       class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-slate-400 hover:bg-slate-100 hover:text-slate-700">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
@@ -90,35 +124,44 @@
             </div>
 
             <!-- Tarjetas móvil -->
-            <div class="cita-cards">
+            <div class="grid gap-4 md:hidden">
                 {% for c in citas %}
-                <div class="cita-card" data-search="{{ c.paciente.nombres|lower }} {{ c.paciente.apellidos|lower }} {{ c.motivo|lower }}">
-                    <div class="cita-card-top">
-                        <div class="cita-card-date">
-                            <span class="cita-card-day">{{ c.fecha|date:"d" }}</span>
-                            <span class="cita-card-month">{{ c.fecha|date:"M" }}</span>
+                <div class="cita-card rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+                     data-search="{{ c.paciente.nombres|lower }} {{ c.paciente.apellidos|lower }} {{ c.motivo|lower }}">
+                    <div class="flex items-start gap-3">
+                        <div class="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-xl bg-slate-100">
+                            <span class="text-lg font-extrabold leading-none text-slate-800">{{ c.fecha|date:"d" }}</span>
+                            <span class="text-[0.65rem] font-semibold uppercase text-slate-500">{{ c.fecha|date:"M" }}</span>
                         </div>
-                        <div class="cita-card-info">
-                            <h3>{{ c.paciente.nombres }} {{ c.paciente.apellidos }}</h3>
-                            <span class="cita-card-doctor">
-                                <i class="fas fa-user-md"></i> {{ c.doctor.nombre_completo|default:"Sin asignar" }}
-                            </span>
+                        <div class="min-w-0 flex-1">
+                            <h3 class="truncate font-bold text-slate-800">{{ c.paciente.nombres }} {{ c.paciente.apellidos }}</h3>
+                            <p class="truncate text-xs text-slate-500">
+                                <i class="fas fa-user-md mr-1"></i>{{ c.doctor.nombre_completo|default:"Sin asignar" }}
+                            </p>
                         </div>
-                        <span class="estado-badge estado-{{ c.estado|lower }}">{{ c.get_estado_display }}</span>
+                        {% if c.estado == 'PENDIENTE' %}
+                        <span class="shrink-0 rounded-full bg-amber-100 px-2.5 py-1 text-[0.65rem] font-bold text-amber-700">{{ c.get_estado_display }}</span>
+                        {% elif c.estado == 'CONFIRMADA' %}
+                        <span class="shrink-0 rounded-full bg-sky-100 px-2.5 py-1 text-[0.65rem] font-bold text-sky-700">{{ c.get_estado_display }}</span>
+                        {% elif c.estado == 'COMPLETADA' %}
+                        <span class="shrink-0 rounded-full bg-emerald-100 px-2.5 py-1 text-[0.65rem] font-bold text-emerald-700">{{ c.get_estado_display }}</span>
+                        {% elif c.estado == 'CANCELADA' %}
+                        <span class="shrink-0 rounded-full bg-red-100 px-2.5 py-1 text-[0.65rem] font-bold text-red-700">{{ c.get_estado_display }}</span>
+                        {% else %}
+                        <span class="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-[0.65rem] font-bold text-slate-600">{{ c.get_estado_display }}</span>
+                        {% endif %}
                     </div>
-                    <div class="cita-card-body">
-                        <div class="cita-card-detail">
-                            <i class="fas fa-clock"></i> {{ c.hora|time:"H:i" }} hrs
-                        </div>
-                        <div class="cita-card-detail">
-                            <i class="fas fa-stethoscope"></i> {{ c.motivo|truncatechars:60 }}
-                        </div>
+                    <div class="mt-3 space-y-1 border-t border-slate-100 pt-3 text-sm text-slate-600">
+                        <div class="flex items-center gap-2"><i class="fas fa-clock w-4 text-center text-slate-400"></i>{{ c.hora|time:"H:i" }} hrs</div>
+                        <div class="flex items-center gap-2"><i class="fas fa-stethoscope w-4 text-center text-slate-400"></i><span class="truncate">{{ c.motivo|truncatechars:60 }}</span></div>
                     </div>
-                    <div class="cita-card-actions">
-                        <a href="{% url 'detalle_cita' c.id %}" class="btn btn-sm btn-outline">
+                    <div class="mt-4 flex gap-2">
+                        <a href="{% url 'detalle_cita' c.id %}"
+                           class="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-sky-400 hover:bg-sky-50 hover:text-sky-700">
                             <i class="fas fa-eye"></i> Ver
                         </a>
-                        <a href="{% url 'editar_cita' c.id %}" class="btn btn-sm btn-outline">
+                        <a href="{% url 'editar_cita' c.id %}"
+                           class="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-100">
                             <i class="fas fa-edit"></i> Editar
                         </a>
                     </div>
@@ -126,11 +169,12 @@
                 {% endfor %}
             </div>
             {% else %}
-            <div class="empty-state">
-                <i class="fas fa-calendar-plus fa-4x"></i>
-                <h3>No hay citas registradas</h3>
-                <p>Comienza agendando la primera cita</p>
-                <a href="{% url 'registrar_cita' %}" class="btn btn-primary">
+            <div class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white py-16 text-center">
+                <i class="fas fa-calendar-plus mb-4 text-5xl text-slate-300"></i>
+                <h3 class="text-lg font-bold text-slate-700">No hay citas registradas</h3>
+                <p class="mt-1 text-sm text-slate-500">Comienza agendando la primera cita</p>
+                <a href="{% url 'registrar_cita' %}"
+                   class="mt-5 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-sky-600/20 transition hover:from-sky-700 hover:to-cyan-600">
                     <i class="fas fa-plus"></i> Nueva Cita
                 </a>
             </div>
@@ -138,73 +182,23 @@
 
             {% include 'componentes/pagination.html' with page_obj=citas %}
         </div>
-
-        <!-- Modal Eliminar -->
-        <div class="modal-overlay" id="deleteCitaModal">
-            <div class="modal-container">
-                <div class="modal-icon"><i class="fas fa-exclamation-triangle"></i></div>
-                <h2 class="modal-title">¿Eliminar cita?</h2>
-                <p class="modal-text">
-                    Estás a punto de eliminar la cita de <strong id="modalCitaPaciente"></strong>
-                    <br>del <span id="modalCitaFecha"></span>.
-                    <br>Esta acción no se puede deshacer.
-                </p>
-                <form method="POST" id="deleteCitaForm" class="modal-actions">
-                    {% csrf_token %}
-                    <button type="button" class="btn btn-secondary" id="cancelCitaDelete">
-                        <i class="fas fa-times"></i> Cancelar
-                    </button>
-                    <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-trash"></i> Sí, Eliminar
-                    </button>
-                </form>
-            </div>
-        </div>
     </main>
 </div>
 
 <script>
-    // Buscador
-    document.getElementById('globalSearch')?.addEventListener('input', function() {
-        const q = this.value.toLowerCase();
-        document.querySelectorAll('.table tbody tr').forEach(row => {
-            row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+    // Buscador en la página (filtro rápido sobre filas/tarjetas)
+    const buscadorCitas = document.getElementById('globalSearch');
+    if (buscadorCitas) {
+        buscadorCitas.addEventListener('input', function() {
+            const q = this.value.toLowerCase();
+            document.querySelectorAll('.cita-fila').forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+            });
+            document.querySelectorAll('.cita-card').forEach(card => {
+                const txt = card.dataset.search || card.textContent.toLowerCase();
+                card.style.display = txt.includes(q) ? '' : 'none';
+            });
         });
-        document.querySelectorAll('.cita-card').forEach(card => {
-            const txt = card.dataset.search || card.textContent.toLowerCase();
-            card.style.display = txt.includes(q) ? '' : 'none';
-        });
-    });
-
-    // Modal eliminar
-    const delModal = document.getElementById('deleteCitaModal');
-    const delForm = document.getElementById('deleteCitaForm');
-
-    document.querySelectorAll('.btn-delete-cita').forEach(btn => {
-        btn.addEventListener('click', function() {
-            delForm.action = '/citas/' + this.dataset.id + '/eliminar/';
-            document.getElementById('modalCitaPaciente').textContent = this.dataset.paciente;
-            document.getElementById('modalCitaFecha').textContent = this.dataset.fecha;
-            delModal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        });
-    });
-
-    document.getElementById('cancelCitaDelete')?.addEventListener('click', () => {
-        delModal.classList.remove('active');
-        document.body.style.overflow = '';
-    });
-    delModal?.addEventListener('click', function(e) {
-        if (e.target === this) {
-            this.classList.remove('active');
-            document.body.style.overflow = '';
-        }
-    });
-    document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') {
-            delModal?.classList.remove('active');
-            document.body.style.overflow = '';
-        }
-    });
+    }
 </script>
 {% endblock %}

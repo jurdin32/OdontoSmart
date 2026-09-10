@@ -8,17 +8,25 @@
     <main class="main-content">
         {% include 'componentes/topbar.html' %}
 
-        <div class="dashboard-content">
-            <div class="page-header">
-                <h1 class="page-title">
-                    {% if cita %}Editar Cita{% else %}Nueva Cita{% endif %}
-                </h1>
-                <p class="page-subtitle">
-                    {% if cita %}Actualiza los datos de la cita{% else %}Agenda una nueva cita odontológica{% endif %}
-                </p>
+        <div class="dashboard-content p-6 lg:p-8">
+            <!-- Encabezado -->
+            <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">
+                        {% if cita %}Editar Cita{% else %}Nueva Cita{% endif %}
+                    </h1>
+                    <p class="mt-1 text-sm text-slate-500">
+                        {% if cita %}Actualiza los datos de la cita{% else %}Agenda una nueva cita odontológica{% endif %}
+                    </p>
+                </div>
+                <a href="{% url 'lista_citas' %}"
+                   class="inline-flex items-center justify-center gap-2 self-start rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 sm:self-auto">
+                    <i class="fas fa-arrow-left"></i> Volver a Citas
+                </a>
             </div>
 
-            <div class="form-card">
+            <!-- Tarjeta del formulario -->
+            <div class="max-w-3xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
                 {% if object_version %}
                 <div class="concurrency-banner" id="concurrencyBanner" style="display:none;">
                     <i class="fas fa-lock"></i>
@@ -35,54 +43,57 @@
                     <input type="hidden" name="object_version" value="{{ object_version }}">
                     {% endif %}
 
-                    <div class="form-section">
-                        <h3 class="form-section-title">
-                            <i class="fas fa-calendar-check"></i> Datos de la Cita
-                        </h3>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">{{ form.paciente.label }}</label>
-                                {{ form.paciente }}
-                                {% if form.paciente.errors %}<div class="form-error">{% for e in form.paciente.errors %}<span>{{ e }}</span>{% endfor %}</div>{% endif %}
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">{{ form.doctor.label }}</label>
-                                {{ form.doctor }}
-                                {% if form.doctor.errors %}<div class="form-error">{% for e in form.doctor.errors %}<span>{{ e }}</span>{% endfor %}</div>{% endif %}
-                            </div>
+                    <div class="mb-6 flex items-center gap-3 border-b border-slate-100 pb-4">
+                        <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-100 text-sky-600">
+                            <i class="fas fa-calendar-check"></i>
+                        </span>
+                        <h2 class="text-lg font-bold text-slate-800">Datos de la Cita</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                        <div>
+                            <label class="mb-1.5 block text-sm font-semibold text-slate-700">{{ form.paciente.label }}</label>
+                            {{ form.paciente }}
+                            {% if form.paciente.errors %}<div class="mt-1.5 space-y-0.5">{% for e in form.paciente.errors %}<p class="text-xs font-medium text-red-600">{{ e }}</p>{% endfor %}</div>{% endif %}
                         </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">{{ form.fecha.label }}</label>
-                                {{ form.fecha }}
-                                {% if form.fecha.errors %}<div class="form-error">{% for e in form.fecha.errors %}<span>{{ e }}</span>{% endfor %}</div>{% endif %}
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">{{ form.hora.label }}</label>
-                                {{ form.hora }}
-                                {% if form.hora.errors %}<div class="form-error">{% for e in form.hora.errors %}<span>{{ e }}</span>{% endfor %}</div>{% endif %}
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">{{ form.estado.label }}</label>
-                                {{ form.estado }}
-                            </div>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-semibold text-slate-700">{{ form.doctor.label }}</label>
+                            {{ form.doctor }}
+                            {% if form.doctor.errors %}<div class="mt-1.5 space-y-0.5">{% for e in form.doctor.errors %}<p class="text-xs font-medium text-red-600">{{ e }}</p>{% endfor %}</div>{% endif %}
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">{{ form.motivo.label }}</label>
-                            {{ form.motivo }}
-                            {% if form.motivo.errors %}<div class="form-error">{% for e in form.motivo.errors %}<span>{{ e }}</span>{% endfor %}</div>{% endif %}
+                        <div>
+                            <label class="mb-1.5 block text-sm font-semibold text-slate-700">{{ form.fecha.label }}</label>
+                            {{ form.fecha }}
+                            {% if form.fecha.errors %}<div class="mt-1.5 space-y-0.5">{% for e in form.fecha.errors %}<p class="text-xs font-medium text-red-600">{{ e }}</p>{% endfor %}</div>{% endif %}
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">{{ form.notas.label }}</label>
-                            {{ form.notas }}
+                        <div>
+                            <label class="mb-1.5 block text-sm font-semibold text-slate-700">{{ form.hora.label }}</label>
+                            {{ form.hora }}
+                            {% if form.hora.errors %}<div class="mt-1.5 space-y-0.5">{% for e in form.hora.errors %}<p class="text-xs font-medium text-red-600">{{ e }}</p>{% endfor %}</div>{% endif %}
+                        </div>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-semibold text-slate-700">{{ form.estado.label }}</label>
+                            {{ form.estado }}
                         </div>
                     </div>
 
-                    <div class="form-actions">
-                        <a href="{% url 'lista_citas' %}" class="btn btn-secondary">
+                    <div class="mt-5">
+                        <label class="mb-1.5 block text-sm font-semibold text-slate-700">{{ form.motivo.label }}</label>
+                        {{ form.motivo }}
+                        {% if form.motivo.errors %}<div class="mt-1.5 space-y-0.5">{% for e in form.motivo.errors %}<p class="text-xs font-medium text-red-600">{{ e }}</p>{% endfor %}</div>{% endif %}
+                    </div>
+                    <div class="mt-5">
+                        <label class="mb-1.5 block text-sm font-semibold text-slate-700">{{ form.notas.label }}</label>
+                        {{ form.notas }}
+                    </div>
+
+                    <div class="mt-8 flex flex-col-reverse items-stretch gap-3 border-t border-slate-100 pt-6 sm:flex-row sm:items-center sm:justify-end">
+                        <a href="{% url 'lista_citas' %}"
+                           class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-50">
                             <i class="fas fa-times"></i> Cancelar
                         </a>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit"
+                                class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-sky-600/20 transition hover:from-sky-700 hover:to-cyan-600">
                             <i class="fas fa-save"></i>
                             {% if cita %}Actualizar Cita{% else %}Registrar Cita{% endif %}
                         </button>
@@ -92,7 +103,6 @@
         </div>
     </main>
 </div>
-
 {% endblock %}
 
 {% block extra_scripts %}

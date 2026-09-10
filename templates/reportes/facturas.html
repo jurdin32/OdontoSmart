@@ -7,125 +7,168 @@
     {% include 'componentes/sidebar.html' with active='reportes' %}
     <main class="main-content">
         {% include 'componentes/topbar.html' %}
-        <div class="dashboard-content">
-            <div class="page-header page-header--between">
+        <div class="dashboard-content p-6 lg:p-8">
+            <!-- Encabezado -->
+            <div class="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                    <h1 class="page-title"><i class="fas fa-file-invoice-dollar"></i> Reporte de Facturas</h1>
-                    <p class="page-subtitle">Resumen de facturación</p>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">
+                        <i class="fas fa-file-invoice-dollar mr-1"></i> Reporte de Facturas
+                    </h1>
+                    <p class="mt-1 text-sm text-slate-500">Resumen de facturación</p>
                 </div>
-                <div style="display:flex;gap:8px;">
-                    <a href="?{% if desde %}desde={{ desde }}&{% endif %}{% if hasta %}hasta={{ hasta }}&{% endif %}excel=1" id="btnExcel" class="btn btn-success" style="display:none;">
+                <div class="flex flex-wrap items-center gap-2 self-start">
+                    <a href="?{% if desde %}desde={{ desde }}&{% endif %}{% if hasta %}hasta={{ hasta }}&{% endif %}excel=1" id="btnExcel"
+                       class="hidden inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-600/20 transition hover:from-emerald-700 hover:to-emerald-600">
                         <i class="fas fa-file-excel"></i> Excel
                     </a>
-                    <a href="{% url 'exportar_facturas_excel' %}?{% if desde %}desde={{ desde }}&{% endif %}{% if hasta %}hasta={{ hasta }}{% endif %}" class="btn btn-success">
+                    <a href="{% url 'exportar_facturas_excel' %}?{% if desde %}desde={{ desde }}&{% endif %}{% if hasta %}hasta={{ hasta }}{% endif %}"
+                       class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-600/20 transition hover:from-emerald-700 hover:to-emerald-600">
                         <i class="fas fa-file-excel"></i> Excel
                     </a>
-                    <a href="{% url 'exportar_facturas_pdf' %}?{% if desde %}desde={{ desde }}&{% endif %}{% if hasta %}hasta={{ hasta }}{% endif %}" class="btn btn-danger">
+                    <a href="{% url 'exportar_facturas_pdf' %}?{% if desde %}desde={{ desde }}&{% endif %}{% if hasta %}hasta={{ hasta }}{% endif %}"
+                       class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-red-600/20 transition hover:from-red-700 hover:to-rose-600">
                         <i class="fas fa-file-pdf"></i> PDF
                     </a>
                 </div>
             </div>
 
             <!-- Filtros -->
-            <div class="search-filter-bar" style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
-                <form method="GET" style="display:flex;gap:12px;flex-wrap:wrap;width:100%;">
+            <form method="GET" class="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div class="flex flex-wrap items-end gap-4">
                     <div>
-                        <label class="form-label">Desde</label>
-                        <input type="date" name="desde" class="form-input" value="{{ desde }}">
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">Desde</label>
+                        <input type="date" name="desde" value="{{ desde }}"
+                               class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-700 shadow-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
                     </div>
                     <div>
-                        <label class="form-label">Hasta</label>
-                        <input type="date" name="hasta" class="form-input" value="{{ hasta }}">
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">Hasta</label>
+                        <input type="date" name="hasta" value="{{ hasta }}"
+                               class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-700 shadow-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
                     </div>
-                    <div style="align-self:flex-end;">
-                        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Filtrar</button>
-                        <a href="{% url 'reporte_facturas' %}" class="btn btn-secondary">Limpiar</a>
-                    </div>
-                </form>
-            </div>
+                    <button type="submit"
+                            class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-sky-600/20 transition hover:from-sky-700 hover:to-cyan-600">
+                        <i class="fas fa-search"></i> Filtrar
+                    </button>
+                    <a href="{% url 'reporte_facturas' %}"
+                       class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-50">
+                        Limpiar
+                    </a>
+                </div>
+            </form>
 
-            <!-- Stats -->
-            <div class="stats-grid" style="margin-bottom:20px;">
-                <div class="stat-card stat-card--blue">
-                    <div class="stat-info"><span class="stat-number">{{ total_facturas }}</span><span class="stat-label">Total Facturas</span></div>
+            <!-- KPIs -->
+            <div class="mb-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                <div class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-sky-600"><i class="fas fa-file-invoice"></i></div>
+                    <div class="min-w-0">
+                        <div class="text-2xl font-extrabold leading-none text-slate-900">{{ total_facturas }}</div>
+                        <div class="mt-1 truncate text-sm text-slate-500">Total Facturas</div>
+                    </div>
                 </div>
-                <div class="stat-card stat-card--green">
-                    <div class="stat-info"><span class="stat-number">{{ pagadas }}</span><span class="stat-label">Pagadas</span></div>
+                <div class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600"><i class="fas fa-check-circle"></i></div>
+                    <div class="min-w-0">
+                        <div class="text-2xl font-extrabold leading-none text-slate-900">{{ pagadas }}</div>
+                        <div class="mt-1 truncate text-sm text-slate-500">Pagadas</div>
+                    </div>
                 </div>
-                <div class="stat-card stat-card--orange">
-                    <div class="stat-info"><span class="stat-number">{{ pendientes }}</span><span class="stat-label">Pendientes</span></div>
+                <div class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600"><i class="fas fa-clock"></i></div>
+                    <div class="min-w-0">
+                        <div class="text-2xl font-extrabold leading-none text-slate-900">{{ pendientes }}</div>
+                        <div class="mt-1 truncate text-sm text-slate-500">Pendientes</div>
+                    </div>
                 </div>
-                <div class="stat-card stat-card--red">
-                    <div class="stat-info"><span class="stat-number">{{ anuladas }}</span><span class="stat-label">Anuladas</span></div>
+                <div class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600"><i class="fas fa-ban"></i></div>
+                    <div class="min-w-0">
+                        <div class="text-2xl font-extrabold leading-none text-slate-900">{{ anuladas }}</div>
+                        <div class="mt-1 truncate text-sm text-slate-500">Anuladas</div>
+                    </div>
                 </div>
-                <div class="stat-card stat-card--purple">
-                    <div class="stat-info"><span class="stat-number">${{ monto_total|floatformat:2 }}</span><span class="stat-label">Monto Total</span></div>
+                <div class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-600"><i class="fas fa-dollar-sign"></i></div>
+                    <div class="min-w-0">
+                        <div class="text-2xl font-extrabold leading-none text-slate-900">${{ monto_total|floatformat:2 }}</div>
+                        <div class="mt-1 truncate text-sm text-slate-500">Monto Total</div>
+                    </div>
                 </div>
-                <div class="stat-card stat-card--success">
-                    <div class="stat-info"><span class="stat-number">${{ monto_pagado|floatformat:2 }}</span><span class="stat-label">Monto Cobrado</span></div>
+                <div class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-teal-100 text-teal-600"><i class="fas fa-hand-holding-usd"></i></div>
+                    <div class="min-w-0">
+                        <div class="text-2xl font-extrabold leading-none text-slate-900">${{ monto_pagado|floatformat:2 }}</div>
+                        <div class="mt-1 truncate text-sm text-slate-500">Monto Cobrado</div>
+                    </div>
                 </div>
             </div>
 
             <!-- Por forma de pago -->
             {% if por_forma %}
-            <div class="form-card" style="margin-bottom:20px;">
-                <h3 style="margin-bottom:12px;">Por forma de pago</h3>
-                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
+            <section class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <h2 class="mb-4 text-lg font-bold text-slate-800">Por forma de pago</h2>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                     {% for fp in por_forma %}
-                    <div style="padding:12px;background:var(--gray-50);border-radius:8px;">
-                        <strong>{{ fp.forma_pago|default:"Sin especificar" }}</strong>
-                        <div style="display:flex;justify-content:space-between;margin-top:4px;">
-                            <span>{{ fp.cantidad }} factura{{ fp.cantidad|pluralize:"s" }}</span>
-                            <span style="font-weight:600;">${{ fp.monto|floatformat:2 }}</span>
+                    <div class="rounded-xl bg-slate-50 p-4">
+                        <div class="truncate text-sm font-semibold text-slate-700">{{ fp.forma_pago|default:"Sin especificar" }}</div>
+                        <div class="mt-2 flex items-center justify-between gap-3 text-sm">
+                            <span class="text-slate-500">{{ fp.cantidad }} factura{{ fp.cantidad|pluralize:"s" }}</span>
+                            <span class="font-extrabold text-slate-900">${{ fp.monto|floatformat:2 }}</span>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
-            </div>
+            </section>
             {% endif %}
 
             <!-- Tabla -->
-            <div class="form-card">
-                <div style="overflow-x:auto;">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>N°</th>
-                                <th>Paciente</th>
-                                <th>Emisión</th>
-                                <th>Total</th>
-                                <th>Forma Pago</th>
-                                <th>Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for f in facturas %}
-                            <tr>
-                                <td><strong>{{ f.numero }}</strong></td>
-                                <td><a href="{% url 'detalle_factura' f.id %}">{{ f.paciente }}</a></td>
-                                <td>{{ f.fecha_emision|date:"d/m/Y" }}</td>
-                                <td><strong>${{ f.total|floatformat:2 }}</strong></td>
-                                <td>{{ f.get_forma_pago_display }}</td>
-                                <td>
-                                    {% if f.estado == 'PAGADA' %}
-                                    <span class="badge badge-success">Pagada</span>
-                                    {% elif f.estado == 'PENDIENTE' %}
-                                    <span class="badge badge-warning">Pendiente</span>
-                                    {% elif f.estado == 'ANULADA' %}
-                                    <span class="badge badge-danger">Anulada</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--gray-400);">
-                                <i class="fas fa-file-invoice-dollar" style="font-size:2rem;display:block;margin-bottom:8px;"></i>
-                                No hay facturas en este período.
-                            </td></tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+            <section>
+                <h2 class="mb-3 text-lg font-bold text-slate-800">Detalle de Facturas</h2>
+                <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                            <thead class="bg-slate-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">N°</th>
+                                    <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Paciente</th>
+                                    <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Emisión</th>
+                                    <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Total</th>
+                                    <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Forma Pago</th>
+                                    <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 bg-white">
+                                {% for f in facturas %}
+                                <tr class="transition hover:bg-slate-50">
+                                    <td class="whitespace-nowrap px-6 py-4 font-semibold text-slate-800">{{ f.numero }}</td>
+                                    <td class="px-6 py-4">
+                                        <a href="{% url 'detalle_factura' f.id %}" class="font-semibold text-sky-700 transition hover:text-sky-900 hover:underline">{{ f.paciente }}</a>
+                                    </td>
+                                    <td class="whitespace-nowrap px-6 py-4 text-slate-600">{{ f.fecha_emision|date:"d/m/Y" }}</td>
+                                    <td class="whitespace-nowrap px-6 py-4 font-semibold text-slate-800">${{ f.total|floatformat:2 }}</td>
+                                    <td class="px-6 py-4 text-slate-600">{{ f.get_forma_pago_display }}</td>
+                                    <td class="whitespace-nowrap px-6 py-4">
+                                        {% if f.estado == 'PAGADA' %}
+                                        <span class="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">Pagada</span>
+                                        {% elif f.estado == 'PENDIENTE' %}
+                                        <span class="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">Pendiente</span>
+                                        {% elif f.estado == 'ANULADA' %}
+                                        <span class="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-700">Anulada</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="px-6 py-16 text-center">
+                                        <i class="fas fa-file-invoice-dollar mb-3 block text-3xl text-slate-300"></i>
+                                        <span class="text-sm font-semibold text-slate-500">No hay facturas en este período.</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
+            </section>
         </div>
     </main>
 </div>

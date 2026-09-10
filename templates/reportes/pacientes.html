@@ -6,60 +6,128 @@
     {% include 'componentes/sidebar.html' with active='reportes' %}
     <main class="main-content">
         {% include 'componentes/topbar.html' %}
-        <div class="dashboard-content">
-            <div class="page-header page-header--between">
+        <div class="dashboard-content p-6 lg:p-8">
+            <!-- Encabezado -->
+            <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 class="page-title">Reporte de Pacientes</h1>
-                    <p class="page-subtitle">Estadísticas demográficas de pacientes</p>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">Reporte de Pacientes</h1>
+                    <p class="mt-1 text-sm text-slate-500">Estadísticas demográficas de pacientes</p>
                 </div>
-                <a href="{% url 'reportes' %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver</a>
+                <a href="{% url 'reportes' %}"
+                   class="inline-flex items-center justify-center gap-2 self-start rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 sm:self-auto">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
             </div>
 
-            <form class="report-filters" method="GET">
-                <div class="filter-group">
-                    <label class="filter-label">Desde</label>
-                    <input type="date" name="desde" class="form-input filter-input" value="{{ desde }}">
+            <!-- Filtros -->
+            <form method="GET" class="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div class="flex flex-wrap items-end gap-4">
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">Desde</label>
+                        <input type="date" name="desde" value="{{ desde }}"
+                               class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-700 shadow-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">Hasta</label>
+                        <input type="date" name="hasta" value="{{ hasta }}"
+                               class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-700 shadow-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
+                    </div>
+                    <button type="submit"
+                            class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-sky-600/20 transition hover:from-sky-700 hover:to-cyan-600">
+                        <i class="fas fa-filter"></i> Filtrar
+                    </button>
+                    {% if desde or hasta %}
+                    <a href="{% url 'reporte_pacientes' %}"
+                       class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-50">
+                        <i class="fas fa-times"></i> Limpiar
+                    </a>
+                    {% endif %}
                 </div>
-                <div class="filter-group">
-                    <label class="filter-label">Hasta</label>
-                    <input type="date" name="hasta" class="form-input filter-input" value="{{ hasta }}">
-                </div>
-                <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Filtrar</button>
-                {% if desde or hasta %}
-                <a href="{% url 'reporte_pacientes' %}" class="btn btn-secondary"><i class="fas fa-times"></i> Limpiar</a>
-                {% endif %}
             </form>
 
-            <div class="stats-grid">
-                <div class="stat-card"><div class="stat-icon stat-card--blue"><i class="fas fa-users"></i></div><div class="stat-info"><span class="stat-number">{{ total }}</span><span class="stat-label">Total Pacientes</span></div></div>
-                <div class="stat-card"><div class="stat-icon" style="background:#dbeafe;color:#2563eb;"><i class="fas fa-male"></i></div><div class="stat-info"><span class="stat-number">{{ hombres }}</span><span class="stat-label">Hombres</span></div></div>
-                <div class="stat-card"><div class="stat-icon" style="background:#fce7f3;color:#db2777;"><i class="fas fa-female"></i></div><div class="stat-info"><span class="stat-number">{{ mujeres }}</span><span class="stat-label">Mujeres</span></div></div>
-                <div class="stat-card"><div class="stat-icon" style="background:#fef3c7;color:#d97706;"><i class="fas fa-child"></i></div><div class="stat-info"><span class="stat-number">{{ menores }}</span><span class="stat-label">Menores (0-17)</span></div></div>
-                <div class="stat-card"><div class="stat-icon" style="background:#ecfdf5;color:#10b981;"><i class="fas fa-user"></i></div><div class="stat-info"><span class="stat-number">{{ adultos }}</span><span class="stat-label">Adultos (18-60)</span></div></div>
-                <div class="stat-card"><div class="stat-icon" style="background:#fef2f2;color:#ef4444;"><i class="fas fa-user-clock"></i></div><div class="stat-info"><span class="stat-number">{{ mayores }}</span><span class="stat-label">Adultos Mayores (60+)</span></div></div>
-            </div>
-
-            {% if ultimos %}
-            <div class="report-section">
-                <h3 class="form-section-title">Últimos Pacientes Registrados</h3>
-                <div class="table-container">
-                    <table class="table">
-                        <thead><tr><th>Paciente</th><th>Cédula</th><th>Género</th><th>Edad</th><th>Fecha Registro</th></tr></thead>
-                        <tbody>
-                            {% for p in ultimos %}
-                            <tr>
-                                <td><strong>{{ p.nombres }} {{ p.apellidos }}</strong></td>
-                                <td>{{ p.cedula }}</td>
-                                <td>{{ p.get_genero_display }}</td>
-                                <td>{{ p.edad|default:'-' }} años</td>
-                                <td>{{ p.fecha_registro|date:"d/m/Y" }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+            <!-- KPIs -->
+            <div class="mb-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                <div class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-sky-600"><i class="fas fa-users"></i></div>
+                    <div class="min-w-0">
+                        <div class="text-2xl font-extrabold leading-none text-slate-900">{{ total }}</div>
+                        <div class="mt-1 truncate text-sm text-slate-500">Total Pacientes</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600"><i class="fas fa-male"></i></div>
+                    <div class="min-w-0">
+                        <div class="text-2xl font-extrabold leading-none text-slate-900">{{ hombres }}</div>
+                        <div class="mt-1 truncate text-sm text-slate-500">Hombres</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-pink-100 text-pink-600"><i class="fas fa-female"></i></div>
+                    <div class="min-w-0">
+                        <div class="text-2xl font-extrabold leading-none text-slate-900">{{ mujeres }}</div>
+                        <div class="mt-1 truncate text-sm text-slate-500">Mujeres</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600"><i class="fas fa-child"></i></div>
+                    <div class="min-w-0">
+                        <div class="text-2xl font-extrabold leading-none text-slate-900">{{ menores }}</div>
+                        <div class="mt-1 truncate text-sm text-slate-500">Menores (0-17)</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600"><i class="fas fa-user"></i></div>
+                    <div class="min-w-0">
+                        <div class="text-2xl font-extrabold leading-none text-slate-900">{{ adultos }}</div>
+                        <div class="mt-1 truncate text-sm text-slate-500">Adultos (18-60)</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600"><i class="fas fa-user-clock"></i></div>
+                    <div class="min-w-0">
+                        <div class="text-2xl font-extrabold leading-none text-slate-900">{{ mayores }}</div>
+                        <div class="mt-1 truncate text-sm text-slate-500">Adultos Mayores (60+)</div>
+                    </div>
                 </div>
             </div>
-            {% endif %}
+
+            <!-- Últimos pacientes -->
+            <section>
+                <h2 class="mb-3 text-lg font-bold text-slate-800">Últimos Pacientes Registrados</h2>
+                {% if ultimos %}
+                <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                            <thead class="bg-slate-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Paciente</th>
+                                    <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Cédula</th>
+                                    <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Género</th>
+                                    <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Edad</th>
+                                    <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Fecha Registro</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 bg-white">
+                                {% for p in ultimos %}
+                                <tr class="transition hover:bg-slate-50">
+                                    <td class="px-6 py-4 font-semibold text-slate-800">{{ p.nombres }} {{ p.apellidos }}</td>
+                                    <td class="px-6 py-4 text-slate-600">{{ p.cedula }}</td>
+                                    <td class="px-6 py-4 text-slate-600">{{ p.get_genero_display }}</td>
+                                    <td class="whitespace-nowrap px-6 py-4 text-slate-600">{{ p.edad|default:'-' }} años</td>
+                                    <td class="whitespace-nowrap px-6 py-4 text-slate-600">{{ p.fecha_registro|date:"d/m/Y" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% else %}
+                <div class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white py-16 text-center">
+                    <i class="fas fa-users mb-3 text-3xl text-slate-300"></i>
+                    <p class="text-sm font-semibold text-slate-500">No hay pacientes en el período seleccionado</p>
+                </div>
+                {% endif %}
+            </section>
         </div>
     </main>
 </div>

@@ -4,6 +4,13 @@ from pacientes.models import Paciente
 from medicos.models import Medico
 from datetime import date, time
 
+# Clases compartidas para los campos (Tailwind CSS)
+INPUT_CLASSES = (
+    'mt-1 block w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 '
+    'text-sm text-slate-800 shadow-sm outline-none transition '
+    'placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100'
+)
+
 
 class CitaForm(forms.ModelForm):
     """Formulario de registro de citas"""
@@ -12,22 +19,22 @@ class CitaForm(forms.ModelForm):
         model = Cita
         fields = ['paciente', 'doctor', 'fecha', 'hora', 'motivo', 'estado', 'notas']
         widgets = {
-            'paciente': forms.Select(attrs={'class': 'form-input'}),
-            'doctor': forms.Select(attrs={'class': 'form-input'}),
+            'paciente': forms.Select(attrs={'class': INPUT_CLASSES}),
+            'doctor': forms.Select(attrs={'class': INPUT_CLASSES}),
             'fecha': forms.DateInput(
                 format='%Y-%m-%d',
-                attrs={'class': 'form-input', 'type': 'date'}
+                attrs={'class': INPUT_CLASSES, 'type': 'date'}
             ),
             'hora': forms.TimeInput(
-                attrs={'class': 'form-input', 'type': 'time'}
+                attrs={'class': INPUT_CLASSES, 'type': 'time'}
             ),
             'motivo': forms.Textarea(attrs={
-                'class': 'form-input', 'placeholder': 'Describe el motivo de la consulta',
+                'class': INPUT_CLASSES, 'placeholder': 'Describe el motivo de la consulta',
                 'rows': 3
             }),
-            'estado': forms.Select(attrs={'class': 'form-input'}),
+            'estado': forms.Select(attrs={'class': INPUT_CLASSES}),
             'notas': forms.Textarea(attrs={
-                'class': 'form-input', 'placeholder': 'Notas adicionales (opcional)',
+                'class': INPUT_CLASSES, 'placeholder': 'Notas adicionales (opcional)',
                 'rows': 3
             }),
         }

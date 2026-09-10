@@ -3,13 +3,20 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from .models import Profile, Role
 
+# Clases Tailwind compartidas por los widgets de los formularios (excepto CustomLoginForm)
+INPUT_CLASSES = (
+    'mt-1 block w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 '
+    'text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 '
+    'focus:border-sky-500 focus:ring-2 focus:ring-sky-100'
+)
+
 
 class CustomUserCreationForm(UserCreationForm):
     """Formulario de registro con campos adicionales"""
     email = forms.EmailField(
         required=True,
         widget=forms.EmailInput(attrs={
-            'class': 'form-input',
+            'class': INPUT_CLASSES,
             'placeholder': 'correo@ejemplo.com'
         })
     )
@@ -18,7 +25,7 @@ class CustomUserCreationForm(UserCreationForm):
         required=True,
         label='Nombres',
         widget=forms.TextInput(attrs={
-            'class': 'form-input',
+            'class': INPUT_CLASSES,
             'placeholder': 'Tus nombres'
         })
     )
@@ -27,7 +34,7 @@ class CustomUserCreationForm(UserCreationForm):
         required=True,
         label='Apellidos',
         widget=forms.TextInput(attrs={
-            'class': 'form-input',
+            'class': INPUT_CLASSES,
             'placeholder': 'Tus apellidos'
         })
     )
@@ -36,7 +43,7 @@ class CustomUserCreationForm(UserCreationForm):
         required=False,
         label='Teléfono',
         widget=forms.TextInput(attrs={
-            'class': 'form-input',
+            'class': INPUT_CLASSES,
             'placeholder': '+57 300 123 4567'
         })
     )
@@ -45,7 +52,7 @@ class CustomUserCreationForm(UserCreationForm):
         required=True,
         label='Rol',
         widget=forms.Select(attrs={
-            'class': 'form-input'
+            'class': INPUT_CLASSES
         })
     )
 
@@ -57,15 +64,15 @@ class CustomUserCreationForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['username'].widget.attrs.update({
-            'class': 'form-input',
+            'class': INPUT_CLASSES,
             'placeholder': 'nombre_usuario'
         })
         self.fields['password1'].widget.attrs.update({
-            'class': 'form-input',
+            'class': INPUT_CLASSES,
             'placeholder': '••••••••'
         })
         self.fields['password2'].widget.attrs.update({
-            'class': 'form-input',
+            'class': INPUT_CLASSES,
             'placeholder': 'Repite la contraseña'
         })
         # Cargar roles disponibles (excluyendo ADMIN y PATIENT para registro público)
@@ -94,18 +101,18 @@ class CustomUserCreationForm(UserCreationForm):
 
 
 class CustomLoginForm(AuthenticationForm):
-    """Formulario de inicio de sesión personalizado"""
+    """Formulario de inicio de sesión personalizado (Tailwind CSS)"""
     username = forms.CharField(
         label='Usuario',
         widget=forms.TextInput(attrs={
-            'class': 'form-input',
+            'class': 'mt-1 block w-full rounded-xl border border-slate-300 bg-white py-3 pl-11 pr-4 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100',
             'placeholder': 'Nombre de usuario'
         })
     )
     password = forms.CharField(
         label='Contraseña',
         widget=forms.PasswordInput(attrs={
-            'class': 'form-input',
+            'class': 'mt-1 block w-full rounded-xl border border-slate-300 bg-white py-3 pl-11 pr-12 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100',
             'placeholder': '••••••••'
         })
     )

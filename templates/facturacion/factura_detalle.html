@@ -6,88 +6,113 @@
 {% block content %}
 <div class="dashboard">
     {% include 'componentes/sidebar.html' with active='facturas' %}
+
     <main class="main-content">
         {% include 'componentes/topbar.html' %}
-        <div class="dashboard-content">
-            <div class="page-header page-header--between">
+
+        <div class="dashboard-content p-6 lg:p-8">
+            <!-- Encabezado -->
+            <div class="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                    <h1 class="page-title">{{ factura.numero }}</h1>
-                    <p class="page-subtitle">
-                        {{ factura.paciente }} — {{ factura.fecha_emision|date:"d/m/Y" }}
+                    <div class="flex flex-wrap items-center gap-3">
+                        <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">{{ factura.numero }}</h1>
+                        {% if factura.estado == 'PENDIENTE' %}
+                        <span class="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">Pendiente</span>
+                        {% elif factura.estado == 'PAGADA' %}
+                        <span class="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">Pagada</span>
+                        {% elif factura.estado == 'ANULADA' %}
+                        <span class="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-700">Anulada</span>
+                        {% endif %}
+                    </div>
+                    <p class="mt-1 text-sm text-slate-500">
+                        {{ factura.paciente }} — {{ factura.fecha_emision|date:"d/M/Y" }}
                     </p>
                 </div>
-                <div class="header-actions">
-                    <a href="{% url 'imprimir_factura' factura.id %}" class="btn btn-secondary" target="_blank">
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <a href="{% url 'imprimir_factura' factura.id %}" target="_blank"
+                       class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-50">
                         <i class="fas fa-print"></i> Imprimir
                     </a>
                     {% if factura.estado == 'PENDIENTE' %}
                     {% tiene_permiso 'editar_facturas' as puede_editar %}
                     {% if puede_editar %}
-                    <a href="{% url 'editar_factura' factura.id %}" class="btn btn-secondary">
+                    <a href="{% url 'editar_factura' factura.id %}"
+                       class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-50">
                         <i class="fas fa-edit"></i> Editar
                     </a>
-                    <button type="button" class="btn btn-success" onclick="document.getElementById('paymentModal').style.display='flex'">
+                    <button type="button" onclick="document.getElementById('paymentModal').style.display='flex'"
+                            class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-600/20 transition hover:bg-emerald-700">
                         <i class="fas fa-check"></i> Registrar Pago
                     </button>
                     {% endif %}
                     {% endif %}
                     {% tiene_permiso 'sri_emitir' as puede_emitir_sri %}
                     {% if puede_emitir_sri and not sri_doc_error and not sri_doc %}
-                    <form method="POST" action="{% url 'emitir_factura_electronica' factura.id %}" style="display:inline;">
+                    <form method="POST" action="{% url 'emitir_factura_electronica' factura.id %}">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-primary" onclick="return confirm('¿Emitir factura electrónica al SRI?')">
+                        <button type="submit" onclick="return confirm('¿Emitir factura electrónica al SRI?')"
+                                class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-sky-600/20 transition hover:from-sky-700 hover:to-cyan-600">
                             <i class="fas fa-file-contract"></i> Emitir SRI
                         </button>
                     </form>
                     {% endif %}
                     {% if puede_emitir_sri and sri_doc_error %}
-                    <form method="POST" action="{% url 'reintentar_envio' sri_doc_error.id %}" style="display:inline;">
+                    <form method="POST" action="{% url 'reintentar_envio' sri_doc_error.id %}">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-warning" onclick="return confirm('¿Reintentar envío al SRI? Se usará el mismo secuencial.')">
+                        <button type="submit" onclick="return confirm('¿Reintentar envío al SRI? Se usará el mismo secuencial.')"
+                                class="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-amber-500/20 transition hover:bg-amber-600">
                             <i class="fas fa-redo"></i> Reintentar SRI
                         </button>
                     </form>
                     {% endif %}
                     {% tiene_permiso 'eliminar_facturas' as puede_eliminar %}
                     {% if puede_eliminar and factura.estado != 'PAGADA' %}
-                    <form method="POST" action="{% url 'eliminar_factura' factura.id %}" style="display:inline;">
+                    <form method="POST" action="{% url 'eliminar_factura' factura.id %}">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-danger" onclick="return confirm('¿Eliminar esta factura?')">
-                            <i class="fas fa-trash"></i>
+                        <button type="submit" title="Eliminar" onclick="return confirm('¿Eliminar esta factura?')"
+                                class="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-red-600/20 transition hover:bg-red-700">
+                            <i class="fas fa-trash"></i> Eliminar
                         </button>
                     </form>
                     {% endif %}
                 </div>
             </div>
 
-            {% if sri_info.sri_configurado %}
             <!-- Estado SRI -->
-            <div class="form-card sri-banner">
-                <div class="sri-banner-row">
-                    <div class="sri-banner-left">
-                        <span class="badge {% if sri_info.sri_ambiente == '1' %}badge-warning{% else %}badge-success{% endif %}">
-                            <i class="fas fa-cloud"></i>
-                            {{ sri_info.sri_ambiente_nombre }}
+            {% if sri_info.sri_configurado %}
+            <div class="mb-6 rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div class="flex flex-col gap-3 p-4 lg:flex-row lg:items-center lg:justify-between lg:gap-4">
+                    <div class="flex items-center gap-3">
+                        {% if sri_info.sri_ambiente == '1' %}
+                        <span class="inline-flex items-center gap-2 rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">
+                            <i class="fas fa-cloud"></i> {{ sri_info.sri_ambiente_nombre }}
                         </span>
-                        <span class="sri-label">SRI</span>
+                        {% else %}
+                        <span class="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">
+                            <i class="fas fa-cloud"></i> {{ sri_info.sri_ambiente_nombre }}
+                        </span>
+                        {% endif %}
+                        <span class="text-sm font-bold text-slate-400">SRI</span>
                     </div>
+
                     {% if sri_info.sri_certificado_valido %}
-                    <div class="sri-banner-center">
-                        <i class="fas fa-certificate sri-cert-icon"></i>
+                    <div class="flex flex-wrap items-center gap-2 text-sm text-slate-600">
+                        <i class="fas fa-certificate text-emerald-500"></i>
                         <span>
-                            <strong>{{ sri_info.sri_certificado_dias }} días</strong> restantes
-                            <span class="sri-date">(vence {{ sri_info.sri_certificado_hasta }})</span>
+                            <strong class="font-bold text-slate-800">{{ sri_info.sri_certificado_dias }} días</strong> restantes
+                            <span class="text-xs text-slate-400">(vence {{ sri_info.sri_certificado_hasta }})</span>
                         </span>
                         {% if sri_info.sri_certificado_dias <= 30 %}
-                        <span class="badge badge-danger">⚠️ Próximo a vencer</span>
+                        <span class="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-700">⚠️ Próximo a vencer</span>
                         {% elif sri_info.sri_certificado_dias <= 60 %}
-                        <span class="badge badge-warning">Vence pronto</span>
+                        <span class="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">Vence pronto</span>
                         {% else %}
-                        <span class="badge badge-success">Vigente</span>
+                        <span class="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">Vigente</span>
                         {% endif %}
                     </div>
                     {% else %}
-                    <div class="sri-banner-center sri-banner-error">
+                    <div class="flex flex-wrap items-center gap-2 text-sm text-red-600">
                         <i class="fas fa-exclamation-triangle"></i>
                         <span>
                             {% if sri_info.sri_certificado_hasta %}
@@ -96,19 +121,21 @@
                                 Certificado no configurado o contraseña incorrecta
                             {% endif %}
                         </span>
-                        <a href="{% url 'sri_configuracion' %}" class="btn btn-sm btn-danger">
+                        <a href="{% url 'sri_configuracion' %}"
+                           class="ml-1 inline-flex items-center gap-2 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm transition hover:bg-red-700">
                             <i class="fas fa-cog"></i> Configurar
                         </a>
                     </div>
                     {% endif %}
+
                     {% if sri_doc %}
-                    <div class="sri-banner-right">
+                    <div class="flex items-center">
                         {% if sri_doc.estado == 'AUTORIZADO' %}
-                        <span class="badge badge-success"><i class="fas fa-check-circle"></i> Autorizado</span>
+                        <span class="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700"><i class="fas fa-check-circle"></i> Autorizado</span>
                         {% elif sri_doc.estado == 'ENVIADO' %}
-                        <span class="badge badge-warning"><i class="fas fa-clock"></i> Pendiente</span>
+                        <span class="inline-flex items-center gap-2 rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700"><i class="fas fa-clock"></i> Pendiente</span>
                         {% elif sri_doc.estado == 'ERROR' %}
-                        <span class="badge badge-danger"><i class="fas fa-times-circle"></i> Error</span>
+                        <span class="inline-flex items-center gap-2 rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-700"><i class="fas fa-times-circle"></i> Error</span>
                         {% endif %}
                     </div>
                     {% endif %}
@@ -116,130 +143,215 @@
             </div>
             {% endif %}
 
-            <div class="detail-grid-2col">
-                <!-- Detalle -->
-                <div class="form-card">
-                    <h3 style="margin-bottom:16px;">Servicios</h3>
-                    <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Descripción</th>
-                                <th>Cant.</th>
-                                <th>P. Unit.</th>
-                                <th>Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for item in factura.items %}
-                            <tr class="item-row">
-                                <td data-label="Descripción">{{ item.descripcion }}</td>
-                                <td data-label="Cant.">{{ item.cantidad }}</td>
-                                <td data-label="P. Unit.">${{ item.precio_unitario|floatformat:2 }}</td>
-                                <td data-label="Total">${{ item.cantidad|multiply:item.precio_unitario|floatformat:2 }}</td>
-                            </tr>
-                            {% empty %}
-                            <tr><td colspan="4" style="text-align:center;">Sin items</td></tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                <!-- Detalle: Servicios -->
+                <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm lg:col-span-2">
+                    <div class="flex items-center gap-3 border-b border-slate-100 px-5 py-4">
+                        <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-100 text-sky-600"><i class="fas fa-list"></i></span>
+                        <h3 class="text-sm font-bold text-slate-800">Servicios</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                            <thead class="bg-slate-50">
+                                <tr>
+                                    <th class="px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Descripción</th>
+                                    <th class="px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Cant.</th>
+                                    <th class="px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">P. Unit.</th>
+                                    <th class="px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 bg-white">
+                                {% for item in factura.items %}
+                                <tr class="transition hover:bg-slate-50">
+                                    <td class="px-5 py-3.5 font-medium text-slate-700">{{ item.descripcion }}</td>
+                                    <td class="px-5 py-3.5 text-slate-600">{{ item.cantidad }}</td>
+                                    <td class="px-5 py-3.5 text-slate-600">${{ item.precio_unitario|floatformat:2 }}</td>
+                                    <td class="px-5 py-3.5 font-bold text-slate-800">${{ item.cantidad|multiply:item.precio_unitario|floatformat:2 }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="px-5 py-10 text-center text-sm text-slate-400">Sin items</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
-                <!-- Totales (móvil: oculto, se muestra items-mobile) -->
-                <div class="detail-sidebar">
+                <!-- Totales y metadatos -->
+                <div class="space-y-6">
                     <!-- Resumen -->
-                    <div class="detail-card">
-                        <div class="detail-card-header">
-                            <div class="detail-card-icon" style="background:#ecfdf5;color:var(--success);"><i class="fas fa-calculator"></i></div>
-                            <span class="detail-card-title">Resumen</span>
+                    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+                        <div class="flex items-center gap-3 border-b border-slate-100 px-5 py-4">
+                            <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600"><i class="fas fa-calculator"></i></span>
+                            <h3 class="text-sm font-bold text-slate-800">Resumen</h3>
                         </div>
-                        <div class="detail-card-body">
-                            <div class="detail-row"><span>Subtotal</span><strong>${{ factura.subtotal|floatformat:2 }}</strong></div>
+                        <dl class="px-5 py-4 text-sm">
+                            <div class="flex items-center justify-between gap-4 py-2">
+                                <dt class="text-slate-500">Subtotal</dt>
+                                <dd class="font-semibold text-slate-800">${{ factura.subtotal|floatformat:2 }}</dd>
+                            </div>
                             {% if factura.descuento_porcentaje > 0 %}
-                            <div class="detail-row detail-row-red"><span>Descuento ({{ factura.descuento_porcentaje }}%)</span><strong>-${{ factura.descuento_monto|floatformat:2 }}</strong></div>
+                            <div class="flex items-center justify-between gap-4 py-2">
+                                <dt class="text-red-600">Descuento ({{ factura.descuento_porcentaje }}%)</dt>
+                                <dd class="font-semibold text-red-600">-${{ factura.descuento_monto|floatformat:2 }}</dd>
+                            </div>
                             {% endif %}
                             {% if factura.impuesto_porcentaje > 0 %}
-                            <div class="detail-row"><span>Impuesto ({{ factura.impuesto_porcentaje }}%)</span><strong>${{ factura.impuesto_monto|floatformat:2 }}</strong></div>
+                            <div class="flex items-center justify-between gap-4 py-2">
+                                <dt class="text-slate-500">Impuesto ({{ factura.impuesto_porcentaje }}%)</dt>
+                                <dd class="font-semibold text-slate-800">${{ factura.impuesto_monto|floatformat:2 }}</dd>
+                            </div>
                             {% endif %}
-                            <div class="detail-row detail-row-total"><span>TOTAL</span><strong>${{ factura.total|floatformat:2 }}</strong></div>
-                        </div>
+                            <div class="mt-2 flex items-center justify-between gap-4 border-t border-slate-200 pt-4">
+                                <dt class="text-sm font-black uppercase tracking-wide text-slate-800">Total</dt>
+                                <dd class="text-2xl font-black text-sky-700">${{ factura.total|floatformat:2 }}</dd>
+                            </div>
+                        </dl>
                     </div>
 
                     <!-- Información -->
-                    <div class="detail-card">
-                        <div class="detail-card-header">
-                            <div class="detail-card-icon" style="background:#eff6ff;color:var(--primary);"><i class="fas fa-info-circle"></i></div>
-                            <span class="detail-card-title">Información</span>
+                    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+                        <div class="flex items-center gap-3 border-b border-slate-100 px-5 py-4">
+                            <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-100 text-sky-600"><i class="fas fa-info-circle"></i></span>
+                            <h3 class="text-sm font-bold text-slate-800">Información</h3>
                         </div>
-                        <div class="detail-card-body">
-                            <div class="detail-row"><span>Paciente</span><span>{{ factura.paciente }}</span></div>
-                            <div class="detail-row"><span>Médico</span><span>{{ factura.medico|default:"-" }}</span></div>
-                            <div class="detail-row"><span>Emisión</span><span>{{ factura.fecha_emision|date:"d/m/Y" }}</span></div>
-                            {% if factura.fecha_pago %}<div class="detail-row"><span>Fecha pago</span><span>{{ factura.fecha_pago|date:"d/m/Y" }}</span></div>{% endif %}
-                            <div class="detail-row"><span>Forma pago</span><span>{{ factura.get_forma_pago_display }}</span></div>
-                            <div class="detail-row"><span>Estado</span><span>{{ factura.get_estado_display }}</span></div>
-                            {% if factura.proforma %}<div class="detail-row"><span>Proforma</span><span><a href="{% url 'detalle_proforma' factura.proforma.id %}">{{ factura.proforma.numero }}</a></span></div>{% endif %}
-                            <div class="detail-row"><span>Creado por</span><span>{{ factura.registrado_por.get_full_name|default:factura.registrado_por.username }}</span></div>
-                        </div>
+                        <dl class="divide-y divide-slate-50 px-5 py-2 text-sm">
+                            <div class="flex justify-between gap-4 py-2.5"><dt class="text-slate-500">Paciente</dt><dd class="text-right font-medium text-slate-800">{{ factura.paciente }}</dd></div>
+                            <div class="flex justify-between gap-4 py-2.5"><dt class="text-slate-500">Médico</dt><dd class="text-right font-medium text-slate-800">{{ factura.medico|default:"—" }}</dd></div>
+                            <div class="flex justify-between gap-4 py-2.5"><dt class="text-slate-500">Emisión</dt><dd class="font-medium text-slate-800">{{ factura.fecha_emision|date:"d/m/Y" }}</dd></div>
+                            {% if factura.fecha_pago %}
+                            <div class="flex justify-between gap-4 py-2.5"><dt class="text-slate-500">Fecha pago</dt><dd class="font-medium text-slate-800">{{ factura.fecha_pago|date:"d/m/Y" }}</dd></div>
+                            {% endif %}
+                            <div class="flex justify-between gap-4 py-2.5"><dt class="text-slate-500">Forma pago</dt><dd class="text-right font-medium text-slate-800">{{ factura.get_forma_pago_display }}</dd></div>
+                            <div class="flex justify-between gap-4 py-2.5"><dt class="text-slate-500">Estado</dt><dd class="font-medium text-slate-800">{{ factura.get_estado_display }}</dd></div>
+                            {% if factura.proforma %}
+                            <div class="flex justify-between gap-4 py-2.5">
+                                <dt class="text-slate-500">Proforma</dt>
+                                <dd class="font-medium">
+                                    <a href="{% url 'detalle_proforma' factura.proforma.id %}" class="font-semibold text-sky-600 transition hover:text-sky-800">{{ factura.proforma.numero }}</a>
+                                </dd>
+                            </div>
+                            {% endif %}
+                            <div class="flex justify-between gap-4 py-2.5">
+                                <dt class="text-slate-500">Creado por</dt>
+                                <dd class="text-right font-medium text-slate-800">{{ factura.registrado_por.get_full_name|default:factura.registrado_por.username|default:"—" }}</dd>
+                            </div>
+                        </dl>
                     </div>
 
                     <!-- SRI Status -->
                     {% if sri_doc %}
-                    <div class="detail-card" style="border-left:4px solid {% if sri_doc.estado == 'AUTORIZADO' %}var(--success){% elif sri_doc.estado == 'ERROR' %}var(--error){% else %}var(--warning){% endif %};">
-                        <div class="detail-card-header">
-                            <div class="detail-card-icon" style="{% if sri_doc.estado == 'AUTORIZADO' %}background:#ecfdf5;color:var(--success){% elif sri_doc.estado == 'ERROR' %}background:#fef2f2;color:var(--error){% else %}background:#fef3c7;color:#d97706{% endif %};"><i class="fas fa-file-contract"></i></div>
-                            <span class="detail-card-title">SRI Electrónico</span>
+                    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                        <div class="h-1 {% if sri_doc.estado == 'AUTORIZADO' %}bg-emerald-500{% elif sri_doc.estado == 'ERROR' %}bg-red-500{% else %}bg-amber-500{% endif %}"></div>
+                        <div class="flex items-center gap-3 border-b border-slate-100 px-5 py-4">
+                            {% if sri_doc.estado == 'AUTORIZADO' %}
+                            <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600"><i class="fas fa-file-contract"></i></span>
+                            {% elif sri_doc.estado == 'ERROR' %}
+                            <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-red-100 text-red-600"><i class="fas fa-file-contract"></i></span>
+                            {% else %}
+                            <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-100 text-amber-600"><i class="fas fa-file-contract"></i></span>
+                            {% endif %}
+                            <h3 class="text-sm font-bold text-slate-800">SRI Electrónico</h3>
                         </div>
-                        <div class="detail-card-body">
-                            <div class="detail-row"><span>Estado</span><span>{% if sri_doc.estado == 'AUTORIZADO' %}✅ Autorizado{% elif sri_doc.estado == 'ENVIADO' %}📤 Enviado{% elif sri_doc.estado == 'ERROR' %}❌ Error{% else %}{{ sri_doc.get_estado_display }}{% endif %}</span></div>
-                            <div class="detail-row"><span>N° Documento</span><span class="mono">{{ sri_doc.numero_documento }}</span></div>
-                            <div class="detail-row"><span>Clave de Acceso</span><span class="mono breakall">{{ sri_doc.clave_acceso }}</span></div>
-                            {% if sri_doc.numero_autorizacion %}<div class="detail-row"><span>N° Autorización</span><span class="mono breakall">{{ sri_doc.numero_autorizacion }}</span></div>{% endif %}
-                            {% if sri_doc.estado != 'AUTORIZADO' %}
-                            <div style="margin-top:8px;"><a href="{% url 'consultar_autorizacion' sri_doc.id %}" class="btn btn-primary btn-sm"><i class="fas fa-sync"></i> Consultar</a></div>
-                            {% endif %}
-                            {% if sri_doc.mensajes %}
-                            <details style="margin-top:8px;font-size:.82rem;">
-                                <summary style="cursor:pointer;color:var(--gray-500);">📋 Mensajes SRI ({{ sri_doc.mensajes|length }})</summary>
-                                <ul style="margin:6px 0 0 14px;padding:0;list-style:none;">{% for msg in sri_doc.mensajes %}
-                                    <li>{% if msg.tipo == 'ERROR' %}<span class="sri-msg-error">⚠️</span>{% endif %}<strong>{{ msg.mensaje }}</strong>{% if msg.informacionAdicional %}<br><span class="sri-msg-info">{{ msg.informacionAdicional }}</span>{% endif %}</li>
-                                {% endfor %}</ul>
-                            </details>
-                            <details style="margin-top:6px;font-size:.75rem;">
-                                <summary style="cursor:pointer;color:var(--gray-400);">📄 JSON respuesta SRI</summary>
-                                <pre style="background:var(--gray-50);padding:8px;border-radius:4px;font-size:.65rem;overflow-x:auto;max-height:150px;white-space:pre-wrap;word-break:break-all;margin-top:4px;">{{ sri_json }}</pre>
-                            </details>
-                            {% endif %}
-                            <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--gray-100);display:flex;gap:4px;flex-wrap:wrap;">
-                                {% if sri_doc.archivo_xml_firmado %}<a href="{{ sri_doc.archivo_xml_firmado.url }}" target="_blank" class="btn-sm btn-secondary"><i class="fas fa-file-code"></i> XML Firmado</a>{% endif %}
-                                {% if sri_doc.archivo_xml_autorizado %}<a href="{{ sri_doc.archivo_xml_autorizado.url }}" target="_blank" class="btn-sm btn-success"><i class="fas fa-file-code"></i> XML Autorizado</a>{% endif %}
-                                {% if not sri_doc.archivo_xml_firmado and not sri_doc.archivo_xml_autorizado %}<span style="font-size:.75rem;color:var(--gray-400);">Sin archivos</span>{% endif %}
+                        <div class="px-5 py-4 text-sm">
+                            <div class="flex justify-between gap-4 py-2">
+                                <span class="text-slate-500">Estado</span>
+                                <span>
+                                    {% if sri_doc.estado == 'AUTORIZADO' %}
+                                    <span class="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">✅ Autorizado</span>
+                                    {% elif sri_doc.estado == 'ENVIADO' %}
+                                    <span class="inline-flex items-center rounded-full bg-sky-100 px-3 py-1 text-xs font-bold text-sky-700">📤 Enviado</span>
+                                    {% elif sri_doc.estado == 'ERROR' %}
+                                    <span class="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-700">❌ Error</span>
+                                    {% else %}
+                                    <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">{{ sri_doc.get_estado_display }}</span>
+                                    {% endif %}
+                                </span>
                             </div>
-                            <div style="font-size:.7rem;color:var(--gray-400);margin-top:6px;">{{ sri_doc.created_at|date:"d/m/Y H:i" }}</div>
+                            <div class="flex justify-between gap-4 py-2">
+                                <span class="shrink-0 text-slate-500">N° Documento</span>
+                                <span class="break-all text-right font-mono text-xs font-semibold text-slate-800">{{ sri_doc.numero_documento }}</span>
+                            </div>
+                            <div class="py-2">
+                                <div class="text-slate-500">Clave de Acceso</div>
+                                <div class="mt-1 break-all rounded-lg bg-slate-50 px-3 py-2 font-mono text-[0.7rem] leading-relaxed text-slate-700">{{ sri_doc.clave_acceso }}</div>
+                            </div>
+                            {% if sri_doc.numero_autorizacion %}
+                            <div class="py-2">
+                                <div class="text-slate-500">N° Autorización</div>
+                                <div class="mt-1 break-all rounded-lg bg-slate-50 px-3 py-2 font-mono text-[0.7rem] leading-relaxed text-slate-700">{{ sri_doc.numero_autorizacion }}</div>
+                            </div>
+                            {% endif %}
+
+                            {% if sri_doc.estado != 'AUTORIZADO' %}
+                            <div class="mt-3">
+                                <a href="{% url 'consultar_autorizacion' sri_doc.id %}"
+                                   class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-3.5 py-2 text-xs font-semibold text-white shadow-md shadow-sky-600/20 transition hover:from-sky-700 hover:to-cyan-600">
+                                    <i class="fas fa-sync"></i> Consultar
+                                </a>
+                            </div>
+                            {% endif %}
+
+                            {% if sri_doc.mensajes %}
+                            <details class="mt-3 border-t border-slate-100 pt-3 text-xs">
+                                <summary class="cursor-pointer font-semibold text-slate-500 transition hover:text-slate-700">📋 Mensajes SRI ({{ sri_doc.mensajes|length }})</summary>
+                                <ul class="mt-2 space-y-2">
+                                    {% for msg in sri_doc.mensajes %}
+                                    <li class="rounded-lg bg-slate-50 px-3 py-2 text-slate-600">
+                                        {% if msg.tipo == 'ERROR' %}<span class="mr-1 text-red-600">⚠️</span>{% endif %}
+                                        <strong class="font-bold text-slate-700">{{ msg.mensaje }}</strong>
+                                        {% if msg.informacionAdicional %}<br><span class="text-slate-500">{{ msg.informacionAdicional }}</span>{% endif %}
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </details>
+                            <details class="mt-2 text-xs">
+                                <summary class="cursor-pointer font-semibold text-slate-400 transition hover:text-slate-600">📄 JSON respuesta SRI</summary>
+                                <pre class="mt-2 max-h-40 overflow-auto whitespace-pre-wrap break-all rounded-lg bg-slate-50 p-3 font-mono text-[0.65rem] leading-relaxed text-slate-600">{{ sri_json }}</pre>
+                            </details>
+                            {% endif %}
+
+                            <div class="mt-3 flex flex-wrap gap-2 border-t border-slate-100 pt-3">
+                                {% if sri_doc.archivo_xml_firmado %}
+                                <a href="{{ sri_doc.archivo_xml_firmado.url }}" target="_blank"
+                                   class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-50">
+                                    <i class="fas fa-file-code"></i> XML Firmado
+                                </a>
+                                {% endif %}
+                                {% if sri_doc.archivo_xml_autorizado %}
+                                <a href="{{ sri_doc.archivo_xml_autorizado.url }}" target="_blank"
+                                   class="inline-flex items-center gap-2 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100">
+                                    <i class="fas fa-file-code"></i> XML Autorizado
+                                </a>
+                                {% endif %}
+                                {% if not sri_doc.archivo_xml_firmado and not sri_doc.archivo_xml_autorizado %}
+                                <span class="text-xs text-slate-400">Sin archivos</span>
+                                {% endif %}
+                            </div>
+                            <div class="mt-3 text-[0.7rem] text-slate-400">{{ sri_doc.created_at|date:"d/m/Y H:i" }}</div>
                         </div>
                     </div>
                     {% else %}
-                    <div class="detail-card">
-                        <div class="detail-card-header">
-                            <div class="detail-card-icon" style="background:#f1f5f9;color:var(--gray-400);"><i class="fas fa-file-contract"></i></div>
-                            <span class="detail-card-title">SRI Electrónico</span>
+                    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+                        <div class="flex items-center gap-3 border-b border-slate-100 px-5 py-4">
+                            <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-400"><i class="fas fa-file-contract"></i></span>
+                            <h3 class="text-sm font-bold text-slate-800">SRI Electrónico</h3>
                         </div>
-                        <div class="detail-card-body">
-                            <p style="font-size:.85rem;color:var(--gray-400);padding:8px 0;">Esta factura no ha sido emitida electrónicamente al SRI.</p>
+                        <div class="px-5 py-4">
+                            <p class="text-sm text-slate-400">Esta factura no ha sido emitida electrónicamente al SRI.</p>
                         </div>
                     </div>
                     {% endif %}
 
+                    <!-- Notas -->
                     {% if factura.notas %}
-                    <div class="detail-card">
-                        <div class="detail-card-header">
-                            <div class="detail-card-icon" style="background:#fef3c7;color:#d97706;"><i class="fas fa-sticky-note"></i></div>
-                            <span class="detail-card-title">Notas</span>
+                    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+                        <div class="flex items-center gap-3 border-b border-slate-100 px-5 py-4">
+                            <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-100 text-amber-600"><i class="fas fa-sticky-note"></i></span>
+                            <h3 class="text-sm font-bold text-slate-800">Notas</h3>
                         </div>
-                        <div class="detail-card-body">
-                            <p style="font-size:.85rem;color:var(--gray-600);padding:4px 0;">{{ factura.notas|linebreaks }}</p>
-                        </div>
+                        <div class="px-5 py-4 text-sm leading-relaxed text-slate-600">{{ factura.notas|linebreaks }}</div>
                     </div>
                     {% endif %}
                 </div>
@@ -247,21 +359,31 @@
         </div>
     </main>
 </div>
+
 <!-- Modal de pago -->
-<div id="paymentModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;" onclick="if(event.target===this)this.style.display='none'">
-    <div style="background:#fff;border-radius:16px;padding:32px;width:400px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
-        <h3 style="margin-bottom:20px;font-size:1.2rem;">
-            <i class="fas fa-credit-card" style="color:var(--success);"></i>
-            Registrar Pago — {{ factura.numero }}
-        </h3>
-        <p style="margin-bottom:16px;font-size:1.1rem;">
-            Total a cobrar: <strong style="color:var(--primary);font-size:1.3rem;">${{ factura.total|floatformat:2 }}</strong>
+<div id="paymentModal" style="display:none" onclick="if(event.target===this)this.style.display='none'"
+     class="fixed inset-0 z-[100] items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
+    <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+        <div class="mb-4 flex items-center gap-3">
+            <span class="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                <i class="fas fa-credit-card"></i>
+            </span>
+            <h3 class="text-lg font-extrabold text-slate-900">Registrar Pago</h3>
+        </div>
+        <p class="text-sm text-slate-500">
+            Factura <strong class="font-bold text-slate-800">{{ factura.numero }}</strong>
         </p>
-        <form method="POST" action="{% url 'registrar_pago' factura.id %}">
+        <p class="mt-2 text-sm text-slate-500">
+            Total a cobrar:
+            <strong class="text-xl font-black text-sky-700">${{ factura.total|floatformat:2 }}</strong>
+        </p>
+
+        <form method="POST" action="{% url 'registrar_pago' factura.id %}" class="mt-5">
             {% csrf_token %}
-            <div style="margin-bottom:16px;">
-                <label class="form-label" style="margin-bottom:8px;display:block;">Forma de pago</label>
-                <select name="forma_pago" class="form-input" required>
+            <div>
+                <label class="mb-1.5 block text-sm font-semibold text-slate-700" for="paymentFormaPago">Forma de pago</label>
+                <select name="forma_pago" id="paymentFormaPago" required
+                        class="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-800 shadow-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
                     <option value="EFECTIVO">💵 Efectivo</option>
                     <option value="TARJETA_CREDITO">💳 Tarjeta de Crédito</option>
                     <option value="TARJETA_DEBITO">💳 Tarjeta de Débito</option>
@@ -270,11 +392,13 @@
                     <option value="OTRO">🔄 Otro</option>
                 </select>
             </div>
-            <div style="display:flex;gap:12px;">
-                <button type="submit" class="btn btn-success" style="flex:1;">
+            <div class="mt-6 flex flex-col gap-3 sm:flex-row-reverse">
+                <button type="submit"
+                        class="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-600/20 transition hover:bg-emerald-700">
                     <i class="fas fa-check-circle"></i> Confirmar Pago
                 </button>
-                <button type="button" class="btn btn-secondary" onclick="document.getElementById('paymentModal').style.display='none'">
+                <button type="button" onclick="document.getElementById('paymentModal').style.display='none'"
+                        class="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-50">
                     Cancelar
                 </button>
             </div>

@@ -6,46 +6,76 @@
     {% include 'componentes/sidebar.html' with active='medicos' %}
     <main class="main-content">
         {% include 'componentes/topbar.html' %}
-        <div class="dashboard-content">
-            <div class="page-header page-header--between">
+        <div class="dashboard-content p-6 lg:p-8">
+            <!-- Encabezado -->
+            <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 class="page-title">Médicos</h1>
-                    <p class="page-subtitle">Odontólogos registrados en el consultorio</p>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">Médicos</h1>
+                    <p class="mt-1 text-sm text-slate-500">Odontólogos registrados en el consultorio</p>
                 </div>
-                <a href="{% url 'registrar_medico' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Nuevo Médico</a>
+                <a href="{% url 'registrar_medico' %}"
+                   class="inline-flex items-center justify-center gap-2 self-start rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-sky-600/20 transition hover:from-sky-700 hover:to-cyan-600 sm:self-auto">
+                    <i class="fas fa-plus"></i> Nuevo Médico
+                </a>
             </div>
 
             {% if query %}
-            <div class="search-info">
-                <i class="fas fa-search"></i> Resultados para "<strong>{{ query }}</strong>" — 
-                <span>{{ medicos|length }} médico{{ medicos|length|pluralize:'s' }}</span>
-                <a href="{% url 'lista_medicos' %}" class="search-clear"><i class="fas fa-times"></i> Limpiar</a>
+            <div class="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800">
+                <i class="fas fa-search"></i>
+                <span>Resultados para "<strong>{{ query }}</strong>" — <span class="font-semibold">{{ medicos|length }} médico{{ medicos|length|pluralize:'s' }}</span></span>
+                <a href="{% url 'lista_medicos' %}" class="ml-auto font-semibold text-sky-700 transition hover:text-sky-900">
+                    <i class="fas fa-times"></i> Limpiar
+                </a>
             </div>
             {% endif %}
 
             {% if medicos %}
             <!-- Tabla escritorio -->
-            <div class="table-container">
-                <table class="table">
-                    <thead>
-                        <tr><th>#</th><th>Nombre</th><th>Especialidad</th><th>Reg. Profesional</th><th>Teléfono</th><th>Acciones</th></tr>
-                    </thead>
-                    <tbody>
-                        {% for m in medicos %}
+            <div class="hidden overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm md:block">
+                <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                    <thead class="bg-slate-50">
                         <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>Dr. {{ m.nombres }} {{ m.apellidos }}</td>
-                            <td><span class="especialidad-badge">{{ m.get_especialidad_display }}</span></td>
-                            <td>{{ m.registro_profesional }}</td>
-                            <td>{{ m.telefono }}</td>
-                            <td class="actions-cell">
-                                <a href="{% url 'detalle_medico' m.id %}" class="btn-action btn-view" title="Ver"><i class="fas fa-eye"></i></a>
-                                <a href="{% url 'editar_medico' m.id %}" class="btn-action btn-edit" title="Editar"><i class="fas fa-edit"></i></a>
-                                <button type="button" class="btn-action btn-delete" title="Eliminar"
-                                    data-id="{{ m.id }}" data-nombre="Dr. {{ m.nombres }} {{ m.apellidos }}"
-                                    data-especialidad="{{ m.get_especialidad_display }}">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+                            <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">#</th>
+                            <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Nombre</th>
+                            <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Especialidad</th>
+                            <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Reg. Profesional</th>
+                            <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Teléfono</th>
+                            <th class="px-6 py-3 text-right text-xs font-bold uppercase tracking-wider text-slate-500">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 bg-white">
+                        {% for m in medicos %}
+                        <tr class="medico-fila transition hover:bg-slate-50">
+                            <td class="whitespace-nowrap px-6 py-4 text-slate-400">{{ forloop.counter }}</td>
+                            <td class="whitespace-nowrap px-6 py-4">
+                                <div class="font-semibold text-slate-800">Dr. {{ m.nombres }} {{ m.apellidos }}</div>
+                                <div class="text-xs text-slate-400">CC: {{ m.cedula }}</div>
+                            </td>
+                            <td class="whitespace-nowrap px-6 py-4">
+                                <span class="inline-flex items-center rounded-full bg-indigo-100 px-3 py-1 text-xs font-bold text-indigo-700">{{ m.get_especialidad_display }}</span>
+                            </td>
+                            <td class="whitespace-nowrap px-6 py-4 text-slate-600">{{ m.registro_profesional }}</td>
+                            <td class="whitespace-nowrap px-6 py-4 text-slate-600">{{ m.telefono }}</td>
+                            <td class="whitespace-nowrap px-6 py-4">
+                                <div class="flex items-center justify-end gap-2">
+                                    <a href="{% url 'detalle_medico' m.id %}" title="Ver"
+                                       class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-600">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'editar_medico' m.id %}" title="Editar"
+                                       class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-slate-400 hover:bg-slate-100 hover:text-slate-700">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" class="btn-delete inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-red-300 hover:bg-red-50 hover:text-red-600"
+                                            title="Eliminar"
+                                            data-id="{{ m.id }}"
+                                            data-nombre="Dr. {{ m.nombres }} {{ m.apellidos }}"
+                                            data-especialidad="{{ m.get_especialidad_display }}"
+                                            data-cedula="{{ m.cedula }}"
+                                            data-telefono="{{ m.telefono }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
@@ -54,50 +84,95 @@
             </div>
 
             <!-- Tarjetas móvil -->
-            <div class="medico-cards">
+            <div class="grid gap-4 md:hidden">
                 {% for m in medicos %}
-                <div class="medico-card">
-                    <div class="medico-card-header">
-                        <div class="medico-avatar"><i class="fas fa-user-md"></i></div>
-                        <div class="medico-card-name">
-                            <h3>Dr. {{ m.nombres }} {{ m.apellidos }}</h3>
-                            <span class="especialidad-badge">{{ m.get_especialidad_display }}</span>
+                <div class="medico-card rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+                     data-search="{{ m.nombres|lower }} {{ m.apellidos|lower }} {{ m.cedula }} {{ m.get_especialidad_display|lower }} {{ m.registro_profesional|lower }} {{ m.telefono }}">
+                    <div class="flex items-start gap-3">
+                        <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-cyan-400 text-xl font-bold text-white">
+                            <i class="fas fa-user-md"></i>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <h3 class="truncate font-bold text-slate-800">Dr. {{ m.nombres }} {{ m.apellidos }}</h3>
+                            <div class="mt-1">
+                                <span class="inline-flex items-center rounded-full bg-indigo-100 px-2.5 py-0.5 text-[0.65rem] font-bold text-indigo-700">{{ m.get_especialidad_display }}</span>
+                            </div>
+                        </div>
+                        <div class="flex shrink-0 gap-1.5">
+                            <a href="{% url 'detalle_medico' m.id %}" title="Ver"
+                               class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-600">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <button type="button" class="btn-delete inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-red-300 hover:bg-red-50 hover:text-red-600"
+                                    title="Eliminar"
+                                    data-id="{{ m.id }}"
+                                    data-nombre="Dr. {{ m.nombres }} {{ m.apellidos }}"
+                                    data-especialidad="{{ m.get_especialidad_display }}"
+                                    data-cedula="{{ m.cedula }}"
+                                    data-telefono="{{ m.telefono }}">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
                     </div>
-                    <div class="medico-card-body">
-                        <div class="medico-card-info"><i class="fas fa-id-card"></i> <span class="mlabel">Cédula:</span> {{ m.cedula }}</div>
-                        <div class="medico-card-info"><i class="fas fa-certificate"></i> <span class="mlabel">Registro:</span> {{ m.registro_profesional }}</div>
-                        <div class="medico-card-info"><i class="fas fa-phone"></i> <span class="mlabel">Teléfono:</span> {{ m.telefono }}</div>
+                    <div class="mt-3 space-y-1.5 border-t border-slate-100 pt-3 text-sm text-slate-600">
+                        <div class="flex items-center gap-2"><i class="fas fa-id-card w-4 text-center text-slate-400"></i><span>Cédula:</span><span class="ml-auto font-medium text-slate-700">{{ m.cedula }}</span></div>
+                        <div class="flex items-center gap-2"><i class="fas fa-certificate w-4 text-center text-slate-400"></i><span>Registro:</span><span class="ml-auto font-medium text-slate-700">{{ m.registro_profesional }}</span></div>
+                        <div class="flex items-center gap-2"><i class="fas fa-phone w-4 text-center text-slate-400"></i><span>Teléfono:</span><span class="ml-auto font-medium text-slate-700">{{ m.telefono }}</span></div>
                     </div>
-                    <div class="medico-card-actions">
-                        <a href="{% url 'detalle_medico' m.id %}" class="btn btn-sm btn-outline"><i class="fas fa-eye"></i> Ver</a>
-                        <a href="{% url 'editar_medico' m.id %}" class="btn btn-sm btn-outline"><i class="fas fa-edit"></i> Editar</a>
+                    <div class="mt-4 flex gap-2">
+                        <a href="{% url 'detalle_medico' m.id %}"
+                           class="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-sky-400 hover:bg-sky-50 hover:text-sky-700">
+                            <i class="fas fa-eye"></i> Ver ficha
+                        </a>
+                        <a href="{% url 'editar_medico' m.id %}"
+                           class="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-100 hover:text-slate-700">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
                     </div>
                 </div>
                 {% endfor %}
             </div>
-            {% else %}
-            <div class="empty-state">
-                <i class="fas fa-user-md fa-4x"></i>
-                <h3>No hay médicos registrados</h3>
-                <p>Registra el primer odontólogo del consultorio</p>
-                <a href="{% url 'registrar_medico' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Registrar Médico</a>
-            </div>
-            {% endif %}
 
             {% include 'componentes/pagination.html' with page_obj=medicos %}
+            {% else %}
+            <div class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white py-16 text-center">
+                <i class="fas fa-user-md mb-4 text-5xl text-slate-300"></i>
+                <h3 class="text-lg font-bold text-slate-700">No hay médicos registrados</h3>
+                <p class="mt-1 text-sm text-slate-500">Registra el primer odontólogo del consultorio</p>
+                <a href="{% url 'registrar_medico' %}"
+                   class="mt-5 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-sky-600/20 transition hover:from-sky-700 hover:to-cyan-600">
+                    <i class="fas fa-plus"></i> Registrar Médico
+                </a>
+            </div>
+            {% endif %}
         </div>
 
-        <!-- Modal Eliminar -->
-        <div class="modal-overlay" id="deleteModal">
-            <div class="modal-container">
-                <div class="modal-icon"><i class="fas fa-exclamation-triangle"></i></div>
-                <h2 class="modal-title">¿Eliminar médico?</h2>
-                <p class="modal-text">Estás a punto de eliminar a <strong id="modalMedicoNombre"></strong>.<br>Esta acción no se puede deshacer.</p>
-                <form method="POST" id="deleteForm" class="modal-actions">
+        <!-- Modal Eliminar Médico -->
+        <div id="deleteModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
+            <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+                <div class="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-2xl text-red-600">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h2 class="text-xl font-extrabold text-slate-900">¿Eliminar médico?</h2>
+                <p class="mt-2 text-sm text-slate-500">
+                    Estás a punto de eliminar a <strong id="modalMedicoNombre" class="text-slate-800"></strong>.
+                    Esta acción no se puede deshacer.
+                </p>
+                <div class="mt-4 space-y-2 rounded-xl bg-slate-50 p-4 text-sm">
+                    <div class="flex justify-between"><span class="text-slate-500">Especialidad</span><span id="modalMedicoEspecialidad" class="font-semibold text-slate-800"></span></div>
+                    <div class="flex justify-between"><span class="text-slate-500">Cédula</span><span id="modalMedicoCedula" class="font-semibold text-slate-800"></span></div>
+                    <div class="flex justify-between"><span class="text-slate-500">Teléfono</span><span id="modalMedicoTelefono" class="font-semibold text-slate-800"></span></div>
+                </div>
+                <form method="POST" id="deleteForm" class="mt-6 flex justify-end gap-3">
                     {% csrf_token %}
-                    <button type="button" class="btn btn-secondary" id="cancelDelete"><i class="fas fa-times"></i> Cancelar</button>
-                    <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> Sí, Eliminar</button>
+                    <button type="button" id="cancelDelete"
+                            class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-50">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="submit"
+                            class="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-bold text-white shadow-md shadow-red-600/20 transition hover:bg-red-700">
+                        <i class="fas fa-trash"></i> Sí, Eliminar
+                    </button>
                 </form>
             </div>
         </div>
@@ -105,18 +180,63 @@
 </div>
 
 <script>
-    const dm = document.getElementById('deleteModal');
-    const df = document.getElementById('deleteForm');
-    document.querySelectorAll('.btn-delete').forEach(b => {
-        b.addEventListener('click', function() {
-            df.action = '/medicos/' + this.dataset.id + '/eliminar/';
-            document.getElementById('modalMedicoNombre').textContent = this.dataset.nombre;
-            dm.classList.add('active');
-            document.body.style.overflow = 'hidden';
+    // Buscador en la página (filtro rápido sobre filas/tarjetas)
+    const buscadorMedicos = document.getElementById('globalSearch');
+    if (buscadorMedicos) {
+        buscadorMedicos.addEventListener('input', function() {
+            const q = this.value.toLowerCase();
+            document.querySelectorAll('.medico-fila').forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+            });
+            document.querySelectorAll('.medico-card').forEach(card => {
+                const txt = card.dataset.search || card.textContent.toLowerCase();
+                card.style.display = txt.includes(q) ? '' : 'none';
+            });
+        });
+    }
+
+    // Modal Eliminar
+    const deleteModal = document.getElementById('deleteModal');
+    const deleteForm = document.getElementById('deleteForm');
+    const modalMedicoNombre = document.getElementById('modalMedicoNombre');
+    const modalMedicoEspecialidad = document.getElementById('modalMedicoEspecialidad');
+    const modalMedicoCedula = document.getElementById('modalMedicoCedula');
+    const modalMedicoTelefono = document.getElementById('modalMedicoTelefono');
+    const cancelDelete = document.getElementById('cancelDelete');
+
+    function openDeleteModal(id, nombre, especialidad, cedula, telefono) {
+        deleteForm.action = '/medicos/' + id + '/eliminar/';
+        modalMedicoNombre.textContent = nombre;
+        modalMedicoEspecialidad.textContent = especialidad;
+        modalMedicoCedula.textContent = cedula;
+        modalMedicoTelefono.textContent = telefono;
+        deleteModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeDeleteModal() {
+        deleteModal.classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+
+    document.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', function() {
+            openDeleteModal(
+                this.dataset.id,
+                this.dataset.nombre,
+                this.dataset.especialidad,
+                this.dataset.cedula,
+                this.dataset.telefono
+            );
         });
     });
-    document.getElementById('cancelDelete')?.addEventListener('click', () => { dm.classList.remove('active'); document.body.style.overflow = ''; });
-    dm?.addEventListener('click', function(e) { if (e.target === this) { this.classList.remove('active'); document.body.style.overflow = ''; }});
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') { dm?.classList.remove('active'); document.body.style.overflow = ''; }});
+
+    cancelDelete?.addEventListener('click', closeDeleteModal);
+    deleteModal?.addEventListener('click', function(e) {
+        if (e.target === this) closeDeleteModal();
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeDeleteModal();
+    });
 </script>
 {% endblock %}

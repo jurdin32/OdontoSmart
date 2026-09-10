@@ -7,84 +7,92 @@
     <main class="main-content">
         {% include 'componentes/topbar.html' %}
 
-        <div class="dashboard-content">
-            <div class="page-header">
-                <h1 class="page-title">👤 Nuevo Usuario</h1>
-                <p class="page-subtitle">Registra un nuevo usuario para la clínica</p>
+        <div class="dashboard-content p-6 lg:p-8">
+            <!-- Encabezado -->
+            <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">Nuevo Usuario</h1>
+                    <p class="mt-1 text-sm text-slate-500">Registra un nuevo usuario para la clínica</p>
+                </div>
+                <a href="{% url 'lista_usuarios' %}"
+                   class="inline-flex items-center justify-center gap-2 self-start rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 sm:self-auto">
+                    <i class="fas fa-arrow-left"></i> Volver a Usuarios
+                </a>
             </div>
 
-            <div class="form-card">
+            <!-- Tarjeta del formulario -->
+            <div class="max-w-3xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
                 <form method="POST" novalidate>
                     {% csrf_token %}
 
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label class="form-label">{{ form.username.label }}</label>
+                    {% if form.non_field_errors %}
+                    <div class="mb-5 space-y-1 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                        {% for e in form.non_field_errors %}<p>{{ e }}</p>{% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="mb-6 flex items-center gap-3 border-b border-slate-100 pb-4">
+                        <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-100 text-sky-600"><i class="fas fa-user-plus"></i></span>
+                        <h2 class="text-lg font-bold text-slate-800">Datos del Usuario</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                        <div>
+                            <label class="mb-1.5 block text-sm font-semibold text-slate-700" for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
                             {{ form.username }}
-                            {% if form.username.errors %}
-                            <div class="form-error">{{ form.username.errors.0 }}</div>
-                            {% endif %}
+                            {% for e in form.username.errors %}<p class="mt-1 text-xs font-medium text-red-600">{{ e }}</p>{% endfor %}
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">{{ form.email.label }}</label>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-semibold text-slate-700" for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
                             {{ form.email }}
-                            {% if form.email.errors %}
-                            <div class="form-error">{{ form.email.errors.0 }}</div>
-                            {% endif %}
+                            {% for e in form.email.errors %}<p class="mt-1 text-xs font-medium text-red-600">{{ e }}</p>{% endfor %}
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">{{ form.first_name.label }}</label>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-semibold text-slate-700" for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
                             {{ form.first_name }}
-                            {% if form.first_name.errors %}
-                            <div class="form-error">{{ form.first_name.errors.0 }}</div>
-                            {% endif %}
+                            {% for e in form.first_name.errors %}<p class="mt-1 text-xs font-medium text-red-600">{{ e }}</p>{% endfor %}
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">{{ form.last_name.label }}</label>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-semibold text-slate-700" for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
                             {{ form.last_name }}
-                            {% if form.last_name.errors %}
-                            <div class="form-error">{{ form.last_name.errors.0 }}</div>
-                            {% endif %}
+                            {% for e in form.last_name.errors %}<p class="mt-1 text-xs font-medium text-red-600">{{ e }}</p>{% endfor %}
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">{{ form.telefono.label }}</label>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-semibold text-slate-700" for="{{ form.telefono.id_for_label }}">{{ form.telefono.label }}</label>
                             {{ form.telefono }}
+                            {% for e in form.telefono.errors %}<p class="mt-1 text-xs font-medium text-red-600">{{ e }}</p>{% endfor %}
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">{{ form.rol.label }}</label>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-semibold text-slate-700" for="{{ form.rol.id_for_label }}">{{ form.rol.label }}</label>
                             {{ form.rol }}
-                            {% if form.rol.errors %}
-                            <div class="form-error">{{ form.rol.errors.0 }}</div>
-                            {% endif %}
+                            {% for e in form.rol.errors %}<p class="mt-1 text-xs font-medium text-red-600">{{ e }}</p>{% endfor %}
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">{{ form.password1.label }}</label>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-semibold text-slate-700" for="{{ form.password1.id_for_label }}">{{ form.password1.label }}</label>
                             {{ form.password1 }}
-                            {% if form.password1.errors %}
-                            <div class="form-error">{{ form.password1.errors.0 }}</div>
-                            {% endif %}
+                            {% for e in form.password1.errors %}<p class="mt-1 text-xs font-medium text-red-600">{{ e }}</p>{% endfor %}
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">{{ form.password2.label }}</label>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-semibold text-slate-700" for="{{ form.password2.id_for_label }}">{{ form.password2.label }}</label>
                             {{ form.password2 }}
-                            {% if form.password2.errors %}
-                            <div class="form-error">{{ form.password2.errors.0 }}</div>
-                            {% endif %}
+                            {% for e in form.password2.errors %}<p class="mt-1 text-xs font-medium text-red-600">{{ e }}</p>{% endfor %}
                         </div>
                     </div>
 
-                    <div class="form-info" style="margin:16px 0;padding:12px;background:var(--primary-bg);border-radius:var(--radius);font-size:0.85rem;color:var(--gray-600);">
-                        <i class="fas fa-info-circle"></i>
-                        <strong>Nota:</strong> Si el rol es <strong>Odontólogo</strong>, se creará automáticamente un perfil de médico vinculado a este usuario.
+                    <div class="mt-6 flex items-start gap-3 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800">
+                        <i class="fas fa-info-circle mt-0.5"></i>
+                        <p><strong>Nota:</strong> Si el rol es <strong>Odontólogo</strong>, se creará automáticamente un perfil de médico vinculado a este usuario.</p>
                     </div>
 
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Crear Usuario
-                        </button>
-                        <a href="{% url 'lista_usuarios' %}" class="btn btn-secondary">
+                    <div class="mt-7 flex flex-col-reverse items-stretch gap-3 border-t border-slate-100 pt-6 sm:flex-row sm:items-center sm:justify-end">
+                        <a href="{% url 'lista_usuarios' %}"
+                           class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-50">
                             <i class="fas fa-times"></i> Cancelar
                         </a>
+                        <button type="submit"
+                                class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-sky-600/20 transition hover:from-sky-700 hover:to-cyan-600">
+                            <i class="fas fa-save"></i> Crear Usuario
+                        </button>
                     </div>
                 </form>
             </div>

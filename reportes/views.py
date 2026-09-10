@@ -504,7 +504,15 @@ def exportar_facturas_pdf(request):
         'hoy': date.today(),
     })
 
-    from weasyprint import HTML
+    try:
+        from weasyprint import HTML
+    except ImportError:
+        # Fallback sin WeasyPrint: se sirve el HTML y el navegador permite
+        # imprimirlo o "Guardar como PDF" (window.print se lanza al cargar).
+        auto_print = '<script>window.addEventListener("load", function () { window.print(); });</script>'
+        html_print = html.replace('</body>', auto_print + '</body>') if '</body>' in html else html + auto_print
+        return HttpResponse(html_print, content_type='text/html')
+
     pdf = HTML(string=html).write_pdf()
 
     response = HttpResponse(pdf, content_type='application/pdf')

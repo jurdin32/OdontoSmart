@@ -7,40 +7,62 @@
     <main class="main-content">
         {% include 'componentes/topbar.html' %}
 
-        <div class="dashboard-content">
-            <div class="page-header">
-                <h1 class="page-title">✏️ Editar Usuario</h1>
-                <p class="page-subtitle">{{ user_edit.get_full_name|default:user_edit.username }}</p>
+        <div class="dashboard-content p-6 lg:p-8">
+            <!-- Encabezado -->
+            <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">Editar Usuario</h1>
+                    <p class="mt-1 text-sm text-slate-500">{{ user_edit.get_full_name|default:user_edit.username }}</p>
+                </div>
+                <a href="{% url 'lista_usuarios' %}"
+                   class="inline-flex items-center justify-center gap-2 self-start rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 sm:self-auto">
+                    <i class="fas fa-arrow-left"></i> Volver a Usuarios
+                </a>
             </div>
 
-            <div class="form-card">
+            <div class="max-w-3xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
                 <form method="POST" novalidate>
                     {% csrf_token %}
 
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label class="form-label">Usuario</label>
-                            <input type="text" class="form-input" value="{{ user_edit.username }}" disabled style="opacity:0.6;">
+                    <div class="mb-6 flex items-center gap-3 border-b border-slate-100 pb-4">
+                        <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-100 text-amber-600"><i class="fas fa-user-edit"></i></span>
+                        <h2 class="text-lg font-bold text-slate-800">Datos del Usuario</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                        <div>
+                            <label class="mb-1.5 block text-sm font-semibold text-slate-700">Usuario</label>
+                            <input type="text" value="{{ user_edit.username }}" disabled
+                                   class="mt-1 block w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-500 shadow-sm outline-none">
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">Email</label>
-                            <input type="email" name="email" class="form-input" value="{{ user_edit.email }}" required>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-semibold text-slate-700" for="id_email">Email</label>
+                            <input type="email" name="email" id="id_email" value="{{ user_edit.email }}" required
+                                   class="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+                                   placeholder="correo@ejemplo.com">
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">Nombres</label>
-                            <input type="text" name="first_name" class="form-input" value="{{ user_edit.first_name }}" required>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-semibold text-slate-700" for="id_first_name">Nombres</label>
+                            <input type="text" name="first_name" id="id_first_name" value="{{ user_edit.first_name }}" required
+                                   class="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+                                   placeholder="Nombres">
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">Apellidos</label>
-                            <input type="text" name="last_name" class="form-input" value="{{ user_edit.last_name }}" required>
+                        <div>
+                            <label class="mb-1.5 block text-sm font-semibold text-slate-700" for="id_last_name">Apellidos</label>
+                            <input type="text" name="last_name" id="id_last_name" value="{{ user_edit.last_name }}" required
+                                   class="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+                                   placeholder="Apellidos">
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">Teléfono</label>
-                            <input type="text" name="telefono" class="form-input" value="{{ profile.telefono }}">
+                        <div>
+                            <label class="mb-1.5 block text-sm font-semibold text-slate-700" for="id_telefono">Teléfono</label>
+                            <input type="text" name="telefono" id="id_telefono" value="{{ profile.telefono }}"
+                                   class="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+                                   placeholder="+57 300 123 4567">
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">Rol</label>
-                            <select name="rol" class="form-input">
+                        <div>
+                            <label class="mb-1.5 block text-sm font-semibold text-slate-700" for="id_rol">Rol</label>
+                            <select name="rol" id="id_rol"
+                                    class="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-800 shadow-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
                                 {% for rol in roles %}
                                 <option value="{{ rol.nombre }}" {% if profile.rol and profile.rol.nombre == rol.nombre %}selected{% endif %}>
                                     {{ rol.get_nombre_display }}
@@ -48,36 +70,46 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">Nueva contraseña <small>(dejar vacío para no cambiar)</small></label>
-                            <input type="password" name="password1" class="form-input" placeholder="••••••••" minlength="8">
+                        <div>
+                            <label class="mb-1.5 block text-sm font-semibold text-slate-700" for="id_password1">
+                                Nueva contraseña <span class="font-normal text-slate-400">(dejar vacío para no cambiar)</span>
+                            </label>
+                            <input type="password" name="password1" id="id_password1" placeholder="••••••••" minlength="8"
+                                   class="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">Confirmar contraseña</label>
-                            <input type="password" name="password2" class="form-input" placeholder="Repite la contraseña">
+                        <div>
+                            <label class="mb-1.5 block text-sm font-semibold text-slate-700" for="id_password2">Confirmar contraseña</label>
+                            <input type="password" name="password2" id="id_password2" placeholder="Repite la contraseña"
+                                   class="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
                         </div>
                     </div>
 
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Guardar Cambios
-                        </button>
-                        <a href="{% url 'lista_usuarios' %}" class="btn btn-secondary">
+                    <div class="mt-7 flex flex-col-reverse items-stretch gap-3 border-t border-slate-100 pt-6 sm:flex-row sm:items-center sm:justify-end">
+                        <a href="{% url 'lista_usuarios' %}"
+                           class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-50">
                             <i class="fas fa-times"></i> Cancelar
                         </a>
+                        <button type="submit"
+                                class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-sky-600/20 transition hover:from-sky-700 hover:to-cyan-600">
+                            <i class="fas fa-save"></i> Guardar Cambios
+                        </button>
                     </div>
                 </form>
             </div>
 
             {% if user_edit.medico %}
-            <div class="form-card" style="margin-top:16px;">
-                <div class="form-section">
-                    <h3 class="form-section-title">🩺 Médico Vinculado</h3>
-                    <p>Este usuario está vinculado al médico <strong>Dr. {{ user_edit.medico.nombre_completo }}</strong></p>
-                    <a href="{% url 'editar_medico' user_edit.medico.id %}" class="btn btn-secondary" style="margin-top:8px;">
-                        <i class="fas fa-user-md"></i> Ver Médico
-                    </a>
+            <div class="mt-6 max-w-3xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-100 text-teal-600"><i class="fas fa-user-md"></i></span>
+                    <h2 class="text-lg font-bold text-slate-800">Médico Vinculado</h2>
                 </div>
+                <p class="mt-4 text-sm text-slate-600">
+                    Este usuario está vinculado al médico <strong class="text-slate-800">Dr. {{ user_edit.medico.nombre_completo }}</strong>
+                </p>
+                <a href="{% url 'editar_medico' user_edit.medico.id %}"
+                   class="mt-4 inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-50">
+                    <i class="fas fa-user-md"></i> Ver Médico
+                </a>
             </div>
             {% endif %}
         </div>

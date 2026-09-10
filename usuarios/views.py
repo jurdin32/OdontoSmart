@@ -278,15 +278,29 @@ def registrar_usuario(request):
     return render(request, 'usuarios/registrar.html', context)
 
 
+def _normalizar_nombre_usuario(user):
+    """Devuelve nombres y apellidos seguros, incluso si el usuario viene sin datos."""
+    nombres = (user.first_name or '').strip()
+    apellidos = (user.last_name or '').strip()
+    if not nombres and not apellidos:
+        return user.username, user.username
+    if not nombres:
+        nombres = user.username
+    if not apellidos:
+        apellidos = user.username
+    return nombres, apellidos
+
+
 def _vincular_medico(user, empresa):
     """Busca un médico sin usuario en la misma empresa y lo vincula, o crea uno nuevo."""
+    primer_nombre = (user.first_name or '').strip().split()[0] if (user.first_name or '').strip() else ''
     medico = Medico.objects.filter(
         empresa=empresa,
         user__isnull=True,
         activo=True
     ).filter(
         Q(cedula=user.username) | Q(email=user.email) |
-        Q(nombres__icontains=user.first_name.split()[0] if user.first_name else '')
+        Q(nombres__icontains=primer_nombre)
     ).first()
 
     if medico:
@@ -294,8 +308,7 @@ def _vincular_medico(user, empresa):
         medico.save()
     else:
         # Crear médico automáticamente con datos del usuario
-        nombres = user.first_name or user.username
-        apellidos = user.last_name or user.username
+        nombres, apellidos = _normalizar_nombre_usuario(user)
         Medico.objects.create(
             empresa=empresa,
             user=user,

@@ -13,96 +13,163 @@
 {% tiene_permiso 'sri_consultar' as puede_sri_consultar %}
 {% es_admin as es_admin_user %}
 <aside class="sidebar">
-    <div class="sidebar-brand">
-        <a href="{% url 'dashboard' %}" style="display:flex;flex-direction:column;align-items:center;gap:8px;text-decoration:none;">
+    <div class="flex flex-col items-center gap-2 border-b border-white/10 px-5 py-5">
+        <a href="{% url 'dashboard' %}" class="flex flex-col items-center gap-2">
             {% if config_empresa and config_empresa.logo %}
-            <img src="{{ config_empresa.logo.url }}" alt="{{ empresa.nombre }}" class="sidebar-logo">
+            <img src="{{ config_empresa.logo.url }}" alt="{{ empresa.nombre }}" class="max-h-12 w-auto rounded-lg">
+            {% else %}
+            <img src="{% static 'images/odontoSmart_2.png' %}" alt="OdontSmart" class="h-12 w-auto drop-shadow-md">
             {% endif %}
-            <div class="sidebar-brand-name">{{ empresa.nombre|default:'OdontSmart' }}</div>
+            <span class="max-w-[180px] truncate text-center text-sm font-bold text-white/90">
+                {{ empresa.nombre|default:'OdontSmart' }}
+            </span>
         </a>
     </div>
-    <nav class="sidebar-nav">
-        <a href="{% url 'dashboard' %}" class="nav-item {% if active == 'dashboard' %}active{% endif %}">
-            <i class="fas fa-th-large"></i><span>Panel Principal</span>
+
+    <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+        <a href="{% url 'dashboard' %}"
+           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
+                  {% if active == 'dashboard' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+            <i class="fas fa-th-large w-5 text-center text-[15px]"></i>
+            <span>Panel Principal</span>
         </a>
+
         {% if puede_ver_citas %}
-        <a href="{% url 'lista_citas' %}" class="nav-item {% if active == 'citas' %}active{% endif %}">
-            <i class="fas fa-calendar-check"></i><span>Citas</span>
+        <a href="{% url 'lista_citas' %}"
+           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
+                  {% if active == 'citas' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+            <i class="fas fa-calendar-check w-5 text-center text-[15px]"></i>
+            <span>Citas</span>
         </a>
         {% endif %}
+
         {% if puede_ver_pacientes %}
-        <a href="{% url 'lista_pacientes' %}" class="nav-item {% if active == 'pacientes' %}active{% endif %}">
-            <i class="fas fa-users"></i><span>Pacientes</span>
+        <a href="{% url 'lista_pacientes' %}"
+           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
+                  {% if active == 'pacientes' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+            <i class="fas fa-users w-5 text-center text-[15px]"></i>
+            <span>Pacientes</span>
         </a>
         {% endif %}
+
         {% if puede_ver_historia %}
-        <a href="{% url 'lista_pacientes' %}" class="nav-item {% if active == 'pacientes' %}active{% endif %}">
-            <i class="fas fa-notes-medical"></i><span>Historial Clínico</span>
+        <a href="{% url 'lista_pacientes' %}"
+           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
+                  {% if active == 'pacientes' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+            <i class="fas fa-notes-medical w-5 text-center text-[15px]"></i>
+            <span>Historial Clínico</span>
         </a>
         {% endif %}
+
         {% if puede_ver_medicos %}
-        <a href="{% url 'lista_medicos' %}" class="nav-item {% if active == 'medicos' %}active{% endif %}">
-            <i class="fas fa-user-md"></i><span>Médicos</span>
+        <a href="{% url 'lista_medicos' %}"
+           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
+                  {% if active == 'medicos' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+            <i class="fas fa-user-md w-5 text-center text-[15px]"></i>
+            <span>Médicos</span>
         </a>
         {% endif %}
+
         {% if puede_ver_reportes %}
-        <a href="{% url 'reportes' %}" class="nav-item {% if active == 'reportes' %}active{% endif %}">
-            <i class="fas fa-chart-bar"></i><span>Reportes</span>
+        <a href="{% url 'reportes' %}"
+           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
+                  {% if active == 'reportes' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+            <i class="fas fa-chart-bar w-5 text-center text-[15px]"></i>
+            <span>Reportes</span>
         </a>
         {% endif %}
+
         {% if puede_ver_proformas %}
-        <a href="{% url 'lista_proformas' %}" class="nav-item {% if active == 'proformas' %}active{% endif %}">
-            <i class="fas fa-file-invoice"></i><span>Proformas</span>
+        <a href="{% url 'lista_proformas' %}"
+           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
+                  {% if active == 'proformas' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+            <i class="fas fa-file-invoice w-5 text-center text-[15px]"></i>
+            <span>Proformas</span>
         </a>
         {% endif %}
+
         {% if puede_ver_facturas %}
-        <a href="{% url 'lista_facturas' %}" class="nav-item {% if active == 'facturas' %}active{% endif %}">
-            <i class="fas fa-file-invoice-dollar"></i><span>Facturas</span>
+        <a href="{% url 'lista_facturas' %}"
+           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
+                  {% if active == 'facturas' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+            <i class="fas fa-file-invoice-dollar w-5 text-center text-[15px]"></i>
+            <span>Facturas</span>
         </a>
         {% endif %}
+
         {% if puede_ver_usuarios %}
-        <a href="{% url 'lista_usuarios' %}" class="nav-item {% if active == 'usuarios' %}active{% endif %}">
-            <i class="fas fa-user-shield"></i><span>Usuarios</span>
+        <a href="{% url 'lista_usuarios' %}"
+           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
+                  {% if active == 'usuarios' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+            <i class="fas fa-user-shield w-5 text-center text-[15px]"></i>
+            <span>Usuarios</span>
         </a>
-        <a href="{% url 'lista_roles' %}" class="nav-item {% if active == 'roles' %}active{% endif %}">
-            <i class="fas fa-tags"></i><span>Roles</span>
+        <a href="{% url 'lista_roles' %}"
+           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
+                  {% if active == 'roles' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+            <i class="fas fa-tags w-5 text-center text-[15px]"></i>
+            <span>Roles</span>
         </a>
-        <a href="{% url 'lista_permisos' %}" class="nav-item {% if active == 'permisos' %}active{% endif %}">
-            <i class="fas fa-key"></i><span>Permisos</span>
+        <a href="{% url 'lista_permisos' %}"
+           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
+                  {% if active == 'permisos' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+            <i class="fas fa-key w-5 text-center text-[15px]"></i>
+            <span>Permisos</span>
         </a>
         {% endif %}
+
         {% if es_admin_user %}
-        <a href="{% url 'tareas_list' %}" class="nav-item {% if active == 'tareas' %}active{% endif %}">
-            <i class="fas fa-tasks"></i><span>Tareas Programadas</span>
+        <a href="{% url 'tareas_list' %}"
+           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
+                  {% if active == 'tareas' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+            <i class="fas fa-tasks w-5 text-center text-[15px]"></i>
+            <span>Tareas Programadas</span>
         </a>
         {% endif %}
+
         {% if puede_sri_config or puede_sri_consultar %}
-        <div style="padding:8px 16px 4px;font-size:.7rem;text-transform:uppercase;color:var(--gray-500);letter-spacing:1px;">
+        <div class="mb-1 mt-3 flex items-center gap-2 px-3 text-[0.65rem] font-bold uppercase tracking-widest text-slate-500">
             <i class="fas fa-file-contract"></i> SRI
         </div>
         {% if puede_sri_config %}
-        <a href="{% url 'sri_configuracion' %}" class="nav-item {% if active == 'sri_config' %}active{% endif %}">
-            <i class="fas fa-cog"></i><span>Config. SRI</span>
+        <a href="{% url 'sri_configuracion' %}"
+           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
+                  {% if active == 'sri_config' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+            <i class="fas fa-cog w-5 text-center text-[15px]"></i>
+            <span>Config. SRI</span>
         </a>
         {% endif %}
         {% if puede_sri_consultar %}
-        <a href="{% url 'sri_documentos' %}" class="nav-item {% if active == 'sri_docs' %}active{% endif %}">
-            <i class="fas fa-file-invoice"></i><span>Docs. Electrónicos</span>
+        <a href="{% url 'sri_documentos' %}"
+           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
+                  {% if active == 'sri_docs' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+            <i class="fas fa-file-invoice w-5 text-center text-[15px]"></i>
+            <span>Docs. Electrónicos</span>
         </a>
-        <a href="{% url 'sri_log' %}" class="nav-item {% if active == 'sri_log' %}active{% endif %}">
-            <i class="fas fa-history"></i><span>Log SRI</span>
+        <a href="{% url 'sri_log' %}"
+           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
+                  {% if active == 'sri_log' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+            <i class="fas fa-history w-5 text-center text-[15px]"></i>
+            <span>Log SRI</span>
         </a>
         {% endif %}
         {% endif %}
+
         {% if puede_ver_configuracion %}
-        <a href="{% url 'configuracion_empresa' %}" class="nav-item {% if active == 'configuracion' %}active{% endif %}">
-            <i class="fas fa-cog"></i><span>Configuración</span>
+        <a href="{% url 'configuracion_empresa' %}"
+           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
+                  {% if active == 'configuracion' %}bg-white/15 text-white shadow-inner{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+            <i class="fas fa-cog w-5 text-center text-[15px]"></i>
+            <span>Configuración</span>
         </a>
         {% endif %}
     </nav>
-    <div class="sidebar-footer">
-        <a href="{% url 'logout' %}" class="nav-item logout-btn">
-            <i class="fas fa-sign-out-alt"></i><span>Cerrar Sesión</span>
+
+    <div class="border-t border-white/10 p-3">
+        <a href="{% url 'logout' %}"
+           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-400 transition hover:bg-red-500/10 hover:text-red-400">
+            <i class="fas fa-sign-out-alt w-5 text-center text-[15px]"></i>
+            <span>Cerrar Sesión</span>
         </a>
     </div>
 </aside>

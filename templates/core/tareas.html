@@ -8,63 +8,71 @@
     <main class="main-content">
         {% include 'componentes/topbar.html' %}
 
-        <div class="dashboard-content">
-            <div class="page-header page-header--between">
+        <div class="dashboard-content p-6 lg:p-8">
+            <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 class="page-title">⚙️ Tareas en Segundo Plano</h1>
-                    <p class="page-subtitle">Ejecuta tareas administrativas sin interrumpir la atención</p>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">⚙️ Tareas en Segundo Plano</h1>
+                    <p class="mt-1 text-sm text-slate-500">Ejecuta tareas administrativas sin interrumpir la atención</p>
                 </div>
             </div>
 
             <!-- Tarjetas de tareas disponibles -->
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:32px;">
-                <div class="detail-card" style="padding:20px;">
-                    <h3 style="margin-bottom:8px;"><i class="fas fa-bell" style="color:var(--warning);"></i> Recordatorios</h3>
-                    <p style="font-size:.85rem;color:var(--gray-500);margin-bottom:16px;">
-                        Envía recordatorios de citas para mañana por correo y WhatsApp.
-                    </p>
-                    <form method="POST" action="{% url 'ejecutar_tarea' 'recordatorios' %}">
+            <div class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div class="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <span class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
+                        <i class="fas fa-bell"></i>
+                    </span>
+                    <h3 class="text-base font-bold text-slate-800">Recordatorios</h3>
+                    <p class="mt-1 mb-4 text-sm text-slate-500">Envía recordatorios de citas para mañana por correo y WhatsApp.</p>
+                    <form method="POST" action="{% url 'ejecutar_tarea' 'recordatorios' %}" class="mt-auto">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-primary" style="width:100%;">
+                        <button type="submit"
+                                class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-sky-600/20 transition hover:from-sky-700 hover:to-cyan-600">
                             <i class="fas fa-play"></i> Ejecutar
                         </button>
                     </form>
                 </div>
 
-                <div class="detail-card" style="padding:20px;">
-                    <h3 style="margin-bottom:8px;"><i class="fas fa-file-invoice-dollar" style="color:var(--success);"></i> Facturación Mensual</h3>
-                    <p style="font-size:.85rem;color:var(--gray-500);margin-bottom:16px;">
-                        Genera resumen de facturación del mes actual.
-                    </p>
-                    <form method="POST" action="{% url 'ejecutar_tarea' 'facturacion' %}">
+                <div class="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <span class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </span>
+                    <h3 class="text-base font-bold text-slate-800">Facturación Mensual</h3>
+                    <p class="mt-1 mb-4 text-sm text-slate-500">Genera resumen de facturación del mes actual.</p>
+                    <form method="POST" action="{% url 'ejecutar_tarea' 'facturacion' %}" class="mt-auto">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-primary" style="width:100%;">
+                        <button type="submit"
+                                class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-sky-600/20 transition hover:from-sky-700 hover:to-cyan-600">
                             <i class="fas fa-play"></i> Ejecutar
                         </button>
                     </form>
                 </div>
 
-                <div class="detail-card" style="padding:20px;">
-                    <h3 style="margin-bottom:8px;"><i class="fas fa-database" style="color:var(--info);"></i> Respaldo BD</h3>
-                    <p style="font-size:.85rem;color:var(--gray-500);margin-bottom:16px;">
-                        Crea un respaldo comprimido de la base de datos.
-                    </p>
-                    <form method="POST" action="{% url 'ejecutar_tarea' 'respaldo' %}">
+                <div class="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <span class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-sky-100 text-sky-600">
+                        <i class="fas fa-database"></i>
+                    </span>
+                    <h3 class="text-base font-bold text-slate-800">Respaldo BD</h3>
+                    <p class="mt-1 mb-4 text-sm text-slate-500">Crea un respaldo comprimido de la base de datos.</p>
+                    <form method="POST" action="{% url 'ejecutar_tarea' 'respaldo' %}" class="mt-auto">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-primary" style="width:100%;">
+                        <button type="submit"
+                                class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-sky-600/20 transition hover:from-sky-700 hover:to-cyan-600">
                             <i class="fas fa-play"></i> Ejecutar
                         </button>
                     </form>
                 </div>
 
-                <div class="detail-card" style="padding:20px;">
-                    <h3 style="margin-bottom:8px;"><i class="fas fa-broom" style="color:var(--gray-500);"></i> Limpieza de Locks</h3>
-                    <p style="font-size:.85rem;color:var(--gray-500);margin-bottom:16px;">
-                        Limpia locks de edición expirados del sistema.
-                    </p>
-                    <form method="POST" action="{% url 'ejecutar_tarea' 'limpieza' %}">
+                <div class="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <span class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
+                        <i class="fas fa-broom"></i>
+                    </span>
+                    <h3 class="text-base font-bold text-slate-800">Limpieza de Locks</h3>
+                    <p class="mt-1 mb-4 text-sm text-slate-500">Limpia locks de edición expirados del sistema.</p>
+                    <form method="POST" action="{% url 'ejecutar_tarea' 'limpieza' %}" class="mt-auto">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-primary" style="width:100%;">
+                        <button type="submit"
+                                class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-rose-600 to-red-500 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-rose-600/20 transition hover:from-rose-700 hover:to-red-600">
                             <i class="fas fa-play"></i> Ejecutar
                         </button>
                     </form>
@@ -72,66 +80,112 @@
             </div>
 
             <!-- Historial de ejecuciones -->
-            <div class="form-card">
-                <h3 class="form-section-title" style="margin-bottom:16px;">
-                    <i class="fas fa-history"></i> Historial de Ejecuciones
-                </h3>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div class="mb-5 flex items-center gap-3 border-b border-slate-100 pb-4">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+                        <i class="fas fa-history"></i>
+                    </span>
+                    <h2 class="text-lg font-bold text-slate-800">Historial de Ejecuciones</h2>
+                </div>
 
                 {% if logs %}
-                <div style="overflow-x:auto;">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Tarea</th>
-                                <th>Estado</th>
-                                <th>Detalle</th>
-                                <th>Ejecutado por</th>
-                                <th>Fecha</th>
-                                <th>Duración</th>
-                                <th>Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for log in logs %}
-                            <tr>
-                                <td><strong>{{ log.get_tarea_display }}</strong></td>
-                                <td>
-                                    {% if log.estado == 'COMPLETADO' %}
-                                    <span style="color:var(--success);font-weight:600;">✅ Completado</span>
-                                    {% elif log.estado == 'ERROR' %}
-                                    <span style="color:var(--error);font-weight:600;">❌ Error</span>
-                                    {% elif log.estado == 'EN_PROCESO' %}
-                                    <span style="color:var(--warning);font-weight:600;">⏳ En proceso</span>
-                                    {% elif log.estado == 'SIMULADO' %}
-                                    <span style="color:var(--gray-500);font-weight:600;">🔷 Simulado</span>
-                                    {% else %}
-                                    <span>{{ log.get_estado_display }}</span>
-                                    {% endif %}
-                                </td>
-                                <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-                                    {{ log.detalle|truncatechars:80 }}
-                                </td>
-                                <td>{% if log.ejecutado_por %}{{ log.ejecutado_por.get_full_name|default:log.ejecutado_por.username }}{% else %}-{% endif %}</td>
-                                <td>{{ log.fecha_ejecucion|date:"d/m/Y H:i" }}</td>
-                                <td>{{ log.duracion_segundos|floatformat:1 }}s</td>
-                                <td>
-                                    <form method="POST" action="{% url 'eliminar_log_tarea' log.id %}" style="display:inline;">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-sm btn-secondary" onclick="return confirm('¿Eliminar este registro?')">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                <!-- Tabla escritorio -->
+                <div class="hidden overflow-hidden rounded-xl border border-slate-200 md:block">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                            <thead class="bg-slate-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Tarea</th>
+                                    <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Estado</th>
+                                    <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Detalle</th>
+                                    <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Ejecutado por</th>
+                                    <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Fecha</th>
+                                    <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Duración</th>
+                                    <th class="px-6 py-3 text-right text-xs font-bold uppercase tracking-wider text-slate-500">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 bg-white">
+                                {% for log in logs %}
+                                <tr class="transition hover:bg-slate-50">
+                                    <td class="whitespace-nowrap px-6 py-4 font-semibold text-slate-800">{{ log.get_tarea_display }}</td>
+                                    <td class="whitespace-nowrap px-6 py-4">
+                                        {% if log.estado == 'COMPLETADO' %}
+                                        <span class="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">✅ {{ log.get_estado_display }}</span>
+                                        {% elif log.estado == 'ERROR' %}
+                                        <span class="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-700">❌ {{ log.get_estado_display }}</span>
+                                        {% elif log.estado == 'EN_PROCESO' %}
+                                        <span class="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">⏳ {{ log.get_estado_display }}</span>
+                                        {% elif log.estado == 'SIMULADO' %}
+                                        <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">🔷 {{ log.get_estado_display }}</span>
+                                        {% else %}
+                                        <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">{{ log.get_estado_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="max-w-[300px] truncate px-6 py-4 text-slate-600" title="{{ log.detalle }}">{{ log.detalle|truncatechars:80 }}</td>
+                                    <td class="whitespace-nowrap px-6 py-4 text-slate-600">{% if log.ejecutado_por %}{{ log.ejecutado_por.get_full_name|default:log.ejecutado_por.username }}{% else %}-{% endif %}</td>
+                                    <td class="whitespace-nowrap px-6 py-4 text-slate-600">{{ log.fecha_ejecucion|date:"d/m/Y H:i" }}</td>
+                                    <td class="whitespace-nowrap px-6 py-4 text-slate-600">{{ log.duracion_segundos|floatformat:1 }}s</td>
+                                    <td class="whitespace-nowrap px-6 py-4">
+                                        <form method="POST" action="{% url 'eliminar_log_tarea' log.id %}" class="flex justify-end">
+                                            {% csrf_token %}
+                                            <button type="submit" title="Eliminar registro"
+                                                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 transition hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600"
+                                                    onclick="return confirm('¿Eliminar este registro?')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tarjetas móvil -->
+                <div class="grid gap-4 md:hidden">
+                    {% for log in logs %}
+                    <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                        <div class="flex items-start gap-3">
+                            <div class="min-w-0 flex-1">
+                                <h3 class="truncate font-bold text-slate-800">{{ log.get_tarea_display }}</h3>
+                                <p class="mt-0.5 text-xs text-slate-500">
+                                    <i class="fas fa-clock mr-1"></i>{{ log.fecha_ejecucion|date:"d/m/Y H:i" }}
+                                </p>
+                            </div>
+                            {% if log.estado == 'COMPLETADO' %}
+                            <span class="shrink-0 rounded-full bg-emerald-100 px-2.5 py-1 text-[0.65rem] font-bold text-emerald-700">✅ {{ log.get_estado_display }}</span>
+                            {% elif log.estado == 'ERROR' %}
+                            <span class="shrink-0 rounded-full bg-red-100 px-2.5 py-1 text-[0.65rem] font-bold text-red-700">❌ {{ log.get_estado_display }}</span>
+                            {% elif log.estado == 'EN_PROCESO' %}
+                            <span class="shrink-0 rounded-full bg-amber-100 px-2.5 py-1 text-[0.65rem] font-bold text-amber-700">⏳ {{ log.get_estado_display }}</span>
+                            {% elif log.estado == 'SIMULADO' %}
+                            <span class="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-[0.65rem] font-bold text-slate-600">🔷 {{ log.get_estado_display }}</span>
+                            {% else %}
+                            <span class="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-[0.65rem] font-bold text-slate-600">{{ log.get_estado_display }}</span>
+                            {% endif %}
+                        </div>
+                        <p class="mt-3 border-t border-slate-100 pt-3 text-sm text-slate-600">{{ log.detalle|truncatechars:80 }}</p>
+                        <div class="mt-3 flex items-center justify-between text-xs text-slate-500">
+                            <span><i class="fas fa-user mr-1"></i>{% if log.ejecutado_por %}{{ log.ejecutado_por.get_full_name|default:log.ejecutado_por.username }}{% else %}-{% endif %}</span>
+                            <span><i class="fas fa-stopwatch mr-1"></i>{{ log.duracion_segundos|floatformat:1 }}s</span>
+                        </div>
+                        <form method="POST" action="{% url 'eliminar_log_tarea' log.id %}" class="mt-4">
+                            {% csrf_token %}
+                            <button type="submit"
+                                    class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700"
+                                    onclick="return confirm('¿Eliminar este registro?')">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </button>
+                        </form>
+                    </div>
+                    {% endfor %}
                 </div>
                 {% else %}
-                <div style="text-align:center;padding:40px;color:var(--gray-400);">
-                    <i class="fas fa-inbox" style="font-size:2rem;margin-bottom:12px;display:block;"></i>
-                    <p>No hay ejecuciones registradas aún.</p>
-                    <p style="font-size:.85rem;">Usa los botones de arriba para ejecutar una tarea.</p>
+                <div class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white py-16 text-center">
+                    <i class="fas fa-inbox mb-4 text-5xl text-slate-300"></i>
+                    <h3 class="text-lg font-bold text-slate-700">No hay ejecuciones registradas aún</h3>
+                    <p class="mt-1 text-sm text-slate-500">Usa los botones de arriba para ejecutar una tarea.</p>
                 </div>
                 {% endif %}
             </div>

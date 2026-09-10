@@ -6,77 +6,81 @@
     {% include 'componentes/sidebar.html' with active='sri_docs' %}
     <main class="main-content">
         {% include 'componentes/topbar.html' %}
-        <div class="dashboard-content">
-            <div class="page-header">
-                <h1 class="page-title"><i class="fas fa-file-invoice"></i> Documentos Electrónicos</h1>
-                <p class="page-subtitle">Comprobantes emitidos al SRI</p>                <a href="{% url 'sri_log' %}" class="btn btn-secondary">
+        <div class="dashboard-content p-6 lg:p-8">
+            <!-- Encabezado -->
+            <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">Documentos Electrónicos</h1>
+                    <p class="mt-1 text-sm text-slate-500">Comprobantes emitidos al SRI</p>
+                </div>
+                <a href="{% url 'sri_log' %}"
+                   class="inline-flex items-center justify-center gap-2 self-start rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 sm:self-auto">
                     <i class="fas fa-history"></i> Ver Log SRI
-                </a>            </div>
+                </a>
+            </div>
 
-            <div class="form-card">
-                <div style="overflow-x:auto;">
-                    <table class="table">
-                        <thead>
+            {% if documentos %}
+            <!-- Tabla -->
+            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                        <thead class="bg-slate-50">
                             <tr>
-                                <th>N° Documento</th>
-                                <th>Tipo</th>
-                                <th>Estado</th>
-                                <th>Total</th>
-                                <th>Comprador</th>
-                                <th>Emisión</th>
-                                <th>Clave de Acceso</th>
-                                <th>XML</th>
+                                <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">N° Documento</th>
+                                <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Tipo</th>
+                                <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Estado</th>
+                                <th class="px-6 py-3 text-right text-xs font-bold uppercase tracking-wider text-slate-500">Total</th>
+                                <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Comprador</th>
+                                <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Emisión</th>
+                                <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Clave de Acceso</th>
+                                <th class="px-6 py-3 text-right text-xs font-bold uppercase tracking-wider text-slate-500">XML</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="divide-y divide-slate-100 bg-white">
                             {% for doc in documentos %}
-                            <tr>
-                                <td><strong>{{ doc.numero_documento }}</strong></td>
-                                <td>{{ doc.get_tipo_display }}</td>
-                                <td>
+                            <tr class="transition hover:bg-slate-50">
+                                <td class="whitespace-nowrap px-6 py-4 font-mono text-sm font-semibold text-slate-800">{{ doc.numero_documento }}</td>
+                                <td class="whitespace-nowrap px-6 py-4 text-slate-600">{{ doc.get_tipo_display }}</td>
+                                <td class="whitespace-nowrap px-6 py-4">
                                     {% if doc.estado == 'AUTORIZADO' %}
-                                    <span class="badge badge-success">✅ Autorizado</span>
+                                    <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700"><i class="fas fa-check-circle"></i>Autorizado</span>
                                     {% elif doc.estado == 'ENVIADO' %}
-                                    <span class="badge badge-info">📤 Enviado</span>
+                                    <span class="inline-flex items-center gap-1.5 rounded-full bg-sky-100 px-3 py-1 text-xs font-bold text-sky-700"><i class="fas fa-paper-plane"></i>Enviado</span>
                                     {% elif doc.estado == 'NO_AUTORIZADO' %}
-                                    <span class="badge badge-danger">❌ No autorizado</span>
+                                    <span class="inline-flex items-center gap-1.5 rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-700"><i class="fas fa-times-circle"></i>No autorizado</span>
                                     {% elif doc.estado == 'ERROR' %}
-                                    <span class="badge badge-danger">⚠️ Error</span>
+                                    <span class="inline-flex items-center gap-1.5 rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-700"><i class="fas fa-exclamation-triangle"></i>Error</span>
                                     {% else %}
-                                    <span class="badge badge-warning">⏳ Pendiente</span>
+                                    <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700"><i class="fas fa-clock"></i>Pendiente</span>
                                     {% endif %}
                                 </td>
-                                <td><strong>${{ doc.total|floatformat:2 }}</strong></td>
-                                <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-                                    {{ doc.razon_social_comprador|truncatechars:30 }}
+                                <td class="whitespace-nowrap px-6 py-4 text-right font-semibold text-slate-800">${{ doc.total|floatformat:2 }}</td>
+                                <td class="max-w-[180px] truncate px-6 py-4 text-slate-600" title="{{ doc.razon_social_comprador }}">{{ doc.razon_social_comprador|truncatechars:30 }}</td>
+                                <td class="whitespace-nowrap px-6 py-4 text-slate-600">{{ doc.created_at|date:"d/m/Y H:i" }}</td>
+                                <td class="max-w-[160px] px-6 py-4">
+                                    <span class="block truncate font-mono text-xs text-slate-500" title="{{ doc.clave_acceso }}">{{ doc.clave_acceso }}</span>
                                 </td>
-                                <td>{{ doc.created_at|date:"d/m/Y H:i" }}</td>
-                                <td style="font-family:monospace;font-size:.75rem;word-break:break-all;max-width:130px;">
-                                    {{ doc.clave_acceso }}
-                                </td>
-                                <td>
-                                    {% if doc.estado != 'AUTORIZADO' %}
-                                    <a href="{% url 'consultar_autorizacion' doc.id %}" class="btn btn-sm btn-primary" title="Consultar autorización">
-                                        <i class="fas fa-sync"></i>
-                                    </a>
-                                    {% endif %}
-                                    {% if doc.archivo_xml_firmado %}
-                                    <a href="{{ doc.archivo_xml_firmado.url }}" target="_blank" class="btn btn-sm btn-secondary" title="XML Firmado">
-                                        <i class="fas fa-file-code"></i>
-                                    </a>
-                                    {% endif %}
-                                    {% if doc.archivo_xml_autorizado %}
-                                    <a href="{{ doc.archivo_xml_autorizado.url }}" target="_blank" class="btn btn-sm btn-success" title="XML Autorizado">
-                                        <i class="fas fa-file-invoice"></i>
-                                    </a>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="8" style="text-align:center;padding:40px;color:var(--gray-400);">
-                                    <i class="fas fa-file-invoice" style="font-size:2rem;display:block;margin-bottom:8px;"></i>
-                                    No se han emitido documentos electrónicos aún.
+                                <td class="whitespace-nowrap px-6 py-4">
+                                    <div class="flex items-center justify-end gap-2">
+                                        {% if doc.estado != 'AUTORIZADO' %}
+                                        <a href="{% url 'consultar_autorizacion' doc.id %}" title="Consultar autorización"
+                                           class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-600">
+                                            <i class="fas fa-sync"></i>
+                                        </a>
+                                        {% endif %}
+                                        {% if doc.archivo_xml_firmado %}
+                                        <a href="{{ doc.archivo_xml_firmado.url }}" target="_blank" title="XML Firmado"
+                                           class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-amber-300 hover:bg-amber-50 hover:text-amber-600">
+                                            <i class="fas fa-file-code"></i>
+                                        </a>
+                                        {% endif %}
+                                        {% if doc.archivo_xml_autorizado %}
+                                        <a href="{{ doc.archivo_xml_autorizado.url }}" target="_blank" title="XML Autorizado"
+                                           class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-600">
+                                            <i class="fas fa-file-invoice"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -84,6 +88,14 @@
                     </table>
                 </div>
             </div>
+            {% else %}
+            <!-- Estado vacío -->
+            <div class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white py-16 text-center">
+                <i class="fas fa-file-invoice mb-4 text-5xl text-slate-300"></i>
+                <h3 class="text-lg font-bold text-slate-700">No se han emitido documentos electrónicos</h3>
+                <p class="mt-1 text-sm text-slate-500">Los comprobantes autorizados ante el SRI aparecerán aquí</p>
+            </div>
+            {% endif %}
         </div>
     </main>
 </div>

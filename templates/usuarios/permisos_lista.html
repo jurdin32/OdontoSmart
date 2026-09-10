@@ -4,92 +4,114 @@
 {% block content %}
 <div class="dashboard">
     {% include 'componentes/sidebar.html' with active='permisos' %}
+
     <main class="main-content">
         {% include 'componentes/topbar.html' %}
-        <div class="dashboard-content">
-            <div class="page-header page-header--between">
+
+        <div class="dashboard-content p-6 lg:p-8">
+            <!-- Encabezado -->
+            <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 class="page-title">🔑 Permisos</h1>
-                    <p class="page-subtitle">Catálogo de funciones del sistema. Crea nuevos permisos si el sistema crece.</p>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">Permisos</h1>
+                    <p class="mt-1 text-sm text-slate-500">Catálogo de funciones del sistema. Crea nuevos permisos si el sistema crece.</p>
                 </div>
-                <a href="{% url 'crear_permiso' %}" class="btn btn-primary">
+                <a href="{% url 'crear_permiso' %}"
+                   class="inline-flex items-center justify-center gap-2 self-start rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-sky-600/20 transition hover:from-sky-700 hover:to-cyan-600 sm:self-auto">
                     <i class="fas fa-plus"></i> Nuevo Permiso
                 </a>
             </div>
+
             {% regroup permisos by get_modulo_display as modulos %}
+            <div class="space-y-6">
             {% for modulo in modulos %}
-            <div class="form-card" style="margin-bottom:16px;">
-                <h3 style="font-size:0.95rem;font-weight:600;color:var(--gray-700);margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--primary);display:inline-block;">
-                    {{ modulo.grouper }}
-                </h3>
+            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <!-- Cabecera del módulo -->
+                <div class="flex items-center gap-3 border-b border-slate-100 px-6 py-4">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600"><i class="fas fa-folder-open"></i></span>
+                    <h2 class="text-lg font-bold text-slate-800">{{ modulo.grouper }}</h2>
+                    <span class="ml-auto rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-500">{{ modulo.list|length }} permiso{{ modulo.list|length|pluralize:'s' }}</span>
+                </div>
+
                 <!-- Tabla escritorio -->
-                <div class="table-container">
-                    <table class="table">
-                        <thead>
+                <div class="hidden md:block">
+                    <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                        <thead class="bg-slate-50">
                             <tr>
-                                <th>Permiso</th>
-                                <th>Código</th>
-                                <th>Descripción</th>
-                                <th>Acciones</th>
+                                <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Permiso</th>
+                                <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Código</th>
+                                <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Descripción</th>
+                                <th class="px-6 py-3 text-right text-xs font-bold uppercase tracking-wider text-slate-500">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="divide-y divide-slate-100 bg-white">
                             {% for p in modulo.list %}
-                            <tr>
-                                <td><strong>{{ p.nombre }}</strong></td>
-                                <td><code>{{ p.codigo }}</code></td>
-                                <td>{{ p.descripcion|default:'—' }}</td>
-                                <td class="actions-cell">
-                                    <a href="{% url 'editar_permiso' p.id %}" class="btn-action btn-edit" title="Editar">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <form method="POST" action="{% url 'eliminar_permiso' p.id %}" style="display:inline;">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn-action" title="Eliminar"
-                                                style="background:#fee2e2;color:var(--error);border:none;cursor:pointer;border-radius:8px;width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;"
-                                                onclick="return confirm('¿Eliminar permiso {{ p.nombre }}?');">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
+                            <tr class="transition hover:bg-slate-50">
+                                <td class="whitespace-nowrap px-6 py-4 font-semibold text-slate-800">{{ p.nombre }}</td>
+                                <td class="whitespace-nowrap px-6 py-4">
+                                    <code class="rounded-md bg-slate-100 px-2 py-1 font-mono text-xs text-slate-600">{{ p.codigo }}</code>
+                                </td>
+                                <td class="px-6 py-4 text-slate-600">{{ p.descripcion|default:'—' }}</td>
+                                <td class="whitespace-nowrap px-6 py-4">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <a href="{% url 'editar_permiso' p.id %}" title="Editar"
+                                           class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-slate-400 hover:bg-slate-100 hover:text-slate-700">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form method="POST" action="{% url 'eliminar_permiso' p.id %}" class="inline">
+                                            {% csrf_token %}
+                                            <button type="submit" title="Eliminar"
+                                                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-red-300 hover:bg-red-50 hover:text-red-600"
+                                                    onclick="return confirm('¿Eliminar permiso {{ p.nombre }}?');">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
+
                 <!-- Tarjetas móvil -->
-                <div class="data-cards">
+                <div class="grid gap-4 p-4 md:hidden">
                     {% for p in modulo.list %}
-                    <div class="data-card">
-                        <div class="data-card-header">
-                            <div class="data-card-icon"><i class="fas fa-key"></i></div>
-                            <div class="data-card-info">
-                                <h3 class="data-card-title">{{ p.nombre }}</h3>
-                                <span class="data-card-sub"><span class="badge badge-secondary">{{ modulo.grouper }}</span></span>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                        <div class="flex items-start gap-3">
+                            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-cyan-400 text-white">
+                                <i class="fas fa-key"></i>
                             </div>
-                            <div class="data-card-actions">
-                                <a href="{% url 'editar_permiso' p.id %}" class="data-card-btn data-card-btn-warning" title="Editar">
+                            <div class="min-w-0 flex-1">
+                                <h3 class="truncate font-bold text-slate-800">{{ p.nombre }}</h3>
+                                <div class="mt-1">
+                                    <span class="inline-flex items-center rounded-full bg-indigo-100 px-2.5 py-0.5 text-[0.65rem] font-bold text-indigo-700">{{ modulo.grouper }}</span>
+                                </div>
+                            </div>
+                            <div class="flex shrink-0 gap-1.5">
+                                <a href="{% url 'editar_permiso' p.id %}" title="Editar"
+                                   class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-slate-400 hover:bg-slate-100 hover:text-slate-700">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <form method="POST" action="{% url 'eliminar_permiso' p.id %}" style="display:inline;">
+                                <form method="POST" action="{% url 'eliminar_permiso' p.id %}" class="inline">
                                     {% csrf_token %}
-                                    <button type="submit" class="data-card-btn data-card-btn-danger" title="Eliminar"
+                                    <button type="submit" title="Eliminar"
+                                            class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-red-300 hover:bg-red-50 hover:text-red-600"
                                             onclick="return confirm('¿Eliminar permiso {{ p.nombre }}?');">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
                             </div>
                         </div>
-                        <div class="data-card-body">
-                            <div class="data-card-row">
-                                <i class="fas fa-code"></i>
-                                <span class="data-card-row-label">Código</span>
-                                <span class="data-card-row-value"><code>{{ p.codigo }}</code></span>
+                        <div class="mt-3 space-y-1.5 border-t border-slate-100 pt-3 text-sm text-slate-600">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-code w-4 text-center text-slate-400"></i>
+                                <span>Código</span>
+                                <span class="ml-auto font-mono text-xs font-medium text-slate-700">{{ p.codigo }}</span>
                             </div>
-                            <div class="data-card-row">
-                                <i class="fas fa-align-left"></i>
-                                <span class="data-card-row-label">Descripción</span>
-                                <span class="data-card-row-value">{{ p.descripcion|default:'—' }}</span>
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-align-left w-4 text-center text-slate-400"></i>
+                                <span>Descripción</span>
+                                <span class="ml-auto truncate font-medium text-slate-700">{{ p.descripcion|default:'—' }}</span>
                             </div>
                         </div>
                     </div>
@@ -97,12 +119,18 @@
                 </div>
             </div>
             {% empty %}
-            <div class="empty-state">
-                <i class="fas fa-key" style="font-size:3rem;color:var(--gray-300);margin-bottom:16px;"></i>
-                <h3>No hay permisos creados</h3>
-                <p>Ejecuta <code>python manage.py seed_permisos</code> para crear los permisos por defecto.</p>
+            <!-- Estado vacío -->
+            <div class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white py-16 text-center">
+                <i class="fas fa-key mb-4 text-5xl text-slate-300"></i>
+                <h3 class="text-lg font-bold text-slate-700">No hay permisos creados</h3>
+                <p class="mt-1 text-sm text-slate-500">Ejecuta <code class="rounded-md bg-slate-100 px-2 py-1 font-mono text-xs text-slate-600">python manage.py seed_permisos</code> para crear los permisos por defecto.</p>
+                <a href="{% url 'crear_permiso' %}"
+                   class="mt-5 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-sky-600/20 transition hover:from-sky-700 hover:to-cyan-600">
+                    <i class="fas fa-plus"></i> Crear Permiso
+                </a>
             </div>
             {% endfor %}
+            </div>
         </div>
     </main>
 </div>

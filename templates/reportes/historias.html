@@ -6,66 +6,127 @@
     {% include 'componentes/sidebar.html' with active='reportes' %}
     <main class="main-content">
         {% include 'componentes/topbar.html' %}
-        <div class="dashboard-content">
-            <div class="page-header page-header--between">
+        <div class="dashboard-content p-6 lg:p-8">
+            <!-- Encabezado -->
+            <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 class="page-title">Reporte de Historias Clínicas</h1>
-                    <p class="page-subtitle">Estadísticas de condiciones médicas y evoluciones</p>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">Reporte de Historias Clínicas</h1>
+                    <p class="mt-1 text-sm text-slate-500">Estadísticas de condiciones médicas y evoluciones</p>
                 </div>
-                <a href="{% url 'reportes' %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver</a>
+                <a href="{% url 'reportes' %}"
+                   class="inline-flex items-center justify-center gap-2 self-start rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 sm:self-auto">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
             </div>
 
-            <form class="report-filters" method="GET">
-                <div class="filter-group"><label class="filter-label">Desde</label><input type="date" name="desde" class="form-input filter-input" value="{{ desde }}"></div>
-                <div class="filter-group"><label class="filter-label">Hasta</label><input type="date" name="hasta" class="form-input filter-input" value="{{ hasta }}"></div>
-                <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Filtrar</button>
-                {% if desde or hasta %}<a href="{% url 'reporte_historias' %}" class="btn btn-secondary"><i class="fas fa-times"></i> Limpiar</a>{% endif %}
+            <!-- Filtros -->
+            <form method="GET" class="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div class="flex flex-wrap items-end gap-4">
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">Desde</label>
+                        <input type="date" name="desde" value="{{ desde }}"
+                               class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-700 shadow-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">Hasta</label>
+                        <input type="date" name="hasta" value="{{ hasta }}"
+                               class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-700 shadow-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
+                    </div>
+                    <button type="submit"
+                            class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-sky-600/20 transition hover:from-sky-700 hover:to-cyan-600">
+                        <i class="fas fa-filter"></i> Filtrar
+                    </button>
+                    {% if desde or hasta %}
+                    <a href="{% url 'reporte_historias' %}"
+                       class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-400 hover:bg-slate-50">
+                        <i class="fas fa-times"></i> Limpiar
+                    </a>
+                    {% endif %}
+                </div>
             </form>
 
-            <div class="stats-grid">
-                <div class="stat-card"><div class="stat-icon" style="background:#dbeafe;color:#2563eb;"><i class="fas fa-notes-medical"></i></div><div class="stat-info"><span class="stat-number">{{ total_historias }}</span><span class="stat-label">Historias</span></div></div>
-                <div class="stat-card"><div class="stat-icon" style="background:#ecfdf5;color:#10b981;"><i class="fas fa-check-circle"></i></div><div class="stat-info"><span class="stat-number">{{ con_historia }}</span><span class="stat-label">Pacientes con Historia</span></div></div>
-                <div class="stat-card"><div class="stat-icon" style="background:#fef3c7;color:#d97706;"><i class="fas fa-exclamation-circle"></i></div><div class="stat-info"><span class="stat-number">{{ sin_historia }}</span><span class="stat-label">Sin Historia</span></div></div>
-                <div class="stat-card"><div class="stat-icon" style="background:#f5f3ff;color:#7c3aed;"><i class="fas fa-clipboard-list"></i></div><div class="stat-info"><span class="stat-number">{{ total_evoluciones }}</span><span class="stat-label">Evoluciones</span></div></div>
+            <!-- KPIs -->
+            <div class="mb-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+                <div class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-sky-600"><i class="fas fa-notes-medical"></i></div>
+                    <div class="min-w-0">
+                        <div class="text-2xl font-extrabold leading-none text-slate-900">{{ total_historias }}</div>
+                        <div class="mt-1 truncate text-sm text-slate-500">Historias</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600"><i class="fas fa-check-circle"></i></div>
+                    <div class="min-w-0">
+                        <div class="text-2xl font-extrabold leading-none text-slate-900">{{ con_historia }}</div>
+                        <div class="mt-1 truncate text-sm text-slate-500">Pacientes con Historia</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600"><i class="fas fa-exclamation-circle"></i></div>
+                    <div class="min-w-0">
+                        <div class="text-2xl font-extrabold leading-none text-slate-900">{{ sin_historia }}</div>
+                        <div class="mt-1 truncate text-sm text-slate-500">Sin Historia</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-600"><i class="fas fa-clipboard-list"></i></div>
+                    <div class="min-w-0">
+                        <div class="text-2xl font-extrabold leading-none text-slate-900">{{ total_evoluciones }}</div>
+                        <div class="mt-1 truncate text-sm text-slate-500">Evoluciones</div>
+                    </div>
+                </div>
             </div>
 
-            <div class="report-section">
-                <h3 class="form-section-title">Condiciones Médicas Frecuentes</h3>
-                <div class="condiciones-grid">
+            <!-- Condiciones médicas -->
+            <section class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <h2 class="mb-4 text-lg font-bold text-slate-800">Condiciones Médicas Frecuentes</h2>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                     {% for nombre, cantidad in condiciones.items %}
-                    <div class="condicion-card">
-                        <div class="condicion-header">
-                            <span class="condicion-nombre">{{ nombre }}</span>
-                            <span class="condicion-valor">{{ cantidad }}</span>
+                    <div class="rounded-xl bg-slate-50 p-4">
+                        <div class="flex items-center justify-between gap-3">
+                            <span class="text-sm font-semibold text-slate-700">{{ nombre }}</span>
+                            <span class="text-sm font-extrabold text-slate-900">{{ cantidad }}</span>
                         </div>
-                        <div class="condicion-bar">
-                            <div class="condicion-fill" style="width:{% widthratio cantidad total_historias 100 %}%"></div>
+                        <div class="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-200">
+                            <div class="h-full rounded-full bg-gradient-to-r from-sky-500 to-cyan-400" style="width:{% widthratio cantidad total_historias 100 %}%"></div>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
-            </div>
+            </section>
 
-            <div class="report-section">
-                <h3 class="form-section-title">Últimas Evoluciones</h3>
-                <div class="table-container">
-                    <table class="table">
-                        <thead><tr><th>Paciente</th><th>Médico</th><th>Fecha</th><th>Motivo</th></tr></thead>
-                        <tbody>
-                            {% for e in ultimas_evoluciones %}
-                            <tr>
-                                <td><strong>{{ e.historia.paciente.nombres }} {{ e.historia.paciente.apellidos }}</strong></td>
-                                <td>Dr. {{ e.medico.nombres }} {{ e.medico.apellidos }}</td>
-                                <td>{{ e.fecha|date:"d/m/Y" }}</td>
-                                <td>{{ e.motivo|truncatechars:40 }}</td>
-                            </tr>
-                            {% empty %}
-                            <tr><td colspan="4" class="text-center">Sin evoluciones</td></tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+            <!-- Últimas evoluciones -->
+            <section>
+                <h2 class="mb-3 text-lg font-bold text-slate-800">Últimas Evoluciones</h2>
+                <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                            <thead class="bg-slate-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Paciente</th>
+                                    <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Médico</th>
+                                    <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Fecha</th>
+                                    <th class="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">Motivo</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 bg-white">
+                                {% for e in ultimas_evoluciones %}
+                                <tr class="transition hover:bg-slate-50">
+                                    <td class="px-6 py-4 font-semibold text-slate-800">{{ e.historia.paciente.nombres }} {{ e.historia.paciente.apellidos }}</td>
+                                    <td class="px-6 py-4 text-slate-600">Dr. {{ e.medico.nombres }} {{ e.medico.apellidos }}</td>
+                                    <td class="whitespace-nowrap px-6 py-4 text-slate-600">{{ e.fecha|date:"d/m/Y" }}</td>
+                                    <td class="px-6 py-4 text-slate-600">{{ e.motivo|truncatechars:40 }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="px-6 py-10 text-center text-sm text-slate-400">Sin evoluciones</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
+            </section>
         </div>
     </main>
 </div>
